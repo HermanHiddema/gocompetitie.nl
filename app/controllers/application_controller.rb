@@ -7,9 +7,6 @@ class ApplicationController < ActionController::Base
   # Changes to the importmap will invalidate the etag for HTML responses
   stale_when_importmap_changes
 
-  # Everything is public, editing requires an account.
-  allow_unauthenticated_access only: %i[ index show ]
-
   before_action :set_current_season
 
   helper_method :current_user, :current_season
@@ -17,8 +14,10 @@ class ApplicationController < ActionController::Base
   private
     attr_reader :current_season
 
+    # Public pages skip the authentication callback, so the session is resumed
+    # here to be able to show editing links to signed in users.
     def current_user
-      Current.user
+      Current.user if authenticated?
     end
 
     # Every season has its own subdomain, e.g. voorjaar-2015.gocompetitie.nl.

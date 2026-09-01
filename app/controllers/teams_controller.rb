@@ -1,4 +1,6 @@
 class TeamsController < ApplicationController
+  allow_unauthenticated_access only: %i[ index show ]
+
   BOARDS = 3
 
   before_action :set_team, only: %i[ show edit update destroy ]

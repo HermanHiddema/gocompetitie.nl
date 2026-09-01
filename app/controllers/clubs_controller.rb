@@ -1,4 +1,6 @@
 class ClubsController < ApplicationController
+  allow_unauthenticated_access only: %i[ index show ]
+
   before_action :set_club, only: %i[ show edit update destroy ]
 
   def index

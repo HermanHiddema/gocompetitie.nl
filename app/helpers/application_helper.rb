@@ -16,6 +16,21 @@ module ApplicationHelper
     end
   end
 
+  # Only links out to http(s) urls, so a stored javascript: url can never be
+  # turned into a link.
+  def external_link_to(url, name = nil, **options)
+    return if url.blank?
+
+    uri = URI.parse(url.to_s) rescue nil
+    name ||= url
+
+    if uri.is_a?(URI::HTTP) && uri.host.present?
+      link_to name, uri.to_s, rel: "nofollow noopener", target: "_blank", **options
+    else
+      name
+    end
+  end
+
   def nav_link_to(name, path, **options)
     classes = "rounded-md px-3 py-2 text-sm font-medium transition hover:bg-slate-700 hover:text-white"
     classes += current_page?(path) ? " bg-slate-900 text-white" : " text-slate-200"

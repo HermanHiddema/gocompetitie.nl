@@ -28,7 +28,7 @@
     </main>
 
     <footer class="mx-auto w-full max-w-6xl px-4 py-8 text-sm text-slate-500">
-      Nederlandse Go Competitie<%= " &ndash; #{@season.name}".html_safe if @season %>
+      Nederlandse Go Competitie<% if @season %> &ndash; <%= @season.name %><% end %>
     </footer>
   </body>
 </html>

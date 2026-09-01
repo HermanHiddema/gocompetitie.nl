@@ -14,7 +14,7 @@
   <% end %>
 
   <% if @club.website.present? %>
-    <p class="mt-2 text-sm"><%= link_to @club.website, @club.website, class: "underline", rel: "nofollow" %></p>
+    <p class="mt-2 text-sm"><%= external_link_to @club.website, class: "underline" %></p>
   <% end %>
 
   <%= markdown @club.info %>

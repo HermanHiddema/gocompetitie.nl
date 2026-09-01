@@ -2,10 +2,6 @@
   <div class="font-medium"><%= link_to club.name, club, class: "hover:underline" %></div>
   <div class="text-slate-600"><%= club.abbrev %></div>
   <div class="text-slate-600"><%= club.teams.where(league: @season&.leagues).count %> teams</div>
-  <div class="truncate text-slate-600">
-    <% if club.website.present? %>
-      <%= link_to club.website, club.website, class: "underline", rel: "nofollow" %>
-    <% end %>
-  </div>
+  <div class="truncate text-slate-600"><%= external_link_to club.website, class: "underline" %></div>
   <div class="text-slate-600"><%= club.contact_person&.name %></div>
 </div>
