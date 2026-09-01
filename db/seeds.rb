@@ -59,5 +59,6 @@ if Rails.env.development?
   User.find_or_create_by!(email_address: "admin@example.com") do |user|
     user.password = "secret123456"
     user.admin = true
+    user.save
   end
 end
