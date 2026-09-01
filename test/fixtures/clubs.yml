@@ -1,0 +1,13 @@
+amsterdam:
+  name: Go Club Amsterdam
+  abbrev: Amst
+  contact_person: anna
+  info: "**Welkom** in Amsterdam"
+
+utrecht:
+  name: Go Club Utrecht
+  abbrev: Utre
+
+rotterdam:
+  name: Go Club Rotterdam
+  abbrev: Rott

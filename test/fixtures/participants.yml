@@ -1,0 +1,71 @@
+amsterdam_1:
+  firstname: Speler1
+  lastname: Amsterdam
+  rating: 2100
+  rank: 52
+  club: amsterdam
+  season: current
+
+amsterdam_2:
+  firstname: Speler2
+  lastname: Amsterdam
+  rating: 2050
+  rank: 52
+  club: amsterdam
+  season: current
+
+amsterdam_3:
+  firstname: Speler3
+  lastname: Amsterdam
+  rating: 2000
+  rank: 52
+  club: amsterdam
+  season: current
+
+utrecht_1:
+  firstname: Speler1
+  lastname: Utrecht
+  rating: 2000
+  rank: 52
+  club: utrecht
+  season: current
+
+utrecht_2:
+  firstname: Speler2
+  lastname: Utrecht
+  rating: 1950
+  rank: 52
+  club: utrecht
+  season: current
+
+utrecht_3:
+  firstname: Speler3
+  lastname: Utrecht
+  rating: 1900
+  rank: 52
+  club: utrecht
+  season: current
+
+rotterdam_1:
+  firstname: Speler1
+  lastname: Rotterdam
+  rating: 1900
+  rank: 52
+  club: rotterdam
+  season: current
+
+rotterdam_2:
+  firstname: Speler2
+  lastname: Rotterdam
+  rating: 1850
+  rank: 52
+  club: rotterdam
+  season: current
+
+rotterdam_3:
+  firstname: Speler3
+  lastname: Rotterdam
+  rating: 1800
+  rank: 52
+  club: rotterdam
+  season: current

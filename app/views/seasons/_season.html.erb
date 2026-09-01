@@ -1,0 +1,6 @@
+<div class="border-b border-slate-100 py-2 text-sm last:border-0">
+  <%= link_to season.name, season_url_for(season), class: "font-medium hover:underline" %>
+  <% if current_user %>
+    <%= link_to "bewerken", edit_season_path(season), class: "ml-2 text-slate-500 underline" %>
+  <% end %>
+</div>

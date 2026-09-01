@@ -1,0 +1,23 @@
+<div class="mb-6 rounded-md border border-slate-200 p-4">
+  <h3 class="mb-3 text-sm text-slate-600">
+    <%= match.played? ? "Gespeeld" : "Gepland" %>
+    <% if match.playing_date %><%= l match.playing_date, format: :short_with_day %><% end %>
+    <% if match.playing_time.present? %>om <%= match.playing_time %><% end %>
+    <% if match.venue %>te <%= link_to match.venue.city, match.venue, class: "hover:underline" %><% end %>
+  </h3>
+
+  <div class="flex items-center justify-between border-b border-slate-200 pb-2 font-semibold">
+    <span><%= link_to match.black_team.name, match.black_team, class: "hover:underline" %> &ndash;
+      <%= link_to match.white_team.name, match.white_team, class: "hover:underline" %></span>
+    <%= link_to match.result, match, class: "hover:underline" %>
+  </div>
+
+  <ol class="mt-2 space-y-1">
+    <% match.games.sort_by { |game| game.board_number.to_i }.each_with_index do |game, index| %>
+      <li class="flex items-center gap-3 text-sm">
+        <span class="w-4 text-slate-400"><%= index + 1 %></span>
+        <%= render game %>
+      </li>
+    <% end %>
+  </ol>
+</div>

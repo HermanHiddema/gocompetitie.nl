@@ -1,0 +1,52 @@
+class ParticipantsController < ApplicationController
+  before_action :set_participant, only: %i[ show edit update destroy ]
+
+  def index
+    @participants = @season.participants.includes(:club, team_member: :team).by_rating
+    @show_club = true
+  end
+
+  def show
+    @games = @participant.games.includes(:black_player, :white_player, match: %i[ black_team white_team ])
+  end
+
+  def new
+    @participant = Participant.new(season: @season)
+  end
+
+  def edit
+  end
+
+  def create
+    @participant = Participant.new(participant_params)
+    @participant.season ||= @season
+
+    if @participant.save
+      redirect_to @participant, notice: "Deelnemer is toegevoegd."
+    else
+      render :new, status: :unprocessable_content
+    end
+  end
+
+  def update
+    if @participant.update(participant_params)
+      redirect_to @participant, notice: "Deelnemer is bijgewerkt."
+    else
+      render :edit, status: :unprocessable_content
+    end
+  end
+
+  def destroy
+    @participant.destroy!
+    redirect_to participants_url, notice: "Deelnemer is verwijderd.", status: :see_other
+  end
+
+  private
+    def set_participant
+      @participant = Participant.find(params[:id])
+    end
+
+    def participant_params
+      params.expect(participant: [ :firstname, :lastname, :rating, :egd_pin, :club_id, :season_id, :rank ])
+    end
+end

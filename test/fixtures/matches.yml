@@ -1,0 +1,15 @@
+amsterdam_utrecht:
+  league: top
+  black_team: amsterdam
+  white_team: utrecht
+  venue: amsterdam
+  playing_date: <%= Date.new(2026, 3, 4) %>
+  playing_time: "20:00"
+
+utrecht_rotterdam:
+  league: top
+  black_team: utrecht
+  white_team: rotterdam
+  venue: utrecht
+  playing_date: <%= Date.new(2026, 3, 10) %>
+  playing_time: "19:30"

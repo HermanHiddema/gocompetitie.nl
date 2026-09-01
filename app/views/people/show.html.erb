@@ -1,0 +1,23 @@
+<% content_for :title, @person.name %>
+<h1 class="mb-6 text-2xl font-bold"><%= @person.name %></h1>
+
+<section class="mb-8 rounded-lg bg-white p-4 shadow-sm ring-1 ring-slate-200">
+  <dl class="grid gap-2 text-sm sm:grid-cols-[10rem_1fr]">
+    <dt class="font-semibold">Club</dt>
+    <dd><%= link_to @person.club.name, @person.club, class: "hover:underline" if @person.club %></dd>
+
+    <% if current_user %>
+      <dt class="font-semibold">E-mail</dt>
+      <dd><%= @person.email_addresses.join(" of ") %></dd>
+
+      <dt class="font-semibold">Telefoon</dt>
+      <dd><%= @person.phone_numbers.join(" of ") %></dd>
+    <% end %>
+  </dl>
+</section>
+
+<% if current_user %>
+  <div class="flex gap-3">
+    <%= button_link_to "Persoon bewerken", edit_person_path(@person) %>
+  </div>
+<% end %>

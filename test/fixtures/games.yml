@@ -1,0 +1,29 @@
+board_one:
+  match: amsterdam_utrecht
+  black_player: amsterdam_1
+  white_player: utrecht_1
+  board_number: 1
+  black_points: 2
+  white_points: 0
+
+board_two:
+  match: amsterdam_utrecht
+  black_player: amsterdam_2
+  white_player: utrecht_2
+  board_number: 2
+  black_points: 0
+  white_points: 2
+
+board_three:
+  match: amsterdam_utrecht
+  black_player: amsterdam_3
+  white_player: utrecht_3
+  board_number: 3
+  black_points: 2
+  white_points: 0
+
+unplayed:
+  match: utrecht_rotterdam
+  black_player: utrecht_1
+  white_player: rotterdam_1
+  board_number: 1

@@ -1,0 +1,11 @@
+<div class="grid grid-cols-2 gap-x-4 gap-y-1 border-b border-slate-100 py-2 text-sm last:border-0 md:grid-cols-5">
+  <div class="font-medium"><%= link_to club.name, club, class: "hover:underline" %></div>
+  <div class="text-slate-600"><%= club.abbrev %></div>
+  <div class="text-slate-600"><%= club.teams.where(league: @season&.leagues).count %> teams</div>
+  <div class="truncate text-slate-600">
+    <% if club.website.present? %>
+      <%= link_to club.website, club.website, class: "underline", rel: "nofollow" %>
+    <% end %>
+  </div>
+  <div class="text-slate-600"><%= club.contact_person&.name %></div>
+</div>

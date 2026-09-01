@@ -1,0 +1,26 @@
+<% content_for :title, @venue.name %>
+<h1 class="mb-2 text-2xl font-bold"><%= @venue.name %></h1>
+<p class="mb-6 text-slate-600"><%= @venue.address %>, <%= @venue.city %></p>
+
+<section class="mb-8 rounded-lg bg-white p-4 shadow-sm ring-1 ring-slate-200">
+  <p class="text-sm">
+    <span class="font-semibold">Speelavond:</span>
+    <%= @venue.playing_day_name %> om <%= @venue.playing_time %>
+  </p>
+  <p class="mt-1 text-sm">
+    <span class="font-semibold">Club:</span>
+    <%= link_to @venue.club.name, @venue.club, class: "hover:underline" %>
+  </p>
+  <%= markdown @venue.info %>
+</section>
+
+<section class="mb-8 rounded-lg bg-white p-4 shadow-sm ring-1 ring-slate-200">
+  <h2 class="mb-3 text-lg font-semibold">Wedstrijden</h2>
+  <%= render partial: "matches/match", collection: @matches, locals: { show_date: true } %>
+</section>
+
+<% if current_user %>
+  <div class="flex gap-3">
+    <%= button_link_to "Lokatie bewerken", edit_venue_path(@venue) %>
+  </div>
+<% end %>

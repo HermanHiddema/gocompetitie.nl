@@ -1,0 +1,6 @@
+<p>
+  Je kunt je wachtwoord opnieuw instellen via
+  <%= link_to "deze link", edit_password_url(@user.password_reset_token) %>.
+
+  De link verloopt over <%= distance_of_time_in_words(0, @user.password_reset_token_expires_in) %>.
+</p>

@@ -1,0 +1,16 @@
+<% content_for :title, "Wedstrijden" %>
+<h1 class="mb-6 text-2xl font-bold">Wedstrijden</h1>
+
+<section class="rounded-lg bg-white p-4 shadow-sm ring-1 ring-slate-200">
+  <% if @matches.any? %>
+    <%= render "matches/grid", matches: @matches %>
+  <% else %>
+    <p class="text-slate-600">Er zijn nog geen wedstrijden ingepland.</p>
+  <% end %>
+</section>
+
+<% if current_user %>
+  <div class="mt-6">
+    <%= button_link_to "Wedstrijd toevoegen", new_match_path %>
+  </div>
+<% end %>

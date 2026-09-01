@@ -1,0 +1,30 @@
+<% content_for :title, "Stand #{@season&.name}" %>
+
+<% if @season&.information.present? %>
+  <section class="mb-8 rounded-lg bg-white p-5 shadow-sm ring-1 ring-slate-200">
+    <%= markdown @season.information %>
+  </section>
+<% end %>
+
+<h1 class="mb-6 text-2xl font-bold">Stand <%= @season&.name %></h1>
+
+<% if @leagues.blank? %>
+  <p class="text-slate-600">Er zijn nog geen poules voor dit seizoen.</p>
+<% else %>
+  <div class="grid gap-6 lg:grid-cols-2">
+    <% @leagues.each do |league| %>
+      <section class="rounded-lg bg-white p-4 shadow-sm ring-1 ring-slate-200">
+        <h2 class="mb-3 text-lg font-semibold">
+          <%= link_to league.name, league, class: "hover:underline" %>
+        </h2>
+        <%= render "leagues/standings", league: league %>
+      </section>
+    <% end %>
+  </div>
+<% end %>
+
+<% if current_user %>
+  <div class="mt-8 flex gap-3">
+    <%= button_link_to "Poule toevoegen", new_league_path %>
+  </div>
+<% end %>

@@ -1,0 +1,44 @@
+<% content_for :title, "Nieuwe wedstrijd" %>
+<h1 class="mb-6 text-2xl font-bold">Nieuwe wedstrijd</h1>
+
+<section class="rounded-lg bg-white p-5 shadow-sm ring-1 ring-slate-200">
+  <%= form_with model: @match, class: "space-y-4" do |form| %>
+    <%= render "shared/errors", record: @match %>
+
+    <div>
+      <%= form.label :league_id, Match.human_attribute_name(:league), class: label_classes %>
+      <%= form.collection_select :league_id, @leagues, :id, :name, {}, class: field_classes %>
+    </div>
+
+    <div>
+      <%= form.label :black_team_id, Match.human_attribute_name(:black_team), class: label_classes %>
+      <%= form.collection_select :black_team_id, @teams, :id, :name, { include_blank: true }, class: field_classes %>
+    </div>
+
+    <div>
+      <%= form.label :white_team_id, Match.human_attribute_name(:white_team), class: label_classes %>
+      <%= form.collection_select :white_team_id, @teams, :id, :name, { include_blank: true }, class: field_classes %>
+    </div>
+
+    <div>
+      <%= form.label :venue_id, Match.human_attribute_name(:venue), class: label_classes %>
+      <%= form.collection_select :venue_id, Venue.ordered, :id, :name, { include_blank: true }, class: field_classes %>
+    </div>
+
+    <div class="grid gap-4 sm:grid-cols-2">
+      <div>
+        <%= form.label :playing_date, class: label_classes %>
+        <%= form.date_field :playing_date, class: field_classes %>
+      </div>
+      <div>
+        <%= form.label :playing_time, class: label_classes %>
+        <%= form.text_field :playing_time, class: field_classes %>
+      </div>
+    </div>
+
+    <div class="flex gap-3">
+      <%= form.submit "Opslaan", class: button_classes %>
+      <%= button_link_to "Annuleren", matches_path, style: :secondary %>
+    </div>
+  <% end %>
+</section>

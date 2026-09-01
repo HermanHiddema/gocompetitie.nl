@@ -1,0 +1,32 @@
+<header class="bg-slate-800 text-white shadow" data-controller="navigation">
+  <nav class="mx-auto flex w-full max-w-6xl flex-wrap items-center gap-2 px-4 py-3">
+    <%= link_to "NGC", root_path, class: "text-lg font-bold tracking-wide" %>
+
+    <button type="button" class="ml-auto rounded-md p-2 text-slate-200 hover:bg-slate-700 sm:hidden"
+            data-action="navigation#toggle" aria-label="Menu">
+      <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+      </svg>
+    </button>
+
+    <div class="hidden w-full flex-col gap-1 sm:ml-6 sm:flex sm:w-auto sm:flex-1 sm:flex-row sm:items-center"
+         data-navigation-target="menu">
+      <%= nav_link_to "Stand", root_path %>
+      <%= nav_link_to "Rooster", matches_path %>
+      <%= nav_link_to "Teams", teams_path %>
+      <%= nav_link_to "Clubs", clubs_path %>
+      <%= nav_link_to "Lokaties", venues_path %>
+      <%= nav_link_to "Archief", seasons_path %>
+
+      <div class="sm:ml-auto">
+        <% if current_user %>
+          <span class="px-3 py-2 text-sm text-slate-300"><%= current_user.email_address %></span>
+          <%= button_to "Uitloggen", session_path, method: :delete,
+                class: "rounded-md px-3 py-2 text-sm font-medium text-slate-200 hover:bg-slate-700 hover:text-white cursor-pointer" %>
+        <% else %>
+          <%= nav_link_to "Inloggen", new_session_path %>
+        <% end %>
+      </div>
+    </div>
+  </nav>
+</header>

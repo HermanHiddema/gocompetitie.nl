@@ -1,0 +1,58 @@
+<% content_for :title, @club.name %>
+<h1 class="mb-6 text-2xl font-bold"><%= @club.name %> <span class="text-slate-500">(<%= @club.abbrev %>)</span></h1>
+
+<section class="mb-8 rounded-lg bg-white p-4 shadow-sm ring-1 ring-slate-200">
+  <% if @club.contact_person %>
+    <p class="text-sm"><span class="font-semibold">Contactpersoon:</span> <%= @club.contact_person.name %></p>
+    <% if current_user %>
+      <p class="text-sm text-slate-600"><%= @club.contact_person.email_addresses.join(" of ") %></p>
+    <% end %>
+  <% else %>
+    <p class="text-sm text-slate-600">
+      Geen contactpersoon bekend. Ben je contactpersoon van deze club? Neem dan even contact op met de NGC organisatie.
+    </p>
+  <% end %>
+
+  <% if @club.website.present? %>
+    <p class="mt-2 text-sm"><%= link_to @club.website, @club.website, class: "underline", rel: "nofollow" %></p>
+  <% end %>
+
+  <%= markdown @club.info %>
+</section>
+
+<% if @club.venues.any? %>
+  <section class="mb-8 rounded-lg bg-white p-4 shadow-sm ring-1 ring-slate-200">
+    <h2 class="mb-3 text-lg font-semibold">Speellokatie<%= "s" if @club.venues.many? %></h2>
+    <% @club.venues.ordered.each do |venue| %>
+      <div class="mb-4 last:mb-0">
+        <h3 class="font-medium">
+          <%= venue.playing_day_name&.capitalize %> om <%= venue.playing_time %>:
+          <%= link_to venue.name, venue, class: "hover:underline" %>,
+          <%= venue.address %>, <%= venue.city %>
+        </h3>
+        <%= markdown venue.info %>
+      </div>
+    <% end %>
+  </section>
+<% end %>
+
+<section class="mb-8 rounded-lg bg-white p-4 shadow-sm ring-1 ring-slate-200">
+  <h2 class="mb-3 text-lg font-semibold">Teams</h2>
+  <%= render @teams %>
+</section>
+
+<section class="mb-8 rounded-lg bg-white p-4 shadow-sm ring-1 ring-slate-200">
+  <h2 class="mb-3 text-lg font-semibold">Wedstrijden</h2>
+  <%= render partial: "matches/match", collection: @matches, locals: { show_date: true, show_venue: true } %>
+</section>
+
+<section class="mb-8 rounded-lg bg-white p-4 shadow-sm ring-1 ring-slate-200">
+  <h2 class="mb-3 text-lg font-semibold">Spelers</h2>
+  <%= render partial: "participants/participant", collection: @participants %>
+</section>
+
+<% if current_user %>
+  <div class="flex gap-3">
+    <%= button_link_to "Bewerken", edit_club_path(@club) %>
+  </div>
+<% end %>
