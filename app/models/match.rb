@@ -74,7 +74,7 @@ class Match < ApplicationRecord
   end
 
   def result
-    [ black_points, white_points ].map { |points| points ? format("%g", points) : "?" }.join("-")
+    [black_points, white_points].map { |points| points ? format("%g", points) : "?" }.join("-")
   end
 
   def to_s

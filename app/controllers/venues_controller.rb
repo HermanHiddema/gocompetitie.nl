@@ -1,7 +1,7 @@
 class VenuesController < ApplicationController
-  allow_unauthenticated_access only: %i[ index show ]
+  allow_unauthenticated_access only: %i[index show]
 
-  before_action :set_venue, only: %i[ show edit update destroy ]
+  before_action :set_venue, only: %i[show edit update destroy]
 
   def index
     @venues = Venue.includes(:club).ordered
@@ -47,6 +47,6 @@ class VenuesController < ApplicationController
     end
 
     def venue_params
-      params.expect(venue: [ :club_id, :name, :address, :city, :playing_day, :playing_time, :info ])
+      params.expect(venue: [:club_id, :name, :address, :city, :playing_day, :playing_time, :info])
     end
 end

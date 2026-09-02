@@ -21,6 +21,6 @@ class TeamTest < ActiveSupport::TestCase
     team = Team.new
 
     assert_not team.valid?
-    assert_equal %i[ club league name abbrev ].sort, team.errors.attribute_names.sort
+    assert_equal %i[club league name abbrev].sort, team.errors.attribute_names.sort
   end
 end

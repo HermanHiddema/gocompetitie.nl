@@ -1,7 +1,7 @@
 class ClubsController < ApplicationController
-  allow_unauthenticated_access only: %i[ index show ]
+  allow_unauthenticated_access only: %i[index show]
 
-  before_action :set_club, only: %i[ show edit update destroy ]
+  before_action :set_club, only: %i[show edit update destroy]
 
   def index
     @clubs = (params[:all] ? Club.all : Club.named).ordered
@@ -52,6 +52,6 @@ class ClubsController < ApplicationController
     end
 
     def club_params
-      params.expect(club: [ :name, :abbrev, :contact_person_id, :website, :info ])
+      params.expect(club: [:name, :abbrev, :contact_person_id, :website, :info])
     end
 end

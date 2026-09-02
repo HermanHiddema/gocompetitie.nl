@@ -1,9 +1,9 @@
 class MatchesController < ApplicationController
-  allow_unauthenticated_access only: %i[ index show ]
+  allow_unauthenticated_access only: %i[index show]
 
   BOARDS = 3
 
-  before_action :set_match, only: %i[ show edit update destroy ]
+  before_action :set_match, only: %i[show edit update destroy]
 
   def index
     @matches = @season.matches.includes(:venue, :black_team, :white_team, :games).scheduled
@@ -73,14 +73,14 @@ class MatchesController < ApplicationController
     def related_club_ids(team)
       Participant.joins(:team_member)
         .where(team_members: { team_id: team.club.teams.select(:id) })
-        .distinct.pluck(:club_id).compact.presence || [ team.club_id ]
+        .distinct.pluck(:club_id).compact.presence || [team.club_id]
     end
 
     def match_create_params
-      params.expect(match: [ :league_id, :venue_id, :playing_date, :playing_time, :black_team_id, :white_team_id ])
+      params.expect(match: [:league_id, :venue_id, :playing_date, :playing_time, :black_team_id, :white_team_id])
     end
 
     def match_update_params
-      params.expect(match: [ :venue_id, :playing_date, :playing_time, games_attributes: [ [ :id, :black_id, :white_id, :result ] ] ])
+      params.expect(match: [:venue_id, :playing_date, :playing_time, games_attributes: [[:id, :black_id, :white_id, :result]]])
     end
 end

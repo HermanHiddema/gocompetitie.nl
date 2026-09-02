@@ -1,10 +1,10 @@
 class LeaguesController < ApplicationController
-  allow_unauthenticated_access only: %i[ index show ]
+  allow_unauthenticated_access only: %i[index show]
 
-  before_action :set_league, only: %i[ show edit update destroy ]
+  before_action :set_league, only: %i[show edit update destroy]
 
   def index
-    @leagues = @season.leagues.ordered.includes(teams: [ :club, { team_members: :participant } ], matches: :games)
+    @leagues = @season.leagues.ordered.includes(teams: [:club, { team_members: :participant }], matches: :games)
   end
 
   def show
@@ -55,6 +55,6 @@ class LeaguesController < ApplicationController
     end
 
     def league_params
-      params.expect(league: [ :name, :position, :season_id ])
+      params.expect(league: [:name, :position, :season_id])
     end
 end

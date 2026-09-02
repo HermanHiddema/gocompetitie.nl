@@ -1,5 +1,5 @@
 class Venue < ApplicationRecord
-  DAYS = %w[ zondag maandag dinsdag woensdag donderdag vrijdag zaterdag ].freeze
+  DAYS = %w[zondag maandag dinsdag woensdag donderdag vrijdag zaterdag].freeze
 
   belongs_to :club
 

@@ -18,10 +18,10 @@ class Person < ApplicationRecord
   end
 
   def email_addresses
-    [ email, email2 ].compact_blank
+    [email, email2].compact_blank
   end
 
   def phone_numbers
-    [ phone, phone2 ].compact_blank
+    [phone, phone2].compact_blank
   end
 end

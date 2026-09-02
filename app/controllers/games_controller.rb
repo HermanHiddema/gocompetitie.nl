@@ -2,7 +2,7 @@ class GamesController < ApplicationController
   allow_unauthenticated_access only: :index
 
   def index
-    @games = @season.games.includes(:black_player, :white_player, match: %i[ black_team white_team ])
+    @games = @season.games.includes(:black_player, :white_player, match: %i[black_team white_team])
 
     respond_to do |format|
       format.html

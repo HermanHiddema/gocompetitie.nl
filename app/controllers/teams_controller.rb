@@ -1,9 +1,9 @@
 class TeamsController < ApplicationController
-  allow_unauthenticated_access only: %i[ index show ]
+  allow_unauthenticated_access only: %i[index show]
 
   BOARDS = 3
 
-  before_action :set_team, only: %i[ show edit update destroy ]
+  before_action :set_team, only: %i[show edit update destroy]
 
   def index
     @teams = @season.teams.includes(:league, :club, team_members: :participant).ordered
@@ -11,7 +11,7 @@ class TeamsController < ApplicationController
 
   def show
     @members = @team.team_members.includes(:participant).by_board
-    @matches = @team.matches.includes(:venue, :black_team, :white_team, games: %i[ black_player white_player ]).scheduled
+    @matches = @team.matches.includes(:venue, :black_team, :white_team, games: %i[black_player white_player]).scheduled
   end
 
   def new
@@ -61,6 +61,6 @@ class TeamsController < ApplicationController
     end
 
     def team_params
-      params.expect(team: [ :name, :abbrev, :club_id, :league_id, :captain_id, team_members_attributes: [ [ :id, :board_number, :participant_id, :_destroy ] ] ])
+      params.expect(team: [:name, :abbrev, :club_id, :league_id, :captain_id, team_members_attributes: [[:id, :board_number, :participant_id, :_destroy]]])
     end
 end

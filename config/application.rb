@@ -23,6 +23,6 @@ module GoCompetitie
     #
     config.time_zone = "Amsterdam"
     config.i18n.default_locale = :nl
-    config.i18n.available_locales = %i[ nl en ]
+    config.i18n.available_locales = %i[nl en]
   end
 end

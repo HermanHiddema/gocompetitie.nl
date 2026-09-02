@@ -56,7 +56,7 @@ class League < ApplicationRecord
   end
 
   def make_pairing(weeks = nil)
-    weeks ||= Array.new([ teams.length - 1 + (teams.length.odd? ? 1 : 0), 1 ].max) { |i| Date.today + 14 * (i + 1) }
+    weeks ||= Array.new([teams.length - 1 + (teams.length.odd? ? 1 : 0), 1].max) { |i| Date.today + 14 * (i + 1) }
     pairing = self.class.round_robin_pairing(teams.to_a)
     return if pairing.nil?
 
@@ -97,9 +97,9 @@ class League < ApplicationRecord
       participants.unshift(fixed)
       round = Array.new(boards) do |board|
         if index.odd?
-          [ participants[board], participants[-board - 1] ]
+          [participants[board], participants[-board - 1]]
         else
-          [ participants[-board - 1], participants[board] ]
+          [participants[-board - 1], participants[board]]
         end
       end
       participants.shift

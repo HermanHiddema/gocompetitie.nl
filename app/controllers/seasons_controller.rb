@@ -1,8 +1,8 @@
 class SeasonsController < ApplicationController
-  allow_unauthenticated_access only: %i[ index show ]
+  allow_unauthenticated_access only: %i[index show]
 
-  before_action :set_season, only: %i[ show edit update destroy ]
-  before_action :require_admin!, only: %i[ new create edit update destroy ]
+  before_action :set_season, only: %i[show edit update destroy]
+  before_action :require_admin!, only: %i[new create edit update destroy]
 
   def index
     @seasons = Season.recent
@@ -51,6 +51,6 @@ class SeasonsController < ApplicationController
     end
 
     def season_params
-      params.expect(season: [ :name, :information ])
+      params.expect(season: [:name, :information])
     end
 end

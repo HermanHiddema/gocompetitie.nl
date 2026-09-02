@@ -20,7 +20,7 @@ class ParticipantTest < ActiveSupport::TestCase
   end
 
   test "stronger ranks sort higher" do
-    ranks = [ "5k", "1k", "1d", "5d", "1p" ].map do |rank|
+    ranks = ["5k", "1k", "1d", "5d", "1p"].map do |rank|
       @participant.rank = rank
       @participant[:rank]
     end

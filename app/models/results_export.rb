@@ -5,10 +5,10 @@ class ResultsExport
   PLAYERS_PER_GROUP = 3
 
   def initialize(ordered_participants:, games:, group_names: [])
-    @groups = ordered_participants.first.is_a?(Array) ? ordered_participants : [ ordered_participants ]
+    @groups = ordered_participants.first.is_a?(Array) ? ordered_participants : [ordered_participants]
     @ordered_participants = @groups.flatten.compact.uniq
     @games = games
-    @group_names = group_names + [ "Reserves" ]
+    @group_names = group_names + ["Reserves"]
   end
 
   def lines
@@ -23,7 +23,7 @@ class ResultsExport
       player_lines.each_slice(PLAYERS_PER_GROUP).to_a
     end
     grouped_lines.zip(group_names).flat_map do |players, group_name|
-      [ group_name ? "; #{group_name}" : nil, *players ]
+      [group_name ? "; #{group_name}" : nil, *players]
     end.compact
   end
 
@@ -47,7 +47,7 @@ class ResultsExport
     def player_line(participant, number, results, width)
       [
         number,
-        format("%-30s", [ participant.lastname, participant.firstname ].map(&:strip).join(" ")),
+        format("%-30s", [participant.lastname, participant.firstname].map(&:strip).join(" ")),
         participant.rank,
         "NL",
         participant.club&.abbrev,
@@ -62,7 +62,7 @@ class ResultsExport
     # Every player gets a row of game slots. Both players of a game share the
     # same slot, so the columns line up as rounds.
     def results_table
-      table = ordered_participants.to_h { |participant| [ participant.id, [] ] }
+      table = ordered_participants.to_h { |participant| [participant.id, []] }
 
       games.each do |game|
         next unless game.played? && game.black_id && game.white_id

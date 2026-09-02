@@ -1,5 +1,5 @@
 class Participant < ApplicationRecord
-  PERSON_ATTRIBUTES = %w[ club_id firstname lastname rating egd_pin ].freeze
+  PERSON_ATTRIBUTES = %w[club_id firstname lastname rating egd_pin].freeze
 
   belongs_to :club, optional: true
   belongs_to :season

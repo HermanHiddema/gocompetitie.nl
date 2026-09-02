@@ -1,7 +1,7 @@
 class ParticipantsController < ApplicationController
-  allow_unauthenticated_access only: %i[ index show ]
+  allow_unauthenticated_access only: %i[index show]
 
-  before_action :set_participant, only: %i[ show edit update destroy ]
+  before_action :set_participant, only: %i[show edit update destroy]
 
   def index
     @participants = @season.participants.includes(:club, :black_games, :white_games, team_member: :team).by_rating
@@ -9,7 +9,7 @@ class ParticipantsController < ApplicationController
   end
 
   def show
-    @games = @participant.games.includes(:black_player, :white_player, match: %i[ black_team white_team ])
+    @games = @participant.games.includes(:black_player, :white_player, match: %i[black_team white_team])
   end
 
   def new
@@ -49,6 +49,6 @@ class ParticipantsController < ApplicationController
     end
 
     def participant_params
-      params.expect(participant: [ :firstname, :lastname, :rating, :egd_pin, :club_id, :rank ])
+      params.expect(participant: [:firstname, :lastname, :rating, :egd_pin, :club_id, :rank])
     end
 end

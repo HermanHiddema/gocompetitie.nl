@@ -1,7 +1,7 @@
 class PeopleController < ApplicationController
-  allow_unauthenticated_access only: %i[ index show ]
+  allow_unauthenticated_access only: %i[index show]
 
-  before_action :set_person, only: %i[ show edit update destroy ]
+  before_action :set_person, only: %i[show edit update destroy]
 
   def index
     @people = Person.includes(:club).ordered
@@ -46,6 +46,6 @@ class PeopleController < ApplicationController
     end
 
     def person_params
-      params.expect(person: [ :firstname, :lastname, :egd_pin, :club_id, :email, :email2, :phone, :phone2 ])
+      params.expect(person: [:firstname, :lastname, :egd_pin, :club_id, :email, :email2, :phone, :phone2])
     end
 end

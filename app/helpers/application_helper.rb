@@ -62,6 +62,6 @@ module ApplicationHelper
   end
 
   def season_url_for(season)
-    "//#{season.slug}.#{request.domain}#{":#{request.port}" unless [ 80, 443 ].include?(request.port)}"
+    "//#{season.slug}.#{request.domain}#{":#{request.port}" unless [80, 443].include?(request.port)}"
   end
 end

@@ -8,7 +8,7 @@ class CreateTeamMembers < ActiveRecord::Migration[8.1]
       t.timestamps
     end
 
-    add_index :team_members, [ :team_id, :board_number ], unique: true
+    add_index :team_members, [:team_id, :board_number], unique: true
     add_index :team_members, :participant_id, unique: true
   end
 end

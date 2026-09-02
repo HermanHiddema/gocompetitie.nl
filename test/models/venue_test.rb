@@ -9,6 +9,6 @@ class VenueTest < ActiveSupport::TestCase
     venue = Venue.new
 
     assert_not venue.valid?
-    assert_equal %i[ club name address city playing_time playing_day ].sort, venue.errors.attribute_names.sort
+    assert_equal %i[club name address city playing_time playing_day].sort, venue.errors.attribute_names.sort
   end
 end

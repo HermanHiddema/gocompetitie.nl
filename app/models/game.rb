@@ -1,5 +1,5 @@
 class Game < ApplicationRecord
-  RESULTS = [ "?-?", "1-0", "0-1", "½-½", "1-0!", "0-1!", "0-0" ].freeze
+  RESULTS = ["?-?", "1-0", "0-1", "½-½", "1-0!", "0-1!", "0-0"].freeze
 
   POINTS = { "0" => 0, "½" => 1, "1" => 2 }.freeze
   POINT_LABELS = POINTS.invert.freeze
@@ -98,7 +98,7 @@ class Game < ApplicationRecord
     end
 
     def score_exp(rating_difference)
-      weaker_rating = [ black_rating, white_rating ].min
+      weaker_rating = [black_rating, white_rating].min
       a = 200 - (weaker_rating - 100) / 20.0 # a from the EGF GoR formula
       1.0 / (Math.exp(rating_difference / a) + 1)
     end
