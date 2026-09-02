@@ -15,6 +15,8 @@ class MatchesController < ApplicationController
 
   def new
     @league = @season.leagues.find_by(id: params[:league_id])
+    @league ||= @season.leagues.joins(:teams).find_by(teams: { id: params[:black_team_id] })
+    @league ||= @season.leagues.ordered.first
     @match = @league ? @league.matches.build : Match.new
     @match.black_team_id = params[:black_team_id]
     @match.white_team_id = params[:white_team_id]
@@ -23,7 +25,6 @@ class MatchesController < ApplicationController
   end
 
   def edit
-    fill_boards
     @games = @match.games.includes(:black_player, :white_player).by_board
     @black_players = selectable_players(@match.black_team)
     @white_players = selectable_players(@match.white_team)
@@ -36,7 +37,8 @@ class MatchesController < ApplicationController
       redirect_to edit_match_url(@match), notice: "Wedstrijd is toegevoegd."
     else
       @leagues = @season.leagues.ordered
-      @teams = @season.teams.ordered
+      @league = @season.leagues.find_by(id: @match.league_id)
+      @teams = @league ? @league.teams.ordered : @season.teams.ordered
       render :new, status: :unprocessable_content
     end
   end
@@ -58,14 +60,6 @@ class MatchesController < ApplicationController
   private
     def set_match
       @match = Match.find(params[:id])
-    end
-
-    def fill_boards
-      return if @match.games.count >= BOARDS
-
-      BOARDS.times do |index|
-        @match.games.create(board_number: index + 1) if @match.games.find_by(board_number: index + 1).nil?
-      end
     end
 
     # Players of the clubs that make up the team, so guest players from a

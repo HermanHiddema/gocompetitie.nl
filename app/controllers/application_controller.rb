@@ -12,7 +12,7 @@ class ApplicationController < ActionController::Base
   helper_method :current_user, :current_season
 
   private
-    attr_reader :current_season
+    attr_reader :current_season, :season
 
     # Public pages skip the authentication callback, so the session is resumed
     # here to be able to show editing links to signed in users.
@@ -23,7 +23,7 @@ class ApplicationController < ActionController::Base
     # Every season has its own subdomain, e.g. voorjaar-2015.gocompetitie.nl.
     # Without a matching subdomain the most recent season is shown.
     def set_current_season
-      @season = Season.find_by(slug: request.subdomains.first) || Season.recent.first
+      @season = @current_season = Season.find_by(slug: request.subdomains.first) || Season.recent.first
     end
 
     def require_admin!

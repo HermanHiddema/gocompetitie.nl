@@ -12,11 +12,11 @@ class GamesController < ApplicationController
 
   private
     def rated_games_report
-      @games.select(&:played?).reject(&:forfeit?).map do |game|
+      @games.select { |game| game.played? && game.players? }.reject(&:forfeit?).map do |game|
         [
           game.black_player.firstname, game.black_player.lastname,
           game.white_player.firstname, game.white_player.lastname,
-          game.black_score == 1 ? "+" : "-"
+          game.black_result
         ].join(" ")
       end.join("\n")
     end

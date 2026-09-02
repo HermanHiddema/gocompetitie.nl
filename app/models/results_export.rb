@@ -5,13 +5,24 @@ class ResultsExport
   PLAYERS_PER_GROUP = 3
 
   def initialize(ordered_participants:, games:, group_names: [])
-    @ordered_participants = ordered_participants.compact.uniq
+    @groups = ordered_participants.first.is_a?(Array) ? ordered_participants : [ ordered_participants ]
+    @ordered_participants = @groups.flatten.compact.uniq
     @games = games
     @group_names = group_names + [ "Reserves" ]
   end
 
   def lines
-    player_lines.each_slice(PLAYERS_PER_GROUP).zip(group_names).flat_map do |players, group_name|
+    grouped_lines = if @groups.length > 1
+      offset = 0
+      @groups.map do |group|
+        result = player_lines[offset, group.length]
+        offset += group.length
+        result
+      end
+    else
+      player_lines.each_slice(PLAYERS_PER_GROUP).to_a
+    end
+    grouped_lines.zip(group_names).flat_map do |players, group_name|
       [ group_name ? "; #{group_name}" : nil, *players ]
     end.compact
   end
@@ -54,7 +65,7 @@ class ResultsExport
       table = ordered_participants.to_h { |participant| [ participant.id, [] ] }
 
       games.each do |game|
-        next unless game.black_id && game.white_id
+        next unless game.played? && game.black_id && game.white_id
 
         table[game.black_id] ||= []
         table[game.white_id] ||= []

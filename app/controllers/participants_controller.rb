@@ -4,7 +4,7 @@ class ParticipantsController < ApplicationController
   before_action :set_participant, only: %i[ show edit update destroy ]
 
   def index
-    @participants = @season.participants.includes(:club, team_member: :team).by_rating
+    @participants = @season.participants.includes(:club, :black_games, :white_games, team_member: :team).by_rating
     @show_club = true
   end
 
@@ -49,6 +49,6 @@ class ParticipantsController < ApplicationController
     end
 
     def participant_params
-      params.expect(participant: [ :firstname, :lastname, :rating, :egd_pin, :club_id, :season_id, :rank ])
+      params.expect(participant: [ :firstname, :lastname, :rating, :egd_pin, :club_id, :rank ])
     end
 end

@@ -31,11 +31,17 @@ class Participant < ApplicationRecord
   end
 
   def played_games
-    games.played
+    if black_games.loaded? && white_games.loaded?
+      (black_games + white_games).select(&:played?)
+    else
+      games.played
+    end
   end
 
   def rating_change
-    black_games.played.sum(&:black_rating_change) + white_games.played.sum(&:white_rating_change)
+    black = black_games.loaded? ? black_games.select(&:played?) : black_games.played
+    white = white_games.loaded? ? white_games.select(&:played?) : white_games.played
+    black.sum(&:black_rating_change) + white.sum(&:white_rating_change)
   end
 
   def rating_performance
@@ -49,10 +55,10 @@ class Participant < ApplicationRecord
 
     self[:rank] = case value
     when 1..69 then value
-    when /\A(\d)\s*(dan)?\s*p/i then Regexp.last_match(1).to_i + 60
-    when /\Apro/i then 60
-    when /\A(\d)\s*d/i then Regexp.last_match(1).to_i + 50
-    when /\A([1-4]?\d)\s*k/i then 51 - Regexp.last_match(1).to_i
+    when /\A([1-9])\s*(dan)?\s*p\z/i then Regexp.last_match(1).to_i + 60
+    when /\Apro\z/i then 60
+    when /\A([1-9])\s*d\z/i then Regexp.last_match(1).to_i + 50
+    when /\A([1-9]|[1-4]\d|50)\s*k\z/i then 51 - Regexp.last_match(1).to_i
     else 0
     end
   end

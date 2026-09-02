@@ -1,5 +1,5 @@
 class Game < ApplicationRecord
-  RESULTS = [ "?-?", "1-0", "0-1", "1-0!", "0-1!", "0-0" ].freeze
+  RESULTS = [ "?-?", "1-0", "0-1", "½-½", "1-0!", "0-1!", "0-0" ].freeze
 
   POINTS = { "0" => 0, "½" => 1, "1" => 2 }.freeze
   POINT_LABELS = POINTS.invert.freeze
@@ -47,7 +47,7 @@ class Game < ApplicationRecord
   end
 
   def result=(value)
-    if (match = /\A(.)-(.)(!?)/.match(value.to_s))
+    if (match = /\A([0½1?])-([0½1?])(!?)\z/.match(value.to_s))
       self.black_points = POINTS[match[1]]
       self.white_points = POINTS[match[2]]
       self.reason = match[3] == "!" ? "!" : nil

@@ -1,4 +1,5 @@
 class Match < ApplicationRecord
+  BOARD_COUNT = 3
   belongs_to :league
   belongs_to :venue, optional: true
   belongs_to :black_team, class_name: "Team", inverse_of: :black_matches
@@ -7,6 +8,10 @@ class Match < ApplicationRecord
   has_many :games, dependent: :destroy
 
   accepts_nested_attributes_for :games
+
+  validates :black_team, :white_team, :league, presence: true
+  validate :teams_are_distinct
+  validate :teams_belong_to_league
 
   delegate :name, :address, :city, :club, :playing_time, :playing_day, to: :venue, prefix: true, allow_nil: true
 
@@ -24,11 +29,14 @@ class Match < ApplicationRecord
   end
 
   def fill_games
-    black_team.team_members.each do |black|
-      white = white_team.team_members.find_by(board_number: black.board_number)
-      next unless white
-
-      games.create(board_number: black.board_number, black_player: black.participant, white_player: white.participant)
+    (1..BOARD_COUNT).each do |board_number|
+      black = black_team.team_members.find_by(board_number: board_number)
+      white = white_team.team_members.find_by(board_number: board_number)
+      games.create(
+        board_number: board_number,
+        black_player: black&.participant,
+        white_player: white&.participant
+      )
     end
   end
 
@@ -75,10 +83,22 @@ class Match < ApplicationRecord
 
   private
     def points_for(column)
-      games.filter_map(&column).sum / 2 if played?
+      games.filter_map(&column).sum / 2.0 if played?
     end
 
     def winner_score(points, opponent_points)
-      points > opponent_points ? 1 : 0 if played?
+      return unless played?
+      return 0.5 if points == opponent_points
+      points > opponent_points ? 1 : 0
+    end
+
+    def teams_are_distinct
+      errors.add(:white_team, "must be different from black team") if black_team_id.present? && black_team_id == white_team_id
+    end
+
+    def teams_belong_to_league
+      [black_team, white_team].compact.each do |team|
+        errors.add(:league, "teams must belong to the league") if league && team.league_id != league_id
+      end
     end
 end

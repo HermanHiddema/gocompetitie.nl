@@ -6,6 +6,7 @@ class Season < ApplicationRecord
   has_many :games, through: :matches
 
   validates :name, presence: true
+  validates :slug, uniqueness: true, allow_blank: true
 
   before_validation :update_slug
 
@@ -45,7 +46,8 @@ class Season < ApplicationRecord
         club: club
       )
 
-      participant = participants.build(person: person, rank: player["Grade"])
+      participant = participants.find_or_initialize_by(person: person)
+      participant.rank = player["Grade"]
       participant.copy_person_attributes
       participant.save
     end
@@ -58,12 +60,14 @@ class Season < ApplicationRecord
   private
     def ordered_participants
       team_participants = leagues.ordered.flat_map do |league|
-        league.ranked_teams.flat_map { |team| team.team_members.includes(:participant).by_board.map(&:participant) }
+        league.ranked_teams.map do |team|
+          team.team_members.includes(:participant).by_board.map(&:participant)
+        end
       end
 
       reserves = participants.includes(:club).select { |participant| participant.played_games.any? }
         .sort_by { |participant| -participant.rating_change }
 
-      team_participants + (reserves - team_participants)
+      team_participants + [ reserves - team_participants.flatten ]
     end
 end

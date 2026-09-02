@@ -1,5 +1,5 @@
 class Club < ApplicationRecord
-  belongs_to :contact_person, class_name: "Person", optional: true
+  belongs_to :contact_person, class_name: "Person", optional: true, inverse_of: :contacted_clubs
 
   has_many :people, dependent: :nullify
   has_many :participants, dependent: :nullify

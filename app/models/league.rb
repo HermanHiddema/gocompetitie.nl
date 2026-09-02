@@ -56,7 +56,7 @@ class League < ApplicationRecord
   end
 
   def make_pairing(weeks = nil)
-    weeks ||= Array.new(5) { |i| Date.today.cweek + 2 * (i + 1) }
+    weeks ||= Array.new([teams.length - 1 + (teams.length.odd? ? 1 : 0), 1].max) { |i| Date.today + 14 * (i + 1) }
     pairing = self.class.round_robin_pairing(teams.to_a)
     return if pairing.nil?
 
@@ -65,7 +65,15 @@ class League < ApplicationRecord
         next if home.nil? || away.nil?
 
         venue = home.club.venues.first || Venue.first
-        playing_date = venue && Date.commercial(Date.today.year, weeks[round], venue.playing_day)
+        if venue
+          base_date = weeks[round]
+          iso_day = venue.playing_day.zero? ? 7 : venue.playing_day
+          if base_date.is_a?(Integer)
+            playing_date = Date.commercial(Date.today.year, base_date, iso_day)
+          else
+            playing_date = base_date + ((iso_day - base_date.cwday) % 7)
+          end
+        end
         matches.create(black_team: home, white_team: away, venue: venue, playing_date: playing_date, playing_time: venue&.playing_time)
       end
     end
@@ -110,7 +118,7 @@ class League < ApplicationRecord
 
   private
     def ordered_participants
-      ranked_teams.flat_map { |team| team.team_members.includes(:participant).by_board.map(&:participant) }
+      ranked_teams.map { |team| team.team_members.includes(:participant).by_board.map(&:participant) }
     end
 
     def standing_for(match, color)
@@ -119,6 +127,8 @@ class League < ApplicationRecord
         "unplayed"
       elsif match.public_send(:"#{color}_score") == 1
         "won"
+      elsif match.public_send(:"#{color}_score") == 0.5
+        "draw"
       else
         "lost"
       end

@@ -31,8 +31,11 @@
 
     <%= form.fields_for :games, @games do |game_form| %>
       <div class="grid gap-3 sm:grid-cols-[1fr_1fr_8rem]">
+        <%= game_form.label :black_id, "Bord #{game_form.object.board_number} zwart", class: "sr-only" %>
         <%= game_form.collection_select :black_id, @black_players, :id, :name, { include_blank: true }, class: field_classes %>
+        <%= game_form.label :white_id, "Bord #{game_form.object.board_number} wit", class: "sr-only" %>
         <%= game_form.collection_select :white_id, @white_players, :id, :name, { include_blank: true }, class: field_classes %>
+        <%= game_form.label :result, "Bord #{game_form.object.board_number} resultaat", class: "sr-only" %>
         <%= game_form.select :result, Game::RESULTS, { selected: game_form.object.result }, class: field_classes %>
       </div>
     <% end %>

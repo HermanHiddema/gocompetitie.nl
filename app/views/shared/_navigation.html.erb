@@ -3,14 +3,14 @@
     <%= link_to "NGC", root_path, class: "text-lg font-bold tracking-wide" %>
 
     <button type="button" class="ml-auto rounded-md p-2 text-slate-200 hover:bg-slate-700 sm:hidden"
-            data-action="navigation#toggle" aria-label="Menu">
+            data-action="navigation#toggle" aria-label="Menu" aria-controls="mobile-menu" aria-expanded="false">
       <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
         <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
       </svg>
     </button>
 
     <div class="hidden w-full flex-col gap-1 sm:ml-6 sm:flex sm:w-auto sm:flex-1 sm:flex-row sm:items-center"
-         data-navigation-target="menu">
+         data-navigation-target="menu" id="mobile-menu">
       <%= nav_link_to "Stand", root_path %>
       <%= nav_link_to "Rooster", matches_path %>
       <%= nav_link_to "Teams", teams_path %>

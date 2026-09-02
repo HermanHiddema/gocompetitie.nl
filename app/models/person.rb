@@ -3,6 +3,7 @@ class Person < ApplicationRecord
 
   has_many :participants, dependent: :nullify
   has_many :captained_teams, class_name: "Team", foreign_key: :captain_id, dependent: :nullify, inverse_of: :captain
+  has_many :contacted_clubs, class_name: "Club", foreign_key: :contact_person_id, dependent: :nullify, inverse_of: :contact_person
 
   validates :firstname, :lastname, presence: true
 

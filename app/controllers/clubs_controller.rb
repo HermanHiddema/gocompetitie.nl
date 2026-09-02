@@ -39,8 +39,11 @@ class ClubsController < ApplicationController
   end
 
   def destroy
-    @club.destroy!
-    redirect_to clubs_url, notice: "Club is verwijderd.", status: :see_other
+    if @club.destroy
+      redirect_to clubs_url, notice: "Club is verwijderd.", status: :see_other
+    else
+      redirect_to edit_club_path(@club), alert: @club.errors.full_messages.to_sentence, status: :unprocessable_content
+    end
   end
 
   private

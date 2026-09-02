@@ -1,3 +1,5 @@
+return unless Rails.env.development?
+
 # Demo data for development: one season with two leagues, six teams and a
 # scheduled round robin.
 season = Season.find_or_create_by!(name: "Voorjaar #{Date.today.year}") do |record|
@@ -55,9 +57,7 @@ end
 
 season.leagues.each { |league| league.make_pairing if league.matches.none? }
 
-if Rails.env.development?
-  User.find_or_create_by!(email_address: "admin@example.com") do |user|
-    user.password = "secret123456"
-    user.admin = true
-  end
+User.find_or_create_by!(email_address: "admin@example.com") do |user|
+  user.password = "secret123456"
+  user.admin = true
 end
