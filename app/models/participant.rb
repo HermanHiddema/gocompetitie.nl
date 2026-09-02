@@ -58,7 +58,7 @@ class Participant < ApplicationRecord
     when /\A([1-9])\s*(dan)?\s*p\z/i then Regexp.last_match(1).to_i + 60
     when /\Apro\z/i then 60
     when /\A([1-9])\s*d\z/i then Regexp.last_match(1).to_i + 50
-    when /\A([1-9]|[1-4]\d|50)\s*k\z/i then 51 - Regexp.last_match(1).to_i
+    when /\A([1-9]|[1-4]\d|50)\s*k(?:yu)?\z/i then 51 - Regexp.last_match(1).to_i
     else 0
     end
   end

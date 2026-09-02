@@ -36,11 +36,11 @@ class MatchesControllerTest < ActionDispatch::IntegrationTest
     assert_equal 3, match.games.count
   end
 
-  test "edit fills up the boards and lists selectable players" do
+  test "edit lists selectable players without creating boards" do
     sign_in_as users(:member)
     @match.games.destroy_all
 
-    assert_difference -> { @match.games.count }, 3 do
+    assert_no_difference -> { @match.games.count } do
       get edit_match_url(@match)
     end
 
