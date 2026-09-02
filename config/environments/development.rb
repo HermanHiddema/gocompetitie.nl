@@ -78,4 +78,6 @@ Rails.application.configure do
 
   # Allow requests from GitHub Codespaces / Dev Container forwarded ports.
   config.hosts << /.*\.app\.github\.dev/
+
+  config.action_controller.forgery_protection_origin_check = false
 end

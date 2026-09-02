@@ -1,10 +1,13 @@
 <% content_for :title, "Inloggen" %>
+<% content_for :head do %>
+  <meta name="turbo-cache-control" content="no-cache">
+<% end %>
 
 <div class="mx-auto w-full max-w-md">
   <h1 class="mb-6 text-2xl font-bold">Inloggen</h1>
 
   <section class="rounded-lg bg-white p-5 shadow-sm ring-1 ring-slate-200">
-    <%= form_with url: session_url, class: "space-y-4" do |form| %>
+    <%= form_with url: session_path, method: :post, data: { turbo: false }, class: "space-y-4" do |form| %>
       <div>
         <%= form.label :email_address, User.human_attribute_name(:email_address), class: label_classes %>
         <%= form.email_field :email_address, required: true, autofocus: true, autocomplete: "username",
