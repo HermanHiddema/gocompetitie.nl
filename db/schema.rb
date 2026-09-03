@@ -60,10 +60,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_03_223000) do
     t.bigint "white_team_id", null: false
     t.index ["black_team_id"], name: "index_matches_on_black_team_id"
     t.index ["league_id"], name: "index_matches_on_league_id"
-    t.index "(league_id, LEAST(black_team_id, white_team_id), GREATEST(black_team_id, white_team_id))", name: "index_matches_on_league_and_team_pair", unique: true
     t.index ["venue_id"], name: "index_matches_on_venue_id"
     t.index ["white_team_id"], name: "index_matches_on_white_team_id"
   end
+
+  execute <<~SQL
+    CREATE UNIQUE INDEX index_matches_on_league_and_team_pair
+    ON matches (league_id, LEAST(black_team_id, white_team_id), GREATEST(black_team_id, white_team_id))
+  SQL
 
   create_table "participants", force: :cascade do |t|
     t.bigint "club_id"
