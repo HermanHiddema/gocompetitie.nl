@@ -8,7 +8,7 @@ class VenuesController < ApplicationController
   end
 
   def show
-    @matches = @venue.matches.where(league: @season.leagues).scheduled
+    @matches = @season ? @venue.matches.where(league: @season.leagues).scheduled : Match.none
   end
 
   def new

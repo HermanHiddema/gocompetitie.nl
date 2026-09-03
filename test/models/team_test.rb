@@ -23,4 +23,22 @@ class TeamTest < ActiveSupport::TestCase
     assert_not team.valid?
     assert_equal %i[club league name abbrev].sort, team.errors.attribute_names.sort
   end
+
+  test "the league of a team with matches cannot be changed" do
+    team = teams(:amsterdam)
+
+    assert_not team.update(league: leagues(:first))
+    assert_includes team.errors.attribute_names, :league
+  end
+
+  test "team members must have unique board numbers and participants" do
+    team = teams(:amsterdam)
+    team.assign_attributes(team_members_attributes: {
+      "0" => { id: team_members(:amsterdam_2).id, board_number: 1, participant_id: participants(:amsterdam_2).id },
+      "1" => { id: team_members(:amsterdam_3).id, participant_id: participants(:amsterdam_1).id }
+    })
+
+    assert_not team.valid?
+    assert_equal 2, team.errors.where(:base).count
+  end
 end

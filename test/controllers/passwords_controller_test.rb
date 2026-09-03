@@ -53,11 +53,10 @@ class PasswordsControllerTest < ActionDispatch::IntegrationTest
     token = @user.password_reset_token
     assert_no_changes -> { @user.reload.password_digest } do
       put password_path(token), params: { password: "no", password_confirmation: "match" }
-      assert_redirected_to edit_password_path(token)
     end
 
-    follow_redirect!
-    assert_notice "komen niet overeen"
+    assert_response :unprocessable_content
+    assert_notice "overeen"
   end
 
   private

@@ -13,6 +13,8 @@ class Team < ApplicationRecord
   delegate :name, to: :captain, prefix: true, allow_nil: true
 
   validates :name, :abbrev, presence: true
+  validate :league_is_immutable_with_matches, on: :update
+  validate :team_members_are_unique
 
   scope :ordered, -> { order(:name) }
 
@@ -43,4 +45,20 @@ class Team < ApplicationRecord
   def to_s
     name
   end
+
+  private
+    def league_is_immutable_with_matches
+      errors.add(:league, "cannot be changed when matches are scheduled") if league_id_changed? && matches.exists?
+    end
+
+    def team_members_are_unique
+      members = team_members.reject(&:marked_for_destruction?)
+      errors.add(:base, "board numbers must be unique") if duplicates?(members.map(&:board_number))
+      errors.add(:base, "participants can only play in one team") if duplicates?(members.map(&:participant_id))
+    end
+
+    def duplicates?(values)
+      values = values.compact
+      values.length != values.uniq.length
+    end
 end

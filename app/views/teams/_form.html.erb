@@ -12,7 +12,11 @@
     </div>
     <div>
       <%= form.label :league_id, Team.human_attribute_name(:league), class: label_classes %>
-      <%= form.collection_select :league_id, @season.leagues.ordered, :id, :name, { include_blank: true }, class: field_classes %>
+      <% if team.persisted? && team.matches.exists? %>
+        <p class="px-3 py-2 text-slate-900"><%= team.league.name %></p>
+      <% else %>
+        <%= form.collection_select :league_id, @season.leagues.ordered, :id, :name, { include_blank: true }, class: field_classes %>
+      <% end %>
     </div>
     <div>
       <%= form.label :club_id, Team.human_attribute_name(:club), class: label_classes %>
@@ -29,11 +33,11 @@
     <div class="grid gap-3 sm:grid-cols-[6rem_1fr]">
       <div>
         <%= member_form.label :board_number, class: label_classes %>
-        <%= member_form.number_field :board_number, class: field_classes %>
+        <%= member_form.number_field :board_number, in: 1..Match::BOARD_COUNT, class: field_classes %>
       </div>
       <div>
         <%= member_form.label :participant_id, TeamMember.human_attribute_name(:participant), class: label_classes %>
-        <%= member_form.collection_select :participant_id, @season.participants.by_rating, :id, :name, { include_blank: true }, class: field_classes %>
+        <%= member_form.collection_select :participant_id, @available_participants, :id, :name, { include_blank: true }, class: field_classes %>
       </div>
     </div>
   <% end %>

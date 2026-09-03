@@ -6,7 +6,7 @@ class MatchesController < ApplicationController
   before_action :set_match, only: %i[show edit update destroy]
 
   def index
-    @matches = @season.matches.includes(:venue, :black_team, :white_team, :games).scheduled
+    @matches = @season ? @season.matches.includes(:venue, :black_team, :white_team, :games).scheduled : Match.none
   end
 
   def show

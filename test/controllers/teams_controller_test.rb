@@ -22,11 +22,12 @@ class TeamsControllerTest < ActionDispatch::IntegrationTest
 
   test "signed in users can create a team with members" do
     sign_in_as users(:member)
+    participant = seasons(:current).participants.create!(firstname: "Nieuwe", lastname: "Speler", rating: 1800, club: clubs(:amsterdam))
 
     assert_difference -> { Team.count }, 1 do
       post teams_url, params: { team: { name: "Amsterdam 2", abbrev: "Amst2", club_id: clubs(:amsterdam).id,
         league_id: leagues(:first).id, captain_id: people(:anna).id,
-        team_members_attributes: { "0" => { board_number: 1, participant_id: participants(:amsterdam_1).id } } } }
+        team_members_attributes: { "0" => { board_number: 1, participant_id: participant.id } } } }
     end
 
     assert_equal 1, Team.last.team_members.count

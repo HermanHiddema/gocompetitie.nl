@@ -4,7 +4,7 @@ class ParticipantsController < ApplicationController
   before_action :set_participant, only: %i[show edit update destroy]
 
   def index
-    @participants = @season.participants.includes(:club, :black_games, :white_games, team_member: :team).by_rating
+    @participants = @season ? @season.participants.includes(:club, :black_games, :white_games, team_member: :team).by_rating : Participant.none
     @show_club = true
   end
 

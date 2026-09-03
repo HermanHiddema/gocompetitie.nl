@@ -6,7 +6,7 @@ class TeamsController < ApplicationController
   before_action :set_team, only: %i[show edit update destroy]
 
   def index
-    @teams = @season.teams.includes(:league, :club, team_members: :participant).ordered
+    @teams = @season ? @season.teams.includes(:league, :club, team_members: :participant).ordered : Team.none
   end
 
   def show
@@ -56,6 +56,16 @@ class TeamsController < ApplicationController
     def build_missing_team_members
       ((1..BOARDS).to_a - @team.team_members.map(&:board_number)).each { |board_number| @team.team_members.build(board_number: board_number) }
       @members = @team.team_members
+      @available_participants = available_participants
+    end
+
+    # Participants without a team, plus the members of this team, so a player
+    # can never be assigned to two teams at once.
+    def available_participants
+      unassigned = @season.participants.where.missing(:team_member)
+      return unassigned.by_rating unless @team.persisted?
+
+      unassigned.or(@season.participants.left_joins(:team_member).where(team_members: { team_id: @team.id })).by_rating
     end
 
     def team_params
