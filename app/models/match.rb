@@ -12,6 +12,7 @@ class Match < ApplicationRecord
   validates :black_team, :white_team, :league, presence: true
   validate :teams_are_distinct
   validate :teams_belong_to_league
+  validate :team_pair_is_unique
 
   delegate :name, :address, :city, :club, :playing_time, :playing_day, to: :venue, prefix: true, allow_nil: true
 
@@ -100,5 +101,15 @@ class Match < ApplicationRecord
       [black_team, white_team].compact.each do |team|
         errors.add(:league, "teams must belong to the league") if league && team.league_id != league_id
       end
+    end
+
+    def team_pair_is_unique
+      return unless league && black_team_id && white_team_id
+
+      duplicate = league.matches.where.not(id: id).where(
+        "(black_team_id = :black AND white_team_id = :white) OR (black_team_id = :white AND white_team_id = :black)",
+        black: black_team_id, white: white_team_id
+      ).exists?
+      errors.add(:base, "teams already have a match in this league") if duplicate
     end
 end

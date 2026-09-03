@@ -4,13 +4,13 @@ class LeaguesController < ApplicationController
   before_action :set_league, only: %i[show edit update destroy]
 
   def index
-    @leagues = @season.leagues.ordered.includes(teams: [:club, { team_members: :participant }], matches: :games)
+    @leagues = @season ? @season.leagues.ordered.includes(teams: [:club, { team_members: :participant }], matches: :games) : League.none
   end
 
   def show
     @teams = @league.ranked_teams
     @matches = @league.matches.includes(:venue, :black_team, :white_team, :games).scheduled
-    @participants = @league.participants.includes(:club, team_member: :team).to_a.sort_by(&:rating_change).reverse
+    @participants = @league.participants.includes(:club, :black_games, :white_games, team_member: :team).to_a.sort_by(&:rating_change).reverse
 
     respond_to do |format|
       format.html
@@ -55,6 +55,6 @@ class LeaguesController < ApplicationController
     end
 
     def league_params
-      params.expect(league: [:name, :position, :season_id])
+      params.expect(league: [:name, :position])
     end
 end

@@ -118,7 +118,10 @@ class League < ApplicationRecord
 
   private
     def ordered_participants
-      ranked_teams.map { |team| team.team_members.includes(:participant).by_board.map(&:participant) }
+      team_groups = ranked_teams.map { |team| team.team_members.includes(:participant).by_board.map(&:participant) }
+      roster = team_groups.flatten
+      reserves = games.includes(:black_player, :white_player).played.flat_map { |game| [game.black_player, game.white_player] }.compact.uniq - roster
+      team_groups + (reserves.present? ? [reserves] : [])
     end
 
     def standing_for(match, color)

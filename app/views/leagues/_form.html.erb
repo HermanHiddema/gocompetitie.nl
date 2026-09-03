@@ -11,11 +11,6 @@
     <%= form.number_field :position, class: field_classes %>
   </div>
 
-  <div>
-    <%= form.label :season_id, Season.human_attribute_name(:name), class: label_classes %>
-    <%= form.collection_select :season_id, Season.recent, :id, :name, {}, class: field_classes %>
-  </div>
-
   <div class="flex gap-3">
     <%= form.submit "Opslaan", class: button_classes %>
     <%= button_link_to "Annuleren", league.persisted? ? league_path(league) : leagues_path, style: :secondary %>

@@ -8,6 +8,8 @@ class Game < ApplicationRecord
   belongs_to :black_player, class_name: "Participant", foreign_key: :black_id, optional: true, inverse_of: :black_games
   belongs_to :white_player, class_name: "Participant", foreign_key: :white_id, optional: true, inverse_of: :white_games
 
+  validate :players_are_distinct
+
   delegate :rating, to: :black_player, prefix: :black, allow_nil: true
   delegate :rating, to: :white_player, prefix: :white, allow_nil: true
 
@@ -95,6 +97,10 @@ class Game < ApplicationRecord
   private
     def rated?
       played? && !forfeit? && players? && black_rating.present? && white_rating.present?
+    end
+
+    def players_are_distinct
+      errors.add(:white_player, "must be different from black player") if black_id.present? && black_id == white_id
     end
 
     def score_exp(rating_difference)

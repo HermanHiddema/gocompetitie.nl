@@ -4,6 +4,7 @@
   <h1 class="mb-6 text-2xl font-bold">Nieuw wachtwoord instellen</h1>
 
   <section class="rounded-lg bg-white p-5 shadow-sm ring-1 ring-slate-200">
+    <%= render "shared/errors", record: @user %>
     <%= form_with url: password_path(params[:token]), method: :put, class: "space-y-4" do |form| %>
       <div>
         <%= form.label :password, User.human_attribute_name(:password), class: label_classes %>

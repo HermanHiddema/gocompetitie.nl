@@ -22,7 +22,7 @@ class PasswordsController < ApplicationController
       @user.sessions.destroy_all
       redirect_to new_session_path, notice: "Je wachtwoord is opnieuw ingesteld."
     else
-      redirect_to edit_password_path(params[:token]), alert: "De wachtwoorden komen niet overeen."
+      render :edit, status: :unprocessable_content
     end
   end
 

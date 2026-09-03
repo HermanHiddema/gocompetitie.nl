@@ -5,10 +5,8 @@
   <%= form_with model: @match, class: "space-y-4" do |form| %>
     <%= render "shared/errors", record: @match %>
 
-    <div>
-      <%= form.label :league_id, Match.human_attribute_name(:league), class: label_classes %>
-      <%= form.collection_select :league_id, @leagues, :id, :name, {}, class: field_classes %>
-    </div>
+    <%= form.hidden_field :league_id %>
+    <p><%= Match.human_attribute_name(:league) %>: <%= @league&.name %></p>
 
     <div>
       <%= form.label :black_team_id, Match.human_attribute_name(:black_team), class: label_classes %>

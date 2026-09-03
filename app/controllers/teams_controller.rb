@@ -54,9 +54,7 @@ class TeamsController < ApplicationController
     end
 
     def build_missing_team_members
-      (@team.team_members.size...BOARDS).each do |index|
-        @team.team_members.build(board_number: index + 1)
-      end
+      ((1..BOARDS).to_a - @team.team_members.map(&:board_number)).each { |board_number| @team.team_members.build(board_number: board_number) }
       @members = @team.team_members
     end
 
