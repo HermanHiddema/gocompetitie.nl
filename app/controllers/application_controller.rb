@@ -29,4 +29,10 @@ class ApplicationController < ActionController::Base
     def require_admin!
       head :unauthorized unless current_user&.admin?
     end
+
+    # Editing competition data is only possible within a season, which does not
+    # exist yet on a freshly deployed application.
+    def require_season!
+      redirect_to seasons_url, alert: "Maak eerst een seizoen aan." unless @season
+    end
 end

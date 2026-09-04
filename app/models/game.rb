@@ -54,7 +54,8 @@ class Game < ApplicationRecord
   end
 
   def result=(value)
-    if (match = /\A([0½1?])-([0½1?])(!?)\z/.match(value.to_s))
+    value = value.to_s
+    if RESULTS.include?(value) && (match = /\A([0½1?])-([0½1?])(!?)\z/.match(value))
       self.black_points = POINTS[match[1]]
       self.white_points = POINTS[match[2]]
       self.reason = match[3] == "!" ? "!" : nil

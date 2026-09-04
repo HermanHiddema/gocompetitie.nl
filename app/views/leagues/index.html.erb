@@ -23,7 +23,7 @@
   </div>
 <% end %>
 
-<% if current_user %>
+<% if current_user && @season %>
   <div class="mt-8 flex gap-3">
     <%= button_link_to "Poule toevoegen", new_league_path %>
   </div>

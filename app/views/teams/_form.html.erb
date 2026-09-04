@@ -15,7 +15,7 @@
       <% if team.persisted? && team.matches.exists? %>
         <p class="px-3 py-2 text-slate-900"><%= team.league.name %></p>
       <% else %>
-        <%= form.collection_select :league_id, @season.leagues.ordered, :id, :name, { include_blank: true }, class: field_classes %>
+        <%= form.collection_select :league_id, (team.league&.season || @season).leagues.ordered, :id, :name, { include_blank: true }, class: field_classes %>
       <% end %>
     </div>
     <div>

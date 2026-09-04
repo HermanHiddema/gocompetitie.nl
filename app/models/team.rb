@@ -15,6 +15,7 @@ class Team < ApplicationRecord
   validates :name, :abbrev, presence: true
   validate :league_is_immutable_with_matches, on: :update
   validate :team_members_are_unique
+  validate :team_members_are_valid
 
   scope :ordered, -> { order(:name) }
 
@@ -55,6 +56,12 @@ class Team < ApplicationRecord
       members = team_members.reject(&:marked_for_destruction?)
       errors.add(:base, "board numbers must be unique") if duplicates?(members.map(&:board_number))
       errors.add(:base, "participants can only play in one team") if duplicates?(members.map(&:participant_id))
+    end
+
+    def team_members_are_valid
+      team_members.reject(&:marked_for_destruction?).each do |member|
+        errors.add(:team_members, :invalid) unless member.valid?
+      end
     end
 
     def duplicates?(values)

@@ -2,6 +2,7 @@ class LeaguesController < ApplicationController
   allow_unauthenticated_access only: %i[index show]
 
   before_action :set_league, only: %i[show edit update destroy]
+  before_action :require_season!, only: %i[new create]
 
   def index
     @leagues = @season ? @season.leagues.ordered.includes(teams: [:club, { team_members: :participant }], matches: :games) : League.none

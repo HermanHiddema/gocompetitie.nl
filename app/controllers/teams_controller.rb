@@ -4,6 +4,7 @@ class TeamsController < ApplicationController
   BOARDS = 3
 
   before_action :set_team, only: %i[show edit update destroy]
+  before_action :require_season!, only: %i[new create]
 
   def index
     @teams = @season ? @season.teams.includes(:league, :club, team_members: :participant).ordered : Team.none

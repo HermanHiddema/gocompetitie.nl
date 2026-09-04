@@ -9,7 +9,7 @@
   <% end %>
 </section>
 
-<% if current_user %>
+<% if current_user && @season %>
   <div class="mt-6">
     <%= button_link_to "Wedstrijd toevoegen", new_match_path %>
   </div>
