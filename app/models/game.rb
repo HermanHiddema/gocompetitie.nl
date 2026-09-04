@@ -8,7 +8,9 @@ class Game < ApplicationRecord
   belongs_to :black_player, class_name: "Participant", foreign_key: :black_id, optional: true, inverse_of: :black_games
   belongs_to :white_player, class_name: "Participant", foreign_key: :white_id, optional: true, inverse_of: :white_games
 
+  validates :board_number, presence: true, inclusion: { in: 1..Match::BOARD_COUNT }, uniqueness: { scope: :match_id }
   validate :players_are_distinct
+  validate :players_play_in_the_season
 
   delegate :rating, to: :black_player, prefix: :black, allow_nil: true
   delegate :rating, to: :white_player, prefix: :white, allow_nil: true
@@ -24,8 +26,10 @@ class Game < ApplicationRecord
     !played?
   end
 
+  # A game without points for either player is not a game that was played on
+  # the board, so it is treated like a forfeit: unrated and not exported.
   def forfeit?
-    reason.present?
+    reason.present? || (played? && black_points.zero? && white_points.zero?)
   end
 
   def players?
@@ -101,6 +105,15 @@ class Game < ApplicationRecord
 
     def players_are_distinct
       errors.add(:white_player, "must be different from black player") if black_id.present? && black_id == white_id
+    end
+
+    def players_play_in_the_season
+      season_id = match&.league&.season_id
+      return if season_id.blank?
+
+      { black_player: black_player, white_player: white_player }.each do |attribute, player|
+        errors.add(attribute, "must play in the season of the match") if player && player.season_id != season_id
+      end
     end
 
     def score_exp(rating_difference)

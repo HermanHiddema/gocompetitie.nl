@@ -79,4 +79,30 @@ class GameTest < ActiveSupport::TestCase
     @game.update!(reason: "!")
     assert_equal 0, @game.black_rating_change
   end
+
+  test "a result without points is not a rated game" do
+    @game.result = "0-0"
+
+    assert @game.forfeit?
+    assert_equal 0, @game.black_rating_change
+  end
+
+  test "board numbers are required, limited to the boards of a match and unique" do
+    game = matches(:amsterdam_utrecht).games.build
+
+    assert_not game.valid?
+
+    game.board_number = Match::BOARD_COUNT + 1
+    assert_not game.valid?
+
+    game.board_number = 1
+    assert_not game.valid?
+  end
+
+  test "players must play in the season of the match" do
+    guest = Season.create!(name: "Najaar 2029").participants.create!(firstname: "Gast", lastname: "Speler", rating: 1800)
+    @unplayed.black_player = guest
+
+    assert_not @unplayed.valid?
+  end
 end

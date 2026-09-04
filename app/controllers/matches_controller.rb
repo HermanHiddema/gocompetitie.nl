@@ -65,7 +65,7 @@ class MatchesController < ApplicationController
     # Players of the clubs that make up the team, so guest players from a
     # partner club can be selected as well. Pass ?all=1 to select any player.
     def selectable_players(team)
-      participants = @season.participants
+      participants = @match.league.season.participants
       participants = participants.where(club_id: related_club_ids(team)) unless params[:all]
       participants.includes(:club).by_rating
     end
