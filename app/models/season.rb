@@ -36,20 +36,22 @@ class Season < ApplicationRecord
   def upsert_players(json_file)
     egd_data = JSON.parse(File.read(json_file))
 
-    egd_data["players"].each do |player|
-      club = Club.find_by(abbrev: player["Club"]) || Club.create(name: player["Club"], abbrev: player["Club"])
-      person = Person.find_or_initialize_by(egd_pin: player["Pin_Player"])
-      person.update(
-        rating: player["Gor"].to_i,
-        lastname: player["Real_Last_Name"],
-        firstname: player["Real_Name"],
-        club: club
-      )
+    ActiveRecord::Base.transaction do
+      egd_data["players"].each do |player|
+        club = Club.find_by(abbrev: player["Club"]) || Club.create!(name: player["Club"], abbrev: player["Club"])
+        person = Person.find_or_initialize_by(egd_pin: player["Pin_Player"])
+        person.update!(
+          rating: player["Gor"].to_i,
+          lastname: player["Real_Last_Name"],
+          firstname: player["Real_Name"],
+          club: club
+        )
 
-      participant = participants.find_or_initialize_by(person: person)
-      participant.rank = player["Grade"]
-      participant.copy_person_attributes
-      participant.save
+        participant = participants.find_or_initialize_by(person: person)
+        participant.rank = player["Grade"]
+        participant.copy_person_attributes
+        participant.save!
+      end
     end
   end
 

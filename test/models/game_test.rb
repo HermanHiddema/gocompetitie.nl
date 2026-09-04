@@ -99,6 +99,13 @@ class GameTest < ActiveSupport::TestCase
     assert_not game.valid?
   end
 
+  test "players must be unique across the match" do
+    duplicate_game = @game.match.games.build(board_number: 2, black_player: @game.black_player, white_player: participants(:utrecht_2))
+
+    assert_not duplicate_game.valid?
+    assert_includes duplicate_game.errors[:black_player], "must be unique in the match"
+  end
+
   test "players must play in the season of the match" do
     guest = Season.create!(name: "Najaar 2029").participants.create!(firstname: "Gast", lastname: "Speler", rating: 1800)
     @unplayed.black_player = guest

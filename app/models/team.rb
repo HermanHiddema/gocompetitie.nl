@@ -23,11 +23,11 @@ class Team < ApplicationRecord
   end
 
   def score
-    (black_matches.map(&:black_score) + white_matches.map(&:white_score)).compact.sum
+    matches.includes(:games).sum { |match| (match.black_team_id == id ? match.black_score : match.white_score).to_f }
   end
 
   def points
-    (black_matches.map(&:black_points) + white_matches.map(&:white_points)).compact.sum
+    matches.includes(:games).sum { |match| (match.black_team_id == id ? match.black_points : match.white_points).to_f }
   end
 
   def unplayed_matches

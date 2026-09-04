@@ -41,4 +41,14 @@ class TeamTest < ActiveSupport::TestCase
     assert_not team.valid?
     assert_equal 2, team.errors.where(:base).count
   end
+
+  test "team members must belong to the team's season" do
+    team = teams(:amsterdam)
+    participant = season = Season.create!(name: "Herfst 2025").participants.create!(firstname: "Gast", lastname: "Speler", rating: 1800)
+
+    team.team_members.build(board_number: 1, participant: participant)
+
+    assert_not team.valid?
+    assert_includes team.errors.full_messages.join, "must belong to the team's season"
+  end
 end

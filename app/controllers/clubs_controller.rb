@@ -9,7 +9,7 @@ class ClubsController < ApplicationController
 
   def show
     @participants = @club.participants.where(season: @season).by_rating
-    @teams = @club.teams.includes(:league, :club).where(league: @season.leagues).ordered
+    @teams = @club.teams.includes(:league, :club).where(league: @season ? @season.leagues : League.none).ordered
     @matches = Match.where(black_team: @teams).or(Match.where(white_team: @teams)).scheduled
   end
 
@@ -42,7 +42,8 @@ class ClubsController < ApplicationController
     if @club.destroy
       redirect_to clubs_url, notice: "Club is verwijderd.", status: :see_other
     else
-      redirect_to edit_club_path(@club), alert: @club.errors.full_messages.to_sentence, status: :unprocessable_content
+      flash.now[:alert] = @club.errors.full_messages.to_sentence
+      render :edit, status: :unprocessable_content
     end
   end
 

@@ -10,6 +10,7 @@ class Game < ApplicationRecord
 
   validates :board_number, presence: true, inclusion: { in: 1..Match::BOARD_COUNT }, uniqueness: { scope: :match_id }
   validate :players_are_distinct
+  validate :players_are_unique_in_match
   validate :players_play_in_the_season
 
   delegate :rating, to: :black_player, prefix: :black, allow_nil: true
@@ -105,6 +106,15 @@ class Game < ApplicationRecord
 
     def players_are_distinct
       errors.add(:white_player, "must be different from black player") if black_id.present? && black_id == white_id
+    end
+
+    def players_are_unique_in_match
+      return unless match_id.present?
+
+      existing_player_ids = match.games.where.not(id: id).pluck(:black_id, :white_id).flatten.compact
+      { black_player: black_id, white_player: white_id }.each do |attribute, player_id|
+        errors.add(attribute, "must be unique in the match") if player_id.present? && existing_player_ids.include?(player_id)
+      end
     end
 
     def players_play_in_the_season

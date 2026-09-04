@@ -38,6 +38,10 @@
       <div>
         <%= member_form.label :participant_id, TeamMember.human_attribute_name(:participant), class: label_classes %>
         <%= member_form.collection_select :participant_id, @available_participants, :id, :name, { include_blank: true }, class: field_classes %>
+        <div class="mt-2 flex items-center gap-2">
+          <%= member_form.check_box :_destroy, class: "h-4 w-4 rounded border-slate-300 text-indigo-600" %>
+          <%= member_form.label :_destroy, "Verwijderen", class: "text-sm text-slate-700" %>
+        </div>
       </div>
     </div>
   <% end %>
