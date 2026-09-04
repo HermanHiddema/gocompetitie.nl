@@ -13,9 +13,9 @@
   </div>
 
   <ol class="mt-2 space-y-1">
-    <% match.games.sort_by { |game| game.board_number.to_i }.each_with_index do |game, index| %>
+    <% match.games.sort_by { |game| game.board_number.to_i }.each do |game| %>
       <li class="flex items-center gap-3 text-sm">
-        <span class="w-4 text-slate-400"><%= index + 1 %></span>
+        <span class="w-4 text-slate-400"><%= game.board_number %></span>
         <%= render game %>
       </li>
     <% end %>

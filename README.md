@@ -15,7 +15,7 @@ application on Rails 8, with the same business logic and a new Tailwind CSS fron
 * **Participant** – a person playing in a specific season, with rating and rank.
 * **Team** and **TeamMember** – three players per team, one per board.
 * **Match** and **Game** – a match between two teams consists of a game per board.
-  Board points are 2 for a win, 1 for a jigo; a match is won by the team with the
+  Board points are 1 for a win, 0.5 for a jigo; a match is won by the team with the
   most board points. Individual performance is calculated with the EGF rating formula.
 
 League and season results can be exported in the tab separated format used by the

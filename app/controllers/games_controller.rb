@@ -12,7 +12,7 @@ class GamesController < ApplicationController
 
   private
     def rated_games_report
-      @games.select { |game| game.played? && game.players? }.reject(&:forfeit?).map do |game|
+      @games.select(&:rated?).map do |game|
         [
           game.black_player.firstname, game.black_player.lastname,
           game.white_player.firstname, game.white_player.lastname,

@@ -42,6 +42,17 @@ class TeamTest < ActiveSupport::TestCase
     assert_equal 2, team.errors.where(:base).count
   end
 
+  test "team members can swap board numbers and participants" do
+    team = teams(:amsterdam)
+
+    assert team.update(team_members_attributes: {
+      "0" => { id: team_members(:amsterdam_1).id, board_number: 2, participant_id: participants(:amsterdam_2).id },
+      "1" => { id: team_members(:amsterdam_2).id, board_number: 1, participant_id: participants(:amsterdam_1).id }
+    }), team.errors.full_messages.to_sentence
+    assert_equal participants(:amsterdam_1), team_members(:amsterdam_2).reload.participant
+    assert_equal 1, team_members(:amsterdam_2).board_number
+  end
+
   test "team members must belong to the team's season" do
     team = teams(:amsterdam)
     participant = season = Season.create!(name: "Herfst 2025").participants.create!(firstname: "Gast", lastname: "Speler", rating: 1800)

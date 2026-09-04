@@ -67,7 +67,7 @@ class Season < ApplicationRecord
         end
       end
 
-      reserves = participants.includes(:club).select { |participant| participant.played_games.any? }
+      reserves = participants.includes(:club, :black_games, :white_games).select { |participant| participant.played_games.any? }
         .sort_by { |participant| -participant.rating_change }
 
       team_participants + [reserves - team_participants.flatten]

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_03_223000) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_04_234500) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -58,16 +58,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_03_223000) do
     t.datetime "updated_at", null: false
     t.bigint "venue_id"
     t.bigint "white_team_id", null: false
+    t.index "league_id, LEAST(black_team_id, white_team_id), GREATEST(black_team_id, white_team_id)", name: "index_matches_on_league_and_team_pair", unique: true
     t.index ["black_team_id"], name: "index_matches_on_black_team_id"
     t.index ["league_id"], name: "index_matches_on_league_id"
     t.index ["venue_id"], name: "index_matches_on_venue_id"
     t.index ["white_team_id"], name: "index_matches_on_white_team_id"
   end
-
-  execute <<~SQL
-    CREATE UNIQUE INDEX index_matches_on_league_and_team_pair
-    ON matches (league_id, LEAST(black_team_id, white_team_id), GREATEST(black_team_id, white_team_id))
-  SQL
 
   create_table "participants", force: :cascade do |t|
     t.bigint "club_id"
@@ -124,9 +120,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_03_223000) do
     t.bigint "participant_id", null: false
     t.bigint "team_id", null: false
     t.datetime "updated_at", null: false
-    t.index ["participant_id"], name: "index_team_members_on_participant_id", unique: true
-    t.index ["team_id", "board_number"], name: "index_team_members_on_team_id_and_board_number", unique: true
+    t.index ["participant_id"], name: "index_team_members_on_participant_id"
     t.index ["team_id"], name: "index_team_members_on_team_id"
+    t.unique_constraint ["participant_id"], deferrable: :deferred
+    t.unique_constraint ["team_id", "board_number"], deferrable: :deferred
   end
 
   create_table "teams", force: :cascade do |t|

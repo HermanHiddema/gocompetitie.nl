@@ -69,6 +69,19 @@ class MatchesControllerTest < ActionDispatch::IntegrationTest
     assert_equal "19:00", @match.reload.playing_time
   end
 
+  test "signed in users can swap players between boards" do
+    sign_in_as users(:member)
+    first, second = @match.games.by_board.first(2)
+
+    patch match_url(@match), params: { match: { games_attributes: {
+      "0" => { id: first.id, black_id: second.black_id, white_id: second.white_id },
+      "1" => { id: second.id, black_id: first.black_id, white_id: first.white_id } } } }
+
+    assert_redirected_to match_url(@match)
+    assert_equal participants(:amsterdam_2).id, first.reload.black_id
+    assert_equal participants(:amsterdam_1).id, second.reload.black_id
+  end
+
   test "signed in users can delete a match" do
     sign_in_as users(:member)
 

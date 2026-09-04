@@ -27,6 +27,15 @@ class ParticipantsControllerTest < ActionDispatch::IntegrationTest
     assert_equal seasons(:current), participant.season
   end
 
+  test "adding a participant requires a season" do
+    Season.destroy_all
+    sign_in_as users(:member)
+
+    get new_participant_url
+
+    assert_redirected_to seasons_url
+  end
+
   test "editing requires authentication" do
     get edit_participant_url(participants(:amsterdam_1))
     assert_redirected_to new_session_url

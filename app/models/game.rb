@@ -37,6 +37,12 @@ class Game < ApplicationRecord
     black_player.present? && white_player.present?
   end
 
+  # A rated game is played on the board by two players with a rating, so it
+  # counts for the rating calculation and is included in the rated game report.
+  def rated?
+    played? && !forfeit? && players? && black_rating.present? && white_rating.present?
+  end
+
   def swap_colors
     self.black_points, self.white_points = white_points, black_points
     self.black_player, self.white_player = white_player, black_player
@@ -101,21 +107,33 @@ class Game < ApplicationRecord
   end
 
   private
-    def rated?
-      played? && !forfeit? && players? && black_rating.present? && white_rating.present?
-    end
-
     def players_are_distinct
       errors.add(:white_player, "must be different from black player") if black_id.present? && black_id == white_id
     end
 
     def players_are_unique_in_match
-      return unless match_id.present?
+      return if match.blank?
 
-      existing_player_ids = match.games.where.not(id: id).pluck(:black_id, :white_id).flatten.compact
+      player_ids = other_player_ids
       { black_player: black_id, white_player: white_id }.each do |attribute, player_id|
-        errors.add(attribute, "must be unique in the match") if player_id.present? && existing_player_ids.include?(player_id)
+        errors.add(attribute, "must be unique in the match") if player_id.present? && player_ids.include?(player_id)
       end
+    end
+
+    # The other games of the match, preferring the records of the association
+    # over their stored counterparts, so a nested update sees the new players
+    # of its sibling games instead of the values they still have in the
+    # database.
+    def other_games
+      games = match.games.target.reject { |game| game.equal?(self) || game.marked_for_destruction? }
+      return games if match.games.loaded?
+
+      known_ids = (match.games.target.map(&:id) + [id]).compact
+      games + match.games.where.not(id: known_ids).to_a
+    end
+
+    def other_player_ids
+      other_games.flat_map { |game| [game.black_id, game.white_id] }.compact
     end
 
     def players_play_in_the_season

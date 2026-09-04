@@ -94,6 +94,6 @@ class ResultsExport
     end
 
     def participants_by_id(ids)
-      Participant.where(id: ids).includes(:club, :team_member).index_by(&:id)
+      Participant.where(id: ids).includes(:club, :team_member, :black_games, :white_games).index_by(&:id)
     end
 end

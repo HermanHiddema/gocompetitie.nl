@@ -2,6 +2,7 @@ class ParticipantsController < ApplicationController
   allow_unauthenticated_access only: %i[index show]
 
   before_action :set_participant, only: %i[show edit update destroy]
+  before_action :require_season!, only: %i[new create]
 
   def index
     @participants = @season ? @season.participants.includes(:club, :black_games, :white_games, team_member: :team).by_rating : Participant.none
