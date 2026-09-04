@@ -1,0 +1,31 @@
+<% content_for :title, @league.name %>
+
+<h1 class="mb-6 text-2xl font-bold"><%= @league.name %></h1>
+
+<section class="mb-8 rounded-lg bg-white p-4 shadow-sm ring-1 ring-slate-200">
+  <h2 class="mb-3 text-lg font-semibold">Stand</h2>
+  <%= render "leagues/standings", league: @league %>
+</section>
+
+<section class="mb-8 rounded-lg bg-white p-4 shadow-sm ring-1 ring-slate-200">
+  <h2 class="mb-3 text-lg font-semibold">Wedstrijden</h2>
+  <%= render partial: "matches/match", collection: @matches, locals: { show_date: true, show_venue: true } %>
+</section>
+
+<section class="mb-8 rounded-lg bg-white p-4 shadow-sm ring-1 ring-slate-200">
+  <h2 class="mb-3 text-lg font-semibold">Teams</h2>
+  <%= render @teams %>
+</section>
+
+<% if current_user %>
+  <section class="mb-8 rounded-lg bg-white p-4 shadow-sm ring-1 ring-slate-200">
+    <h2 class="mb-3 text-lg font-semibold">Spelers</h2>
+    <%= render partial: "participants/participant", collection: @participants %>
+  </section>
+
+  <div class="flex flex-wrap gap-3">
+    <%= button_link_to "Poule bewerken", edit_league_path(@league) %>
+    <%= button_link_to "Team toevoegen", new_team_path(league_id: @league.id), style: :secondary %>
+    <%= button_link_to "Resultaten (EGD)", league_path(@league, format: :text), style: :secondary %>
+  </div>
+<% end %>

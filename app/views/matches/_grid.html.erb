@@ -1,0 +1,8 @@
+<% matches.group_by(&:playing_date).each do |playing_date, day_matches| %>
+  <div class="mb-6">
+    <h3 class="mb-2 text-sm font-semibold uppercase tracking-wide text-slate-500">
+      <%= playing_date ? l(playing_date, format: :short_with_day) : "Nog niet ingepland" %>
+    </h3>
+    <%= render partial: "matches/match", collection: day_matches, locals: { show_venue: true } %>
+  </div>
+<% end %>

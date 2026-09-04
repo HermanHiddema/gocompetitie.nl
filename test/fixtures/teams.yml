@@ -1,0 +1,20 @@
+amsterdam:
+  name: Amsterdam 1
+  abbrev: Amst
+  club: amsterdam
+  league: top
+  captain: anna
+
+utrecht:
+  name: Utrecht 1
+  abbrev: Utre
+  club: utrecht
+  league: top
+  captain: bram
+
+rotterdam:
+  name: Rotterdam 1
+  abbrev: Rott
+  club: rotterdam
+  league: top
+  captain: carla

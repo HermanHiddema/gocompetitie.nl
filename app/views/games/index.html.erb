@@ -1,0 +1,10 @@
+<% content_for :title, "Partijen" %>
+<h1 class="mb-6 text-2xl font-bold">Partijen</h1>
+
+<section class="rounded-lg bg-white p-4 shadow-sm ring-1 ring-slate-200">
+  <ul class="space-y-1">
+    <% @games.each do |game| %>
+      <li class="border-b border-slate-100 py-1 text-sm last:border-0"><%= render game %></li>
+    <% end %>
+  </ul>
+</section>

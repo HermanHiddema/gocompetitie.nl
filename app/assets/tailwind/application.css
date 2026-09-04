@@ -1,1 +1,17 @@
 @import "tailwindcss";
+
+@layer components {
+  .markdown :where(h1, h2, h3, h4) {
+    @apply mt-4 mb-2 font-semibold text-slate-900;
+  }
+
+  .markdown h1 { @apply text-2xl; }
+  .markdown h2 { @apply text-xl; }
+  .markdown h3 { @apply text-lg; }
+  .markdown p { @apply my-2 leading-relaxed; }
+  .markdown a { @apply text-slate-700 underline hover:text-slate-900; }
+  .markdown ul { @apply my-2 list-inside list-disc; }
+  .markdown ol { @apply my-2 list-inside list-decimal; }
+  .markdown table { @apply my-2 w-full text-left; }
+  .markdown code { @apply rounded bg-slate-100 px-1 py-0.5 text-sm; }
+}

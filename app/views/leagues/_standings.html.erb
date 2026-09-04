@@ -1,0 +1,61 @@
+<% teams = league.ranked_teams %>
+
+<% if teams.empty? %>
+  <p class="text-sm text-slate-600">Nog geen teams ingedeeld.</p>
+<% else %>
+  <div class="overflow-x-auto">
+    <table class="w-full border-collapse text-sm">
+      <thead>
+        <tr class="text-slate-500">
+          <th class="py-1 text-left font-medium">Team</th>
+          <% teams.each do |team| %>
+            <th class="px-1 py-1 text-center font-medium" title="<%= team.name %>"><%= team.abbrev %></th>
+          <% end %>
+          <th class="px-1 py-1 text-center font-medium" title="Wedstrijdpunten">WP</th>
+          <th class="px-1 py-1 text-center font-medium" title="Bordpunten">BP</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% teams.each do |team| %>
+          <tr class="border-t border-slate-100">
+            <th class="py-1 pr-2 text-left font-normal">
+              <%= link_to team, class: "hover:underline" do %>
+                <span class="hidden md:inline"><%= team.name %></span>
+                <span class="md:hidden"><%= team.abbrev %></span>
+              <% end %>
+            </th>
+            <% teams.each do |opponent| %>
+              <% if team.id == opponent.id %>
+                <td class="px-1 py-1 text-center text-slate-300">&times;</td>
+              <% else %>
+                <% standing = league.standing(team, opponent) %>
+                <% if standing.nil? %>
+                  <td class="px-1 py-1 text-center">
+                    <% if current_user %>
+                      <%= link_to "+", new_match_path(league_id: league.id, black_team_id: team.id, white_team_id: opponent.id),
+                            class: "text-slate-400 hover:text-slate-900", title: "Wedstrijd plannen" %>
+                    <% end %>
+                  </td>
+                <% else %>
+                  <td class="px-1 py-1 text-center <%= { "won" => "bg-emerald-50 text-emerald-800", "lost" => "bg-red-50 text-red-800" }.fetch(standing.status, "text-slate-600") %>">
+                    <%= link_to standing.match, title: standing.venue&.city, class: "block hover:underline" do %>
+                      <% if standing.points %>
+                        <%= standing.points %>
+                      <% elsif standing.match.playing_date %>
+                        <span class="text-xs"><%= l standing.match.playing_date, format: :short %></span>
+                      <% else %>
+                        &ndash;
+                      <% end %>
+                    <% end %>
+                  </td>
+                <% end %>
+              <% end %>
+            <% end %>
+            <td class="px-1 py-1 text-center font-semibold"><%= team.score %></td>
+            <td class="px-1 py-1 text-center font-semibold"><%= team.points %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+<% end %>

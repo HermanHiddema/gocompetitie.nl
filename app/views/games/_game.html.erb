@@ -1,0 +1,6 @@
+<div class="flex w-full items-center justify-between gap-3">
+  <span class="min-w-0 flex-1 truncate">
+    <%= game.black_player&.fullname || "?" %> &ndash; <%= game.white_player&.fullname || "?" %>
+  </span>
+  <span class="w-16 text-right font-medium"><%= game.result %></span>
+</div>

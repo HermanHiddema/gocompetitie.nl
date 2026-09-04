@@ -1,0 +1,53 @@
+<%= form_with model: team, class: "space-y-4" do |form| %>
+  <%= render "shared/errors", record: team %>
+
+  <div class="grid gap-4 sm:grid-cols-2">
+    <div>
+      <%= form.label :name, class: label_classes %>
+      <%= form.text_field :name, class: field_classes %>
+    </div>
+    <div>
+      <%= form.label :abbrev, class: label_classes %>
+      <%= form.text_field :abbrev, class: field_classes %>
+    </div>
+    <div>
+      <%= form.label :league_id, Team.human_attribute_name(:league), class: label_classes %>
+      <% if team.persisted? && team.matches.exists? %>
+        <p class="px-3 py-2 text-slate-900"><%= team.league.name %></p>
+      <% else %>
+        <%= form.collection_select :league_id, (team.league&.season || @season).leagues.ordered, :id, :name, { include_blank: true }, class: field_classes %>
+      <% end %>
+    </div>
+    <div>
+      <%= form.label :club_id, Team.human_attribute_name(:club), class: label_classes %>
+      <%= form.collection_select :club_id, Club.ordered, :id, :name, { include_blank: true }, class: field_classes %>
+    </div>
+    <div class="sm:col-span-2">
+      <%= form.label :captain_id, Team.human_attribute_name(:captain), class: label_classes %>
+      <%= form.collection_select :captain_id, Person.ordered, :id, :name, { include_blank: true }, class: field_classes %>
+    </div>
+  </div>
+
+  <h2 class="pt-4 text-lg font-semibold">Teamleden</h2>
+  <%= form.fields_for :team_members, @members do |member_form| %>
+    <div class="grid gap-3 sm:grid-cols-[6rem_1fr]">
+      <div>
+        <%= member_form.label :board_number, class: label_classes %>
+        <%= member_form.number_field :board_number, in: 1..Match::BOARD_COUNT, class: field_classes %>
+      </div>
+      <div>
+        <%= member_form.label :participant_id, TeamMember.human_attribute_name(:participant), class: label_classes %>
+        <%= member_form.collection_select :participant_id, @available_participants, :id, :name, { include_blank: true }, class: field_classes %>
+        <div class="mt-2 flex items-center gap-2">
+          <%= member_form.check_box :_destroy, class: "h-4 w-4 rounded border-slate-300 text-indigo-600" %>
+          <%= member_form.label :_destroy, "Verwijderen", class: "text-sm text-slate-700" %>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
+  <div class="flex gap-3">
+    <%= form.submit "Opslaan", class: button_classes %>
+    <%= button_link_to "Annuleren", team.persisted? ? team_path(team) : teams_path, style: :secondary %>
+  </div>
+<% end %>

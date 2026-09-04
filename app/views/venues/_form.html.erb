@@ -1,0 +1,42 @@
+<%= form_with model: venue, class: "space-y-4" do |form| %>
+  <%= render "shared/errors", record: venue %>
+
+  <div class="grid gap-4 sm:grid-cols-2">
+    <div>
+      <%= form.label :club_id, Venue.human_attribute_name(:club), class: label_classes %>
+      <%= form.collection_select :club_id, Club.ordered, :id, :name, { include_blank: true }, class: field_classes %>
+    </div>
+    <div>
+      <%= form.label :name, class: label_classes %>
+      <%= form.text_field :name, class: field_classes %>
+    </div>
+    <div>
+      <%= form.label :address, class: label_classes %>
+      <%= form.text_field :address, class: field_classes %>
+    </div>
+    <div>
+      <%= form.label :city, class: label_classes %>
+      <%= form.text_field :city, class: field_classes %>
+    </div>
+    <div>
+      <%= form.label :playing_day, class: label_classes %>
+      <%= form.select :playing_day, Venue::DAYS.each_with_index.map { |day, index| [ day.capitalize, index ] },
+            { include_blank: true }, class: field_classes %>
+    </div>
+    <div>
+      <%= form.label :playing_time, class: label_classes %>
+      <%= form.text_field :playing_time, class: field_classes %>
+    </div>
+  </div>
+
+  <div>
+    <%= form.label :info, class: label_classes %>
+    <%= form.text_area :info, rows: 6, class: field_classes %>
+    <p class="mt-1 text-xs text-slate-500">Markdown wordt ondersteund.</p>
+  </div>
+
+  <div class="flex gap-3">
+    <%= form.submit "Opslaan", class: button_classes %>
+    <%= button_link_to "Annuleren", venue.persisted? ? venue_path(venue) : venues_path, style: :secondary %>
+  </div>
+<% end %>
