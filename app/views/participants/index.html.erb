@@ -1,0 +1,12 @@
+<% content_for :title, "Deelnemers" %>
+<h1 class="mb-6 text-2xl font-bold">Alle deelnemers</h1>
+
+<section class="rounded-lg bg-white p-4 shadow-sm ring-1 ring-slate-200">
+  <%= render partial: "participants/participant", collection: @participants %>
+</section>
+
+<% if current_user %>
+  <div class="mt-6">
+    <%= button_link_to "Deelnemer toevoegen", new_participant_path %>
+  </div>
+<% end %>

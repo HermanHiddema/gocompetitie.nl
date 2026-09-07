@@ -1,0 +1,53 @@
+<% content_for :title, "Wedstrijd bewerken" %>
+<h1 class="mb-2 text-2xl font-bold">Wedstrijd bewerken</h1>
+<p class="mb-6 text-slate-600"><%= @match.black_team.name %> &ndash; <%= @match.white_team.name %></p>
+
+<section class="rounded-lg bg-white p-5 shadow-sm ring-1 ring-slate-200">
+  <%= form_with model: @match, class: "space-y-4" do |form| %>
+    <%= render "shared/errors", record: @match %>
+
+    <div>
+      <%= form.label :venue_id, Match.human_attribute_name(:venue), class: label_classes %>
+      <%= form.collection_select :venue_id, Venue.ordered, :id, :name, { include_blank: true }, class: field_classes %>
+    </div>
+
+    <div class="grid gap-4 sm:grid-cols-2">
+      <div>
+        <%= form.label :playing_date, class: label_classes %>
+        <%= form.date_field :playing_date, class: field_classes %>
+      </div>
+      <div>
+        <%= form.label :playing_time, class: label_classes %>
+        <%= form.text_field :playing_time, class: field_classes %>
+      </div>
+    </div>
+
+    <h2 class="pt-4 text-lg font-semibold">Partijen</h2>
+    <div class="hidden gap-3 text-sm font-medium text-slate-500 sm:grid sm:grid-cols-[1fr_1fr_8rem]">
+      <span>Zwart: <%= @match.black_team.name %></span>
+      <span>Wit: <%= @match.white_team.name %></span>
+      <span>Resultaat</span>
+    </div>
+
+    <%= form.fields_for :games, @games do |game_form| %>
+      <div class="grid gap-3 sm:grid-cols-[1fr_1fr_8rem]">
+        <%= game_form.label :black_id, "Bord #{game_form.object.board_number} zwart", class: "sr-only" %>
+        <%= game_form.collection_select :black_id, @black_players, :id, :name, { include_blank: true }, class: field_classes %>
+        <%= game_form.label :white_id, "Bord #{game_form.object.board_number} wit", class: "sr-only" %>
+        <%= game_form.collection_select :white_id, @white_players, :id, :name, { include_blank: true }, class: field_classes %>
+        <%= game_form.label :result, "Bord #{game_form.object.board_number} resultaat", class: "sr-only" %>
+        <%= game_form.select :result, Game::RESULTS, { selected: game_form.object.result }, class: field_classes %>
+      </div>
+    <% end %>
+
+    <p class="text-sm text-slate-500">
+      <%= link_to params[:all] ? "Alleen clubspelers tonen" : "Alle deelnemers tonen",
+            edit_match_path(@match, all: params[:all] ? nil : 1), class: "underline" %>
+    </p>
+
+    <div class="flex gap-3">
+      <%= form.submit "Opslaan", class: button_classes %>
+      <%= button_link_to "Annuleren", match_path(@match), style: :secondary %>
+    </div>
+  <% end %>
+</section>

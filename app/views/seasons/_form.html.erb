@@ -1,0 +1,19 @@
+<%= form_with model: season, class: "space-y-4" do |form| %>
+  <%= render "shared/errors", record: season %>
+
+  <div>
+    <%= form.label :name, class: label_classes %>
+    <%= form.text_field :name, class: field_classes %>
+  </div>
+
+  <div>
+    <%= form.label :information, class: label_classes %>
+    <%= form.text_area :information, rows: 10, class: field_classes %>
+    <p class="mt-1 text-xs text-slate-500">Markdown wordt ondersteund.</p>
+  </div>
+
+  <div class="flex gap-3">
+    <%= form.submit "Opslaan", class: button_classes %>
+    <%= button_link_to "Annuleren", seasons_path, style: :secondary %>
+  </div>
+<% end %>

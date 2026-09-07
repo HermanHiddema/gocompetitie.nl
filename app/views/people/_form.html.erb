@@ -1,0 +1,43 @@
+<%= form_with model: person, class: "space-y-4" do |form| %>
+  <%= render "shared/errors", record: person %>
+
+  <div class="grid gap-4 sm:grid-cols-2">
+    <div>
+      <%= form.label :firstname, class: label_classes %>
+      <%= form.text_field :firstname, class: field_classes %>
+    </div>
+    <div>
+      <%= form.label :lastname, class: label_classes %>
+      <%= form.text_field :lastname, class: field_classes %>
+    </div>
+    <div>
+      <%= form.label :club_id, Person.human_attribute_name(:club), class: label_classes %>
+      <%= form.collection_select :club_id, Club.ordered, :id, :name, { include_blank: true }, class: field_classes %>
+    </div>
+    <div>
+      <%= form.label :egd_pin, class: label_classes %>
+      <%= form.text_field :egd_pin, class: field_classes %>
+    </div>
+    <div>
+      <%= form.label :email, class: label_classes %>
+      <%= form.email_field :email, class: field_classes %>
+    </div>
+    <div>
+      <%= form.label :email2, class: label_classes %>
+      <%= form.email_field :email2, class: field_classes %>
+    </div>
+    <div>
+      <%= form.label :phone, class: label_classes %>
+      <%= form.telephone_field :phone, class: field_classes %>
+    </div>
+    <div>
+      <%= form.label :phone2, class: label_classes %>
+      <%= form.telephone_field :phone2, class: field_classes %>
+    </div>
+  </div>
+
+  <div class="flex gap-3">
+    <%= form.submit "Opslaan", class: button_classes %>
+    <%= button_link_to "Annuleren", person.persisted? ? person_path(person) : people_path, style: :secondary %>
+  </div>
+<% end %>

@@ -1,0 +1,10 @@
+<% content_for :title, "Team bewerken" %>
+<h1 class="mb-6 text-2xl font-bold">Team bewerken</h1>
+<section class="rounded-lg bg-white p-5 shadow-sm ring-1 ring-slate-200">
+  <%= render "form", team: @team %>
+</section>
+
+<div class="mt-6">
+  <%= button_to "Team verwijderen", team_path(@team), method: :delete, class: button_classes(:danger),
+        form: { data: { turbo_confirm: "Weet je het zeker?" } } %>
+</div>

@@ -1,0 +1,9 @@
+top:
+  name: Hoofdklasse
+  position: 0
+  season: current
+
+first:
+  name: Eerste klasse
+  position: 1
+  season: current

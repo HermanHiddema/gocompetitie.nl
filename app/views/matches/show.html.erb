@@ -1,0 +1,17 @@
+<% content_for :title, "#{@match.black_team.name} - #{@match.white_team.name}" %>
+
+<h1 class="mb-6 text-2xl font-bold">
+  <%= @match.black_team.name %> &ndash; <%= @match.white_team.name %>
+</h1>
+
+<section class="rounded-lg bg-white p-4 shadow-sm ring-1 ring-slate-200">
+  <%= render "matches/match_details", match: @match %>
+</section>
+
+<% if current_user %>
+  <div class="mt-6 flex gap-3">
+    <%= button_link_to "Bewerken", edit_match_path(@match) %>
+    <%= button_to "Verwijderen", match_path(@match), method: :delete, class: button_classes(:danger),
+          form: { data: { turbo_confirm: "Weet je het zeker?" } } %>
+  </div>
+<% end %>

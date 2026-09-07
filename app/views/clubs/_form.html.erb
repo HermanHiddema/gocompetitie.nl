@@ -1,0 +1,33 @@
+<%= form_with model: club, class: "space-y-4" do |form| %>
+  <%= render "shared/errors", record: club %>
+
+  <div class="grid gap-4 sm:grid-cols-2">
+    <div>
+      <%= form.label :name, class: label_classes %>
+      <%= form.text_field :name, class: field_classes %>
+    </div>
+    <div>
+      <%= form.label :abbrev, class: label_classes %>
+      <%= form.text_field :abbrev, class: field_classes %>
+    </div>
+    <div>
+      <%= form.label :website, class: label_classes %>
+      <%= form.url_field :website, class: field_classes %>
+    </div>
+    <div>
+      <%= form.label :contact_person_id, Club.human_attribute_name(:contact_person), class: label_classes %>
+      <%= form.collection_select :contact_person_id, Person.ordered, :id, :name, { include_blank: true }, class: field_classes %>
+    </div>
+  </div>
+
+  <div>
+    <%= form.label :info, class: label_classes %>
+    <%= form.text_area :info, rows: 8, class: field_classes %>
+    <p class="mt-1 text-xs text-slate-500">Markdown wordt ondersteund.</p>
+  </div>
+
+  <div class="flex gap-3">
+    <%= form.submit "Opslaan", class: button_classes %>
+    <%= button_link_to "Annuleren", club.persisted? ? club_path(club) : clubs_path, style: :secondary %>
+  </div>
+<% end %>

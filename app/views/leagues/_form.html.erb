@@ -1,0 +1,18 @@
+<%= form_with model: league, class: "space-y-4" do |form| %>
+  <%= render "shared/errors", record: league %>
+
+  <div>
+    <%= form.label :name, class: label_classes %>
+    <%= form.text_field :name, class: field_classes %>
+  </div>
+
+  <div>
+    <%= form.label :position, class: label_classes %>
+    <%= form.number_field :position, class: field_classes %>
+  </div>
+
+  <div class="flex gap-3">
+    <%= form.submit "Opslaan", class: button_classes %>
+    <%= button_link_to "Annuleren", league.persisted? ? league_path(league) : leagues_path, style: :secondary %>
+  </div>
+<% end %>

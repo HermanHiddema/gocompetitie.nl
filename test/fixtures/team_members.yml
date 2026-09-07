@@ -1,0 +1,44 @@
+amsterdam_1:
+  team: amsterdam
+  participant: amsterdam_1
+  board_number: 1
+
+amsterdam_2:
+  team: amsterdam
+  participant: amsterdam_2
+  board_number: 2
+
+amsterdam_3:
+  team: amsterdam
+  participant: amsterdam_3
+  board_number: 3
+
+utrecht_1:
+  team: utrecht
+  participant: utrecht_1
+  board_number: 1
+
+utrecht_2:
+  team: utrecht
+  participant: utrecht_2
+  board_number: 2
+
+utrecht_3:
+  team: utrecht
+  participant: utrecht_3
+  board_number: 3
+
+rotterdam_1:
+  team: rotterdam
+  participant: rotterdam_1
+  board_number: 1
+
+rotterdam_2:
+  team: rotterdam
+  participant: rotterdam_2
+  board_number: 2
+
+rotterdam_3:
+  team: rotterdam
+  participant: rotterdam_3
+  board_number: 3

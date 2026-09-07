@@ -1,0 +1,23 @@
+amsterdam:
+  club: amsterdam
+  name: Speellokaal Amsterdam
+  address: Da Costakade 158
+  city: Amsterdam
+  playing_day: 2
+  playing_time: "20:00"
+
+utrecht:
+  club: utrecht
+  name: Speellokaal Utrecht
+  address: Oudegracht 245
+  city: Utrecht
+  playing_day: 1
+  playing_time: "19:30"
+
+rotterdam:
+  club: rotterdam
+  name: Speellokaal Rotterdam
+  address: Coolsingel 30
+  city: Rotterdam
+  playing_day: 3
+  playing_time: "20:00"

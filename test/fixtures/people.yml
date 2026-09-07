@@ -1,0 +1,17 @@
+anna:
+  firstname: Anna
+  lastname: Amsterdam
+  club: amsterdam
+  email: anna@example.com
+  phone: "020-1234567"
+
+bram:
+  firstname: Bram
+  lastname: Utrecht
+  club: utrecht
+  email: bram@example.com
+
+carla:
+  firstname: Carla
+  lastname: Rotterdam
+  club: rotterdam

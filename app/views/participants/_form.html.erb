@@ -1,0 +1,36 @@
+<%= form_with model: participant, class: "space-y-4" do |form| %>
+  <%= render "shared/errors", record: participant %>
+
+  <div class="grid gap-4 sm:grid-cols-2">
+    <div>
+      <%= form.label :firstname, class: label_classes %>
+      <%= form.text_field :firstname, class: field_classes %>
+    </div>
+    <div>
+      <%= form.label :lastname, class: label_classes %>
+      <%= form.text_field :lastname, class: field_classes %>
+    </div>
+    <div>
+      <%= form.label :rating, class: label_classes %>
+      <%= form.number_field :rating, class: field_classes %>
+    </div>
+    <div>
+      <%= form.label :rank, class: label_classes %>
+      <%= form.text_field :rank, value: participant.rank, class: field_classes %>
+      <p class="mt-1 text-xs text-slate-500">Bijvoorbeeld 5k, 2d of 1p.</p>
+    </div>
+    <div>
+      <%= form.label :egd_pin, class: label_classes %>
+      <%= form.text_field :egd_pin, class: field_classes %>
+    </div>
+    <div>
+      <%= form.label :club_id, Participant.human_attribute_name(:club), class: label_classes %>
+      <%= form.collection_select :club_id, Club.ordered, :id, :name, { include_blank: true }, class: field_classes %>
+    </div>
+  </div>
+
+  <div class="flex gap-3">
+    <%= form.submit "Opslaan", class: button_classes %>
+    <%= button_link_to "Annuleren", participant.persisted? ? participant_path(participant) : participants_path, style: :secondary %>
+  </div>
+<% end %>

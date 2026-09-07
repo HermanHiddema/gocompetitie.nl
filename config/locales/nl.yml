@@ -1,0 +1,86 @@
+nl:
+  date:
+    formats:
+      default: "%d-%m-%Y"
+      short: "%e/%-m"
+      short_with_day: "%a %e %b"
+      long: "%e %B %Y"
+  time:
+    formats:
+      medium: "%e %b %Y %H:%M"
+  activerecord:
+    models:
+      club: Club
+      game: Partij
+      league: Poule
+      match: Wedstrijd
+      participant: Deelnemer
+      person: Persoon
+      season: Seizoen
+      team: Team
+      team_member: Teamlid
+      venue: Speellokatie
+    attributes:
+      club:
+        name: Naam
+        abbrev: Afkorting
+        website: Website
+        info: Informatie
+        contact_person: Contactpersoon
+      game:
+        black_player: Zwart
+        white_player: Wit
+        result: Resultaat
+        board_number: Bord
+      league:
+        name: Naam
+        position: Volgorde
+        season: Seizoen
+      match:
+        league: Poule
+        venue: Speellokatie
+        black_team: Zwart
+        white_team: Wit
+        playing_date: Speeldatum
+        playing_time: Aanvangstijd
+      participant:
+        firstname: Voornaam
+        lastname: Achternaam
+        rating: Rating
+        rank: Graad
+        egd_pin: EGD pin
+        club: Club
+        season: Seizoen
+      person:
+        firstname: Voornaam
+        lastname: Achternaam
+        egd_pin: EGD pin
+        club: Club
+        email: E-mail
+        email2: E-mail 2
+        phone: Telefoon
+        phone2: Telefoon 2
+      season:
+        name: Naam
+        information: Informatie
+      team:
+        name: Naam
+        abbrev: Afkorting
+        club: Club
+        league: Poule
+        captain: Captain
+      team_member:
+        board_number: Bord
+        participant: Speler
+      venue:
+        club: Club
+        name: Naam
+        address: Adres
+        city: Plaatsnaam
+        playing_day: Speeldag
+        playing_time: Aanvangstijd
+        info: Informatie
+      user:
+        email_address: E-mailadres
+        password: Wachtwoord
+        password_confirmation: Wachtwoord bevestigen
