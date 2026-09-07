@@ -48,6 +48,6 @@
 
   <div class="flex gap-3">
     <%= form.submit "Opslaan", class: button_classes %>
-    <%= button_link_to "Annuleren", team.persisted? ? team_path(team) : teams_path, style: :secondary %>
+    <%= button_link_to "Annuleren", team.persisted? ? team_path(team) : teams_path(season_slug: @season&.slug), style: :secondary %>
   </div>
 <% end %>

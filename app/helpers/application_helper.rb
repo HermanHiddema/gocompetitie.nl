@@ -60,8 +60,4 @@ module ApplicationHelper
   def label_classes
     "block text-sm font-medium text-slate-700 mb-1"
   end
-
-  def season_url_for(season)
-    "//#{season.slug}.#{request.domain}#{":#{request.port}" unless [80, 443].include?(request.port)}"
-  end
 end

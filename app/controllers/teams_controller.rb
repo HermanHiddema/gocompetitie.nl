@@ -46,7 +46,7 @@ class TeamsController < ApplicationController
 
   def destroy
     @team.destroy!
-    redirect_to teams_url, notice: "Team is verwijderd.", status: :see_other
+    redirect_to teams_url(season_slug: @season&.slug), notice: "Team is verwijderd.", status: :see_other
   end
 
   private

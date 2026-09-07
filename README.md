@@ -7,8 +7,9 @@ application on Rails 8, with the same business logic and a new Tailwind CSS fron
 ## Domain
 
 * **Season** – a competition season (e.g. *Voorjaar 2026*). Every season has its own
-  subdomain, `voorjaar-2026.gocompetitie.nl`; without a matching subdomain the most
-  recent season is shown.
+  path, `/season/voorjaar-2026`, which also prefixes the pages of that season, e.g.
+  `/season/voorjaar-2026/teams`. Without a season in the path the most recent season
+  is shown; the front page redirects to it.
 * **League** (*poule*) – a group of teams within a season that play a round robin.
 * **Club**, **Venue** (*speellokatie*) and **Person** – the organisations, playing
   locations and contact persons.

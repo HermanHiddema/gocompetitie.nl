@@ -31,6 +31,6 @@
 
   <div class="flex gap-3">
     <%= form.submit "Opslaan", class: button_classes %>
-    <%= button_link_to "Annuleren", participant.persisted? ? participant_path(participant) : participants_path, style: :secondary %>
+    <%= button_link_to "Annuleren", participant.persisted? ? participant_path(participant) : participants_path(season_slug: @season&.slug), style: :secondary %>
   </div>
 <% end %>

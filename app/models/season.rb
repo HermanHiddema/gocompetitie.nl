@@ -55,6 +55,10 @@ class Season < ApplicationRecord
     end
   end
 
+  def to_param
+    slug
+  end
+
   def to_s
     name
   end
