@@ -31,6 +31,17 @@ class VenuesControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "season-scoped venue forms keep the selected season in their action" do
+    sign_in_as users(:member)
+    slug = seasons(:previous).slug
+
+    get new_venue_url(season_slug: slug)
+    assert_select "form[action=?]", venues_path(season_slug: slug)
+
+    get edit_venue_url(venues(:amsterdam), season_slug: slug)
+    assert_select "form[action=?]", venue_path(venues(:amsterdam), season_slug: slug)
+  end
+
   test "editing requires authentication" do
     get new_venue_url
     assert_redirected_to new_session_url

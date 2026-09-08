@@ -2,7 +2,7 @@
 <h1 class="mb-6 text-2xl font-bold">Nieuwe wedstrijd</h1>
 
 <section class="rounded-lg bg-white p-5 shadow-sm ring-1 ring-slate-200">
-  <%= form_with model: @match, class: "space-y-4" do |form| %>
+  <%= form_with model: @match, url: matches_path(**season_url_options), class: "space-y-4" do |form| %>
     <%= render "shared/errors", record: @match %>
 
     <%= form.hidden_field :league_id %>

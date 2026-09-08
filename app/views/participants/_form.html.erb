@@ -1,4 +1,4 @@
-<%= form_with model: participant, class: "space-y-4" do |form| %>
+<%= form_with model: participant, url: participant.persisted? ? participant_path(participant) : participants_path(**season_url_options), class: "space-y-4" do |form| %>
   <%= render "shared/errors", record: participant %>
 
   <div class="grid gap-4 sm:grid-cols-2">

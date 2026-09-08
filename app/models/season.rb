@@ -6,14 +6,15 @@ class Season < ApplicationRecord
   has_many :games, through: :matches
 
   validates :name, presence: true
-  validates :slug, uniqueness: true, allow_blank: true
+  validates :slug, presence: true, uniqueness: true
 
   before_validation :update_slug
 
+  scope :with_slug, -> { where.not(slug: [nil, ""]) }
   scope :recent, -> { order(created_at: :desc) }
 
   def update_slug
-    self.slug = name.to_s.gsub(/[^A-Za-z0-9]/, "-").downcase
+    self.slug = name.to_s.parameterize
   end
 
   def ranked_teams

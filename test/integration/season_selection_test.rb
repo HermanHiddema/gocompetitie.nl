@@ -23,7 +23,22 @@ class SeasonSelectionTest < ActionDispatch::IntegrationTest
     assert_select "footer", /Najaar 2025/
   end
 
+  test "an unknown season path returns not found" do
+    get teams_url(season_slug: "does-not-exist")
+
+    assert_response :not_found
+  end
+
   test "the most recent season is shown without a season path" do
+    get teams_url
+
+    assert_response :success
+    assert_select "footer", /Voorjaar 2026/
+  end
+
+  test "pages without a season path skip seasons with a blank slug" do
+    Season.create!(name: "Zomer 2026").update_column(:slug, "")
+
     get teams_url
 
     assert_response :success

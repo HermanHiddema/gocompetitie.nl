@@ -6,7 +6,7 @@ class SeasonsController < ApplicationController
 
   # The front page shows the most recent season.
   def front
-    redirect_to Season.recent.first || seasons_url
+    redirect_to Season.with_slug.recent.first || seasons_url
   end
 
   def index

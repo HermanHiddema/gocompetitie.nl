@@ -23,7 +23,11 @@ class ApplicationController < ActionController::Base
     # Season pages carry the season slug in their path, e.g.
     # /season/voorjaar-2026/teams. Without a slug the most recent season is shown.
     def set_current_season
-      @season = @current_season = Season.find_by(slug: params[:season_slug]) || Season.recent.first
+      @season = @current_season = if params.key?(:season_slug)
+        Season.with_slug.find_by!(slug: params[:season_slug])
+      else
+        Season.with_slug.recent.first
+      end
     end
 
     # Records are addressed without a season in their path, so the season of

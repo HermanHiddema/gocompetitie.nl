@@ -14,14 +14,14 @@ Rails.application.routes.draw do
     resources :clubs
     resources :venues
     resources :games, only: :index
-    resources :matches, only: :index
-    resources :participants, only: :index
-    resources :teams, only: :index
+    resources :matches, only: %i[index new create]
+    resources :participants, only: %i[index new create]
+    resources :teams, only: %i[index new create]
   end
 
-  resources :matches, except: :index
-  resources :participants, except: :index
-  resources :teams, except: :index
+  resources :matches, except: %i[index new create]
+  resources :participants, except: %i[index new create]
+  resources :teams, except: %i[index new create]
 
   get "club", to: redirect("/clubs")
 

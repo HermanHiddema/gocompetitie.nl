@@ -47,6 +47,17 @@ class ClubsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to club_url(Club.last, season_slug: seasons(:current).slug)
   end
 
+  test "season-scoped club forms keep the selected season in their action" do
+    sign_in_as users(:member)
+    slug = seasons(:previous).slug
+
+    get new_club_url(season_slug: slug)
+    assert_select "form[action=?]", clubs_path(season_slug: slug)
+
+    get edit_club_url(clubs(:amsterdam), season_slug: slug)
+    assert_select "form[action=?]", club_path(clubs(:amsterdam), season_slug: slug)
+  end
+
   test "invalid clubs are rendered again" do
     sign_in_as users(:member)
 
