@@ -4,7 +4,7 @@
 <section class="mb-8 rounded-lg bg-white p-4 shadow-sm ring-1 ring-slate-200">
   <dl class="grid gap-2 text-sm sm:grid-cols-[10rem_1fr]">
     <dt class="font-semibold">Club</dt>
-    <dd><%= link_to @person.club.name, @person.club, class: "hover:underline" if @person.club %></dd>
+    <dd><%= link_to @person.club.name, club_path(@person.club, **season_url_options), class: "hover:underline" if @person.club %></dd>
 
     <% if current_user %>
       <dt class="font-semibold">E-mail</dt>

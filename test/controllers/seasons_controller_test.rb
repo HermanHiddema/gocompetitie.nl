@@ -8,10 +8,18 @@ class SeasonsControllerTest < ActionDispatch::IntegrationTest
     assert_select "a", text: "Voorjaar 2026"
   end
 
-  test "show redirects to the standings" do
+  test "show renders the standings of the season" do
     get season_url(seasons(:current))
 
-    assert_redirected_to leagues_url
+    assert_response :success
+    assert_select "h1", "Stand Voorjaar 2026"
+    assert_select "table"
+  end
+
+  test "the front page redirects to the most recent season" do
+    get root_url
+
+    assert_redirected_to season_url(Season.recent.first)
   end
 
   test "show renders the EGD result list as text" do

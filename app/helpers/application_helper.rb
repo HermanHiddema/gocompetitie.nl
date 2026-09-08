@@ -31,6 +31,12 @@ module ApplicationHelper
     end
   end
 
+  # Clubs and venues have no season of their own, so links to them carry the
+  # season of the current page in the path.
+  def season_url_options
+    { season_slug: current_season&.slug }
+  end
+
   def nav_link_to(name, path, **options)
     classes = "rounded-md px-3 py-2 text-sm font-medium transition hover:bg-slate-700 hover:text-white"
     classes += current_page?(path) ? " bg-slate-900 text-white" : " text-slate-200"
@@ -59,9 +65,5 @@ module ApplicationHelper
 
   def label_classes
     "block text-sm font-medium text-slate-700 mb-1"
-  end
-
-  def season_url_for(season)
-    "//#{season.slug}.#{request.domain}#{":#{request.port}" unless [80, 443].include?(request.port)}"
   end
 end

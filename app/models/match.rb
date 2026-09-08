@@ -15,6 +15,7 @@ class Match < ApplicationRecord
   validate :team_pair_is_unique
 
   delegate :name, :address, :city, :club, :playing_time, :playing_day, to: :venue, prefix: true, allow_nil: true
+  delegate :season, to: :league, allow_nil: true
 
   after_create :fill_games
 

@@ -20,10 +20,21 @@ class ApplicationController < ActionController::Base
       Current.user if authenticated?
     end
 
-    # Every season has its own subdomain, e.g. voorjaar-2015.gocompetitie.nl.
-    # Without a matching subdomain the most recent season is shown.
+    # Season pages carry the season slug in their path, e.g.
+    # /season/voorjaar-2026/teams. Without a slug the most recent season is shown.
     def set_current_season
-      @season = @current_season = Season.find_by(slug: request.subdomains.first) || Season.recent.first
+      @season = @current_season = if params.key?(:season_slug)
+        Season.with_slug.find_by!(slug: params[:season_slug])
+      else
+        Season.with_slug.recent.first
+      end
+    end
+
+    # Records are addressed without a season in their path, so the season of
+    # the record that is shown becomes the season of the page. This keeps the
+    # navigation within the season the visitor is looking at.
+    def set_current_season_from(record)
+      @season = @current_season = record.season if record&.season
     end
 
     def require_admin!

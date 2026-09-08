@@ -3,8 +3,10 @@ class VenuesController < ApplicationController
 
   before_action :set_venue, only: %i[show edit update destroy]
 
+  # Venues exist outside of a season, so they are all shown as long as there is
+  # no season to filter them by.
   def index
-    @venues = Venue.includes(:club).ordered
+    @venues = (@season ? Venue.in_season(@season) : Venue.all).includes(:club).ordered
   end
 
   def show
@@ -22,7 +24,7 @@ class VenuesController < ApplicationController
     @venue = Venue.new(venue_params)
 
     if @venue.save
-      redirect_to @venue, notice: "Speellokatie is toegevoegd."
+      redirect_to venue_url(@venue, season_slug: @season&.slug), notice: "Speellokatie is toegevoegd."
     else
       render :new, status: :unprocessable_content
     end
@@ -30,7 +32,7 @@ class VenuesController < ApplicationController
 
   def update
     if @venue.update(venue_params)
-      redirect_to @venue, notice: "Speellokatie is bijgewerkt."
+      redirect_to venue_url(@venue, season_slug: @season&.slug), notice: "Speellokatie is bijgewerkt."
     else
       render :edit, status: :unprocessable_content
     end
@@ -38,7 +40,7 @@ class VenuesController < ApplicationController
 
   def destroy
     @venue.destroy!
-    redirect_to venues_url, notice: "Speellokatie is verwijderd.", status: :see_other
+    redirect_to venues_url(season_slug: @season&.slug), notice: "Speellokatie is verwijderd.", status: :see_other
   end
 
   private

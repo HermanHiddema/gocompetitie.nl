@@ -36,6 +36,22 @@ class MatchesControllerTest < ActionDispatch::IntegrationTest
     assert_equal 3, match.games.count
   end
 
+  test "historical season match links and forms keep the selected season" do
+    sign_in_as users(:member)
+    previous = seasons(:previous)
+    league = previous.leagues.create!(name: "Hoofdklasse", position: 0)
+    black_team = league.teams.create!(name: "Amsterdam 9", abbrev: "Amst9", club: clubs(:amsterdam))
+    white_team = league.teams.create!(name: "Utrecht 9", abbrev: "Utre9", club: clubs(:utrecht))
+
+    get matches_url(season_slug: previous.slug)
+    assert_select "a[href=?]", new_match_path(season_slug: previous.slug)
+
+    get new_match_url(season_slug: previous.slug, league_id: league.id, black_team_id: black_team.id, white_team_id: white_team.id)
+    assert_select "form[action=?]", matches_path(season_slug: previous.slug)
+    assert_select "option", text: "Amsterdam 9"
+    assert_select "footer", /Najaar 2025/
+  end
+
   test "edit lists selectable players without creating boards" do
     sign_in_as users(:member)
     @match.games.destroy_all
@@ -89,6 +105,6 @@ class MatchesControllerTest < ActionDispatch::IntegrationTest
       delete match_url(@match)
     end
 
-    assert_redirected_to matches_url
+    assert_redirected_to matches_url(season_slug: @match.season.slug)
   end
 end

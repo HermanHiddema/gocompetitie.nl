@@ -1,14 +1,6 @@
 require "test_helper"
 
 class LeaguesControllerTest < ActionDispatch::IntegrationTest
-  test "the root page shows the standings of the current season" do
-    get root_url
-
-    assert_response :success
-    assert_select "h1", /Stand/
-    assert_select "table"
-  end
-
   test "show renders standings, matches, teams" do
     get league_url(leagues(:top))
 

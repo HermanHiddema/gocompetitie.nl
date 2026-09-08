@@ -1,4 +1,4 @@
-<%= form_with model: club, class: "space-y-4" do |form| %>
+<%= form_with model: club, url: club.persisted? ? club_path(club, **season_url_options) : clubs_path(**season_url_options), class: "space-y-4" do |form| %>
   <%= render "shared/errors", record: club %>
 
   <div class="grid gap-4 sm:grid-cols-2">
@@ -28,6 +28,6 @@
 
   <div class="flex gap-3">
     <%= form.submit "Opslaan", class: button_classes %>
-    <%= button_link_to "Annuleren", club.persisted? ? club_path(club) : clubs_path, style: :secondary %>
+    <%= button_link_to "Annuleren", club.persisted? ? club_path(club, **season_url_options) : clubs_path(**season_url_options), style: :secondary %>
   </div>
 <% end %>
