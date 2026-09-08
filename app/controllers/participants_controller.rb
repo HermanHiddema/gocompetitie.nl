@@ -47,6 +47,7 @@ class ParticipantsController < ApplicationController
   private
     def set_participant
       @participant = Participant.find(params[:id])
+      set_current_season_from(@participant)
     end
 
     def participant_params

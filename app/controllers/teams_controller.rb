@@ -46,12 +46,13 @@ class TeamsController < ApplicationController
 
   def destroy
     @team.destroy!
-    redirect_to teams_url(season_slug: @team.league.season.slug), notice: "Team is verwijderd.", status: :see_other
+    redirect_to teams_url(season_slug: @team.season.slug), notice: "Team is verwijderd.", status: :see_other
   end
 
   private
     def set_team
       @team = Team.find(params[:id])
+      set_current_season_from(@team)
     end
 
     def build_missing_team_members
@@ -63,7 +64,7 @@ class TeamsController < ApplicationController
     # Participants without a team, plus the members of this team, so a player
     # can never be assigned to two teams at once.
     def available_participants
-      season = @team.league&.season || @season
+      season = @team.season || @season
       return Participant.none unless season
 
       unassigned = season.participants.where.missing(:team_member)

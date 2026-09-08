@@ -49,6 +49,7 @@ class LeaguesController < ApplicationController
   private
     def set_league
       @league = League.find(params[:id])
+      set_current_season_from(@league)
     end
 
     def league_params

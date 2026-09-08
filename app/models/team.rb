@@ -11,6 +11,7 @@ class Team < ApplicationRecord
   accepts_nested_attributes_for :team_members, allow_destroy: true, reject_if: ->(attributes) { attributes[:participant_id].blank? }
 
   delegate :name, to: :captain, prefix: true, allow_nil: true
+  delegate :season, to: :league, allow_nil: true
 
   validates :name, :abbrev, presence: true
   validate :league_is_immutable_with_matches, on: :update

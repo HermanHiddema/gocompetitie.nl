@@ -26,6 +26,13 @@ class ApplicationController < ActionController::Base
       @season = @current_season = Season.find_by(slug: params[:season_slug]) || Season.recent.first
     end
 
+    # Records are addressed without a season in their path, so the season of
+    # the record that is shown becomes the season of the page. This keeps the
+    # navigation within the season the visitor is looking at.
+    def set_current_season_from(record)
+      @season = @current_season = record.season if record&.season
+    end
+
     def require_admin!
       head :unauthorized unless current_user&.admin?
     end
