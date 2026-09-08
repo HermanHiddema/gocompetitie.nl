@@ -12,7 +12,8 @@ application on Rails 8, with the same business logic and a new Tailwind CSS fron
   is shown; the front page redirects to it.
 * **League** (*poule*) – a group of teams within a season that play a round robin.
 * **Club**, **Venue** (*speellokatie*) and **Person** – the organisations, playing
-  locations and contact persons.
+  locations and contact persons. Clubs and venues outlive a season, so their pages
+  are prefixed with the season as well and list only what takes part in it.
 * **Participant** – a person playing in a specific season, with rating and rank.
 * **Team** and **TeamMember** – three players per team, one per board.
 * **Match** and **Game** – a match between two teams consists of a game per board.

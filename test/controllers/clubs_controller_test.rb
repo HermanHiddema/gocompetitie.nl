@@ -7,8 +7,17 @@ class ClubsControllerTest < ActionDispatch::IntegrationTest
     assert_select "h1", "Clubs"
   end
 
+  test "index only lists clubs that take part in the season" do
+    get clubs_url(season_slug: seasons(:previous).slug)
+    assert_select "a", text: "Go Club Amsterdam", count: 0
+
+    get clubs_url(season_slug: seasons(:current).slug)
+    assert_select "a", text: "Go Club Amsterdam", count: 1
+  end
+
   test "index only lists clubs with a proper name unless all is given" do
-    Club.create!(name: "Xyz", abbrev: "Xyz")
+    club = Club.create!(name: "Xyz", abbrev: "Xyz")
+    club.participants.create!(firstname: "Speler", lastname: "Xyz", season: seasons(:current))
 
     get clubs_url
     assert_select "a", text: "Xyz", count: 0
@@ -35,7 +44,7 @@ class ClubsControllerTest < ActionDispatch::IntegrationTest
       post clubs_url, params: { club: { name: "Go Club Delft", abbrev: "Delf" } }
     end
 
-    assert_redirected_to club_url(Club.last)
+    assert_redirected_to club_url(Club.last, season_slug: seasons(:current).slug)
   end
 
   test "invalid clubs are rendered again" do
@@ -53,12 +62,12 @@ class ClubsControllerTest < ActionDispatch::IntegrationTest
     club = clubs(:rotterdam)
 
     patch club_url(club), params: { club: { name: "Go Club Rotterdam Zuid" } }
-    assert_redirected_to club_url(club)
+    assert_redirected_to club_url(club, season_slug: seasons(:current).slug)
     assert_equal "Go Club Rotterdam Zuid", club.reload.name
 
     club.teams.destroy_all
     club.venues.destroy_all
     delete club_url(club)
-    assert_redirected_to clubs_url
+    assert_redirected_to clubs_url(season_slug: seasons(:current).slug)
   end
 end

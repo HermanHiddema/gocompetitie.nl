@@ -8,6 +8,14 @@ class VenuesControllerTest < ActionDispatch::IntegrationTest
     assert_select "a", text: "Amsterdam"
   end
 
+  test "index only lists venues of clubs that take part in the season" do
+    get venues_url(season_slug: seasons(:previous).slug)
+    assert_select "a", text: "Amsterdam", count: 0
+
+    get venues_url(season_slug: seasons(:current).slug)
+    assert_select "a", text: "Amsterdam", count: 1
+  end
+
   test "show lists the matches played at the venue" do
     get venue_url(venues(:amsterdam))
 

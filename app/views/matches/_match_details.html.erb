@@ -3,7 +3,7 @@
     <%= match.played? ? "Gespeeld" : "Gepland" %>
     <% if match.playing_date %><%= l match.playing_date, format: :short_with_day %><% end %>
     <% if match.playing_time.present? %>om <%= match.playing_time %><% end %>
-    <% if match.venue %>te <%= link_to match.venue.city, match.venue, class: "hover:underline" %><% end %>
+    <% if match.venue %>te <%= link_to match.venue.city, venue_path(match.venue, **season_url_options), class: "hover:underline" %><% end %>
   </h3>
 
   <div class="flex items-center justify-between border-b border-slate-200 pb-2 font-semibold">

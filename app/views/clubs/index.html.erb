@@ -14,11 +14,11 @@
 
 <p class="mt-4 text-sm text-slate-500">
   <%= link_to params[:all] ? "Alleen clubs met een naam tonen" : "Alle clubs tonen",
-        clubs_path(all: params[:all] ? nil : 1), class: "underline" %>
+        clubs_path(all: params[:all] ? nil : 1, **season_url_options), class: "underline" %>
 </p>
 
 <% if current_user %>
   <div class="mt-6">
-    <%= button_link_to "Club toevoegen", new_club_path %>
+    <%= button_link_to "Club toevoegen", new_club_path(**season_url_options) %>
   </div>
 <% end %>

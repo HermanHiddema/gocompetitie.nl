@@ -27,7 +27,7 @@
       <div class="mb-4 last:mb-0">
         <h3 class="font-medium">
           <%= venue.playing_day_name&.capitalize %> om <%= venue.playing_time %>:
-          <%= link_to venue.name, venue, class: "hover:underline" %>,
+          <%= link_to venue.name, venue_path(venue, **season_url_options), class: "hover:underline" %>,
           <%= venue.address %>, <%= venue.city %>
         </h3>
         <%= markdown venue.info %>
@@ -53,6 +53,6 @@
 
 <% if current_user %>
   <div class="flex gap-3">
-    <%= button_link_to "Bewerken", edit_club_path(@club) %>
+    <%= button_link_to "Bewerken", edit_club_path(@club, **season_url_options) %>
   </div>
 <% end %>

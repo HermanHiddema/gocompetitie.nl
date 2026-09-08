@@ -14,8 +14,8 @@
       <%= nav_link_to "Stand", @season ? season_path(@season) : root_path %>
       <%= nav_link_to "Rooster", matches_path(season_slug: @season&.slug) %>
       <%= nav_link_to "Teams", teams_path(season_slug: @season&.slug) %>
-      <%= nav_link_to "Clubs", clubs_path %>
-      <%= nav_link_to "Lokaties", venues_path %>
+      <%= nav_link_to "Clubs", clubs_path(**season_url_options) %>
+      <%= nav_link_to "Lokaties", venues_path(**season_url_options) %>
       <%= nav_link_to "Archief", seasons_path %>
 
       <div class="sm:ml-auto">

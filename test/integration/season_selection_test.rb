@@ -30,6 +30,20 @@ class SeasonSelectionTest < ActionDispatch::IntegrationTest
     assert_select "footer", /Voorjaar 2026/
   end
 
+  test "clubs and venues keep the season of the path" do
+    slug = seasons(:previous).slug
+
+    [clubs_url(season_slug: slug), club_url(clubs(:amsterdam), season_slug: slug),
+     venues_url(season_slug: slug), venue_url(venues(:amsterdam), season_slug: slug)].each do |url|
+      get url
+
+      assert_response :success
+      assert_select "footer", /Najaar 2025/
+      assert_select "a[href=?]", clubs_path(season_slug: slug)
+      assert_select "a[href=?]", venues_path(season_slug: slug)
+    end
+  end
+
   test "a record of an older season selects that season" do
     league = seasons(:previous).leagues.create!(name: "Hoofdklasse", position: 0)
     team = league.teams.create!(name: "Amsterdam 9", abbrev: "Amst9", club: clubs(:amsterdam))
