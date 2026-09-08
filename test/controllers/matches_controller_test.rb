@@ -89,6 +89,6 @@ class MatchesControllerTest < ActionDispatch::IntegrationTest
       delete match_url(@match)
     end
 
-    assert_redirected_to matches_url
+    assert_redirected_to matches_url(season_slug: @match.league.season.slug)
   end
 end

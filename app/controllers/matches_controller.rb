@@ -55,7 +55,7 @@ class MatchesController < ApplicationController
 
   def destroy
     @match.destroy!
-    redirect_to matches_url(season_slug: @season&.slug), notice: "Wedstrijd is verwijderd.", status: :see_other
+    redirect_to matches_url(season_slug: @match.league.season.slug), notice: "Wedstrijd is verwijderd.", status: :see_other
   end
 
   private
