@@ -7,9 +7,9 @@
     <span class="sm:hidden"><%= match.black_team.abbrev %> &ndash; <%= match.white_team.abbrev %></span>
   </div>
 
-  <%= link_to match.result, match, class: "w-12 text-center font-semibold hover:underline" %>
+  <%= link_to format_match_result(match), match, class: "w-12 shrink-0 text-center font-semibold tabular-nums hover:underline" %>
 
-  <div class="text-right text-slate-500">
+  <div class="w-40 shrink-0 text-right text-slate-500">
     <% if show_date && match.playing_date %>
       <%= l match.playing_date, format: :short_with_day %>
     <% end %>

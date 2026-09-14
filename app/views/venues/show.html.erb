@@ -16,7 +16,7 @@
 
 <section class="mb-8 rounded-lg bg-white p-4 shadow-sm ring-1 ring-slate-200">
   <h2 class="mb-3 text-lg font-semibold">Wedstrijden</h2>
-  <%= render partial: "matches/match", collection: @matches, locals: { show_date: true } %>
+  <%= render "matches/grid", matches: @matches %>
 </section>
 
 <% if current_user %>
