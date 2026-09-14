@@ -13,6 +13,10 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
 
     assert_redirected_to root_path
     assert cookies[:session_id]
+
+    get edit_league_path(leagues(:top))
+
+    assert_response :success
   end
 
   test "create with invalid credentials" do

@@ -21,9 +21,16 @@
 
       <div class="sm:ml-auto">
         <% if current_user %>
-          <span class="px-3 py-2 text-sm text-slate-300"><%= current_user.email_address %></span>
-          <%= button_to "Uitloggen", session_path, method: :delete,
-                class: "rounded-md px-3 py-2 text-sm font-medium text-slate-200 hover:bg-slate-700 hover:text-white cursor-pointer" %>
+          <details class="relative">
+            <summary class="flex cursor-pointer list-none items-center gap-2 rounded-md px-3 py-2 text-sm text-slate-200 hover:bg-slate-700">
+              <%= current_user.email_address %>
+              <span aria-hidden="true">&#9662;</span>
+            </summary>
+            <div class="absolute right-0 z-10 mt-1 min-w-full rounded-md bg-white p-1 shadow-lg ring-1 ring-slate-200">
+              <%= button_to "Uitloggen", session_path, method: :delete,
+                    class: "w-full rounded px-3 py-2 text-left text-sm text-slate-700 hover:bg-slate-100 cursor-pointer" %>
+            </div>
+          </details>
         <% else %>
           <%= nav_link_to "Inloggen", new_session_path %>
         <% end %>

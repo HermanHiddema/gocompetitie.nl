@@ -78,4 +78,8 @@ Rails.application.configure do
 
   # Allow requests from GitHub Codespaces / Dev Container forwarded ports.
   config.hosts << /.*\.app\.github\.dev/
+
+  # The Codespaces proxy can use a different public origin than the forwarded
+  # host Rails sees in the request.
+  config.action_controller.forgery_protection_origin_check = false
 end
