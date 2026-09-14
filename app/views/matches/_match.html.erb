@@ -15,7 +15,7 @@
     <% end %>
     <%= match.playing_time %>
     <% if show_venue && match.venue %>
-      <%= link_to match.venue.city, match.venue, class: "hover:underline" %>
+      <%= link_to match.venue.city, venue_path(match.venue, **season_url_options), class: "hover:underline" %>
     <% end %>
   </div>
 </div>

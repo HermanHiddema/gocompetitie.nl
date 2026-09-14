@@ -1,6 +1,7 @@
 <header class="bg-slate-800 text-white shadow" data-controller="navigation">
   <nav class="mx-auto flex w-full max-w-6xl flex-wrap items-center gap-2 px-4 py-3">
-    <%= link_to "NGC", root_path, class: "text-lg font-bold tracking-wide" %>
+    <%= link_to ["NGC", @season&.name].compact.join(" "), @season ? season_path(@season) : root_path,
+          class: "text-lg font-bold tracking-wide" %>
 
     <button type="button" class="ml-auto rounded-md p-2 text-slate-200 hover:bg-slate-700 sm:hidden"
             data-action="navigation#toggle" aria-label="Menu" aria-controls="mobile-menu" aria-expanded="false">
@@ -11,12 +12,12 @@
 
     <div class="hidden w-full flex-col gap-1 sm:ml-6 sm:flex sm:w-auto sm:flex-1 sm:flex-row sm:items-center"
          data-navigation-target="menu" id="mobile-menu">
-      <%= nav_link_to "Stand", root_path %>
-      <%= nav_link_to "Rooster", matches_path %>
-      <%= nav_link_to "Teams", teams_path %>
-      <%= nav_link_to "Clubs", clubs_path %>
-      <%= nav_link_to "Lokaties", venues_path %>
-      <%= nav_link_to "Archief", seasons_path %>
+      <%= nav_link_to "Stand", @season ? season_path(@season) : root_path %>
+      <%= nav_link_to "Rooster", matches_path(season_slug: @season&.slug) %>
+      <%= nav_link_to "Teams", teams_path(season_slug: @season&.slug) %>
+      <%= nav_link_to "Clubs", clubs_path(**season_url_options) %>
+      <%= nav_link_to "Lokaties", venues_path(**season_url_options) %>
+      <%= nav_link_to "Archief", seasons_path(**season_url_options) %>
 
       <div class="sm:ml-auto">
         <% if current_user %>

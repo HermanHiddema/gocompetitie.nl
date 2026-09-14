@@ -11,6 +11,6 @@
 
 <% if current_user && @season %>
   <div class="mt-6">
-    <%= button_link_to "Wedstrijd toevoegen", new_match_path %>
+    <%= button_link_to "Wedstrijd toevoegen", new_match_path(**season_url_options) %>
   </div>
 <% end %>

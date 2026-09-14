@@ -55,18 +55,19 @@ class MatchesController < ApplicationController
 
   def destroy
     @match.destroy!
-    redirect_to matches_url, notice: "Wedstrijd is verwijderd.", status: :see_other
+    redirect_to matches_url(season_slug: @match.season.slug), notice: "Wedstrijd is verwijderd.", status: :see_other
   end
 
   private
     def set_match
       @match = Match.find(params[:id])
+      set_current_season_from(@match)
     end
 
     # Players of the clubs that make up the team, so guest players from a
     # partner club can be selected as well. Pass ?all=1 to select any player.
     def selectable_players(team)
-      participants = @match.league.season.participants
+      participants = @match.season.participants
       participants = participants.where(club_id: related_club_ids(team)) unless params[:all]
       participants.includes(:club).by_rating
     end

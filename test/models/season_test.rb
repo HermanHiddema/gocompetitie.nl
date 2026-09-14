@@ -7,6 +7,13 @@ class SeasonTest < ActiveSupport::TestCase
     assert_equal "voorjaar-2027", season.slug
   end
 
+  test "the slug must not be blank" do
+    season = Season.new(name: "!!!")
+
+    assert_not season.valid?
+    assert season.errors.added?(:slug, :blank)
+  end
+
   test "leagues are created with the traditional names" do
     season = Season.create!(name: "Najaar 2027")
     season.create_leagues(3)

@@ -1,12 +1,8 @@
 class LeaguesController < ApplicationController
-  allow_unauthenticated_access only: %i[index show]
+  allow_unauthenticated_access only: :show
 
   before_action :set_league, only: %i[show edit update destroy]
   before_action :require_season!, only: %i[new create]
-
-  def index
-    @leagues = @season ? @season.leagues.ordered.includes(teams: [:club, { team_members: :participant }], matches: :games) : League.none
-  end
 
   def show
     @teams = @league.ranked_teams
@@ -47,12 +43,13 @@ class LeaguesController < ApplicationController
 
   def destroy
     @league.destroy!
-    redirect_to leagues_url, notice: "Poule is verwijderd.", status: :see_other
+    redirect_to @league.season, notice: "Poule is verwijderd.", status: :see_other
   end
 
   private
     def set_league
       @league = League.find(params[:id])
+      set_current_season_from(@league)
     end
 
     def league_params

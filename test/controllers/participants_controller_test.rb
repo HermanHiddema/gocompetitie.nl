@@ -27,6 +27,25 @@ class ParticipantsControllerTest < ActionDispatch::IntegrationTest
     assert_equal seasons(:current), participant.season
   end
 
+  test "historical season participant links and forms keep the selected season" do
+    sign_in_as users(:member)
+    previous = seasons(:previous)
+
+    get participants_url(season_slug: previous.slug)
+    assert_select "a[href=?]", new_participant_path(season_slug: previous.slug)
+
+    get new_participant_url(season_slug: previous.slug)
+    assert_select "form[action=?]", participants_path(season_slug: previous.slug)
+    assert_select "footer", /Najaar 2025/
+
+    assert_difference -> { previous.participants.count }, 1 do
+      post participants_url(season_slug: previous.slug), params: { participant: { firstname: "Nieuwe", lastname: "Speler",
+        rating: 1600, rank: "5k", club_id: clubs(:amsterdam).id } }
+    end
+
+    assert_equal previous, Participant.last.season
+  end
+
   test "adding a participant requires a season" do
     Season.destroy_all
     sign_in_as users(:member)

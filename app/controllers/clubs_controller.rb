@@ -3,8 +3,11 @@ class ClubsController < ApplicationController
 
   before_action :set_club, only: %i[show edit update destroy]
 
+  # Clubs exist outside of a season, so they are all shown as long as there is
+  # no season to filter them by.
   def index
-    @clubs = (params[:all] ? Club.all : Club.named).ordered
+    clubs = @season ? Club.in_season(@season) : Club.all
+    @clubs = (params[:all] ? clubs : clubs.named).ordered
   end
 
   def show
@@ -25,7 +28,7 @@ class ClubsController < ApplicationController
     @club = Club.new(club_params)
 
     if @club.save
-      redirect_to @club, notice: "Club is toegevoegd."
+      redirect_to club_url(@club, season_slug: @season&.slug), notice: "Club is toegevoegd."
     else
       render :new, status: :unprocessable_content
     end
@@ -33,7 +36,7 @@ class ClubsController < ApplicationController
 
   def update
     if @club.update(club_params)
-      redirect_to @club, notice: "Club is bijgewerkt."
+      redirect_to club_url(@club, season_slug: @season&.slug), notice: "Club is bijgewerkt."
     else
       render :edit, status: :unprocessable_content
     end
@@ -41,7 +44,7 @@ class ClubsController < ApplicationController
 
   def destroy
     if @club.destroy
-      redirect_to clubs_url, notice: "Club is verwijderd.", status: :see_other
+      redirect_to clubs_url(season_slug: @season&.slug), notice: "Club is verwijderd.", status: :see_other
     else
       flash.now[:alert] = @club.errors.full_messages.to_sentence
       render :edit, status: :unprocessable_content

@@ -1,8 +1,13 @@
 class SeasonsController < ApplicationController
-  allow_unauthenticated_access only: %i[index show]
+  allow_unauthenticated_access only: %i[front index show]
 
   before_action :set_season, only: %i[show edit update destroy]
   before_action :require_admin!, only: %i[new create edit update destroy]
+
+  # The front page shows the most recent season.
+  def front
+    redirect_to Season.with_slug.recent.first || seasons_url
+  end
 
   def index
     @seasons = Season.recent
@@ -10,7 +15,7 @@ class SeasonsController < ApplicationController
 
   def show
     respond_to do |format|
-      format.html { redirect_to leagues_url }
+      format.html { @leagues = @season.leagues.ordered.includes(teams: [:club, { team_members: :participant }], matches: :games) }
       format.text { render plain: @season.results.join("\n") }
     end
   end
@@ -47,7 +52,7 @@ class SeasonsController < ApplicationController
 
   private
     def set_season
-      @season = Season.find(params[:id])
+      @season = @current_season = Season.find_by!(slug: params[:slug])
     end
 
     def season_params

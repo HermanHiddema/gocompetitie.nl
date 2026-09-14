@@ -9,7 +9,7 @@
   </p>
   <p class="mt-1 text-sm">
     <span class="font-semibold">Club:</span>
-    <%= link_to @venue.club.name, @venue.club, class: "hover:underline" %>
+    <%= link_to @venue.club.name, club_path(@venue.club, **season_url_options), class: "hover:underline" %>
   </p>
   <%= markdown @venue.info %>
 </section>
@@ -21,6 +21,6 @@
 
 <% if current_user %>
   <div class="flex gap-3">
-    <%= button_link_to "Lokatie bewerken", edit_venue_path(@venue) %>
+    <%= button_link_to "Lokatie bewerken", edit_venue_path(@venue, **season_url_options) %>
   </div>
 <% end %>

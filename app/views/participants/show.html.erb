@@ -9,7 +9,7 @@
     <dt class="font-semibold">Club</dt>
     <dd>
       <% if @participant.club %>
-        <%= link_to @participant.club.name, @participant.club, class: "hover:underline" %>
+        <%= link_to @participant.club.name, club_path(@participant.club, **season_url_options), class: "hover:underline" %>
       <% end %>
     </dd>
 

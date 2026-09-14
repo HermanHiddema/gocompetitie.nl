@@ -7,6 +7,6 @@
 
 <% if current_user %>
   <div class="mt-6">
-    <%= button_link_to "Lokatie toevoegen", new_venue_path %>
+    <%= button_link_to "Lokatie toevoegen", new_venue_path(**season_url_options) %>
   </div>
 <% end %>

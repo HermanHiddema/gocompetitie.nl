@@ -41,12 +41,13 @@ class ParticipantsController < ApplicationController
 
   def destroy
     @participant.destroy!
-    redirect_to participants_url, notice: "Deelnemer is verwijderd.", status: :see_other
+    redirect_to participants_url(season_slug: @participant.season.slug), notice: "Deelnemer is verwijderd.", status: :see_other
   end
 
   private
     def set_participant
       @participant = Participant.find(params[:id])
+      set_current_season_from(@participant)
     end
 
     def participant_params

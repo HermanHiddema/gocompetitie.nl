@@ -33,6 +33,20 @@ class TeamsControllerTest < ActionDispatch::IntegrationTest
     assert_equal 1, Team.last.team_members.count
   end
 
+  test "historical season team links and forms keep the selected season" do
+    sign_in_as users(:member)
+    previous = seasons(:previous)
+    league = previous.leagues.create!(name: "Hoofdklasse", position: 0)
+
+    get teams_url(season_slug: previous.slug)
+    assert_select "a[href=?]", new_team_path(season_slug: previous.slug)
+
+    get new_team_url(season_slug: previous.slug, league_id: league.id)
+    assert_select "form[action=?]", teams_path(season_slug: previous.slug)
+    assert_select "option", text: "Hoofdklasse"
+    assert_select "footer", /Najaar 2025/
+  end
+
   test "a team without a name is rendered again" do
     sign_in_as users(:member)
 
