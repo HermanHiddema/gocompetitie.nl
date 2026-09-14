@@ -20,7 +20,8 @@ class ApplicationHelperTest < ActionView::TestCase
 
   test "formats match results with fractions" do
     match = matches(:amsterdam_utrecht)
+    games(:board_three).update!(black_points: 1, white_points: 1)
 
-    assert_equal "2-1", format_match_result(match)
+    assert_equal "1½-1½", format_match_result(match.reload)
   end
 end
