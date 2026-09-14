@@ -18,7 +18,9 @@ class Team < ApplicationRecord
   validate :team_members_are_unique
   validate :team_members_are_valid
 
-  scope :ordered, -> { order(:name) }
+  # Alphabetically, ignoring any ordering inherited from an association such as
+  # the league order of Season#teams.
+  scope :ordered, -> { reorder(:name) }
 
   def matches
     Match.where(black_team_id: id).or(Match.where(white_team_id: id))

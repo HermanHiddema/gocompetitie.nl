@@ -8,6 +8,19 @@ class TeamsControllerTest < ActionDispatch::IntegrationTest
     assert_select "a", text: "Amsterdam 1"
   end
 
+  test "index lists the teams of the season alphabetically, across leagues" do
+    teams(:amsterdam).update!(name: "Zwolle 1")
+    leagues(:first).teams.create!(name: "Almere 1", abbrev: "Alme", club: clubs(:amsterdam))
+
+    get teams_url
+
+    assert_response :success
+    names = css_select("a.font-semibold").map(&:text)
+    assert_equal names.sort, names
+    assert_equal "Almere 1", names.first
+    assert_equal "Zwolle 1", names.last
+  end
+
   test "show lists members and matches" do
     get team_url(teams(:amsterdam))
 

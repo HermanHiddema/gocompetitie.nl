@@ -8,6 +8,16 @@ class LeaguesControllerTest < ActionDispatch::IntegrationTest
     assert_select "h1", "Hoofdklasse"
   end
 
+  test "show lists the teams alphabetically" do
+    teams(:amsterdam).update!(name: "Zwolle 1")
+
+    get league_url(leagues(:top))
+
+    names = css_select("#teams a").map(&:text)
+    assert_equal names.sort, names
+    assert_equal "Zwolle 1", names.last
+  end
+
   test "show renders the EGD result list as text" do
     get league_url(leagues(:top), format: :text)
 

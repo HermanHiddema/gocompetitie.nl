@@ -5,7 +5,7 @@ class LeaguesController < ApplicationController
   before_action :require_season!, only: %i[new create]
 
   def show
-    @teams = @league.ranked_teams
+    @teams = @league.teams.includes(:league, :club, team_members: :participant).ordered
     @matches = @league.matches.includes(:venue, :black_team, :white_team, :games).scheduled
     @participants = @league.participants.includes(:club, :black_games, :white_games, team_member: :team).to_a.sort_by(&:rating_change).reverse
 
