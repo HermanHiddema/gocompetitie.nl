@@ -14,6 +14,7 @@ class SeasonSelectionTest < ActionDispatch::IntegrationTest
 
     assert_select "h1", "Stand Najaar 2025"
     assert_select "a[href=?]", teams_path(season_slug: seasons(:previous).slug)
+    assert_select "header nav > a[href=?]", season_path(seasons(:previous)), text: "NGC Najaar 2025"
   end
 
   test "a season path selects that season on the other pages" do
@@ -71,6 +72,7 @@ class SeasonSelectionTest < ActionDispatch::IntegrationTest
       assert_select "footer", /Najaar 2025/
       assert_select "a[href=?]", teams_path(season_slug: seasons(:previous).slug)
       assert_select "a[href=?]", season_path(seasons(:previous))
+      assert_select "header nav > a[href=?]", season_path(seasons(:previous)), text: "NGC Najaar 2025"
     end
   end
 end
