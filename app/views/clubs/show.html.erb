@@ -22,7 +22,7 @@
 
 <% if @club.venues.any? %>
   <section class="mb-8 rounded-lg bg-white p-4 shadow-sm ring-1 ring-slate-200">
-    <h2 class="mb-3 text-lg font-semibold">Speellokatie<%= "s" if @club.venues.many? %></h2>
+    <h2 class="mb-3 text-lg font-semibold">Speellocatie<%= "s" if @club.venues.many? %></h2>
     <% @club.venues.ordered.each do |venue| %>
       <div class="mb-4 last:mb-0">
         <h3 class="font-medium">

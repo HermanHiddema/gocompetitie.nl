@@ -24,7 +24,7 @@ class VenuesController < ApplicationController
     @venue = Venue.new(venue_params)
 
     if @venue.save
-      redirect_to venue_url(@venue, season_slug: @season&.slug), notice: "Speellokatie is toegevoegd."
+      redirect_to venue_url(@venue, season_slug: @season&.slug), notice: "Speellocatie is toegevoegd."
     else
       render :new, status: :unprocessable_content
     end
@@ -32,7 +32,7 @@ class VenuesController < ApplicationController
 
   def update
     if @venue.update(venue_params)
-      redirect_to venue_url(@venue, season_slug: @season&.slug), notice: "Speellokatie is bijgewerkt."
+      redirect_to venue_url(@venue, season_slug: @season&.slug), notice: "Speellocatie is bijgewerkt."
     else
       render :edit, status: :unprocessable_content
     end
@@ -40,7 +40,7 @@ class VenuesController < ApplicationController
 
   def destroy
     @venue.destroy!
-    redirect_to venues_url(season_slug: @season&.slug), notice: "Speellokatie is verwijderd.", status: :see_other
+    redirect_to venues_url(season_slug: @season&.slug), notice: "Speellocatie is verwijderd.", status: :see_other
   end
 
   private
