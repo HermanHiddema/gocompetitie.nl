@@ -19,7 +19,7 @@ nl:
       season: Seizoen
       team: Team
       team_member: Teamlid
-      venue: Speellokatie
+      venue: Speellocatie
     attributes:
       club:
         name: Naam
@@ -38,7 +38,7 @@ nl:
         season: Seizoen
       match:
         league: Poule
-        venue: Speellokatie
+        venue: Speellocatie
         black_team: Zwart
         white_team: Wit
         playing_date: Speeldatum

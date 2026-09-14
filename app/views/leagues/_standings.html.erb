@@ -40,7 +40,7 @@
                   <td class="px-1 py-1 text-center <%= { "won" => "bg-emerald-50 text-emerald-800", "lost" => "bg-red-50 text-red-800" }.fetch(standing.status, "text-slate-600") %>">
                     <%= link_to standing.match, title: standing.venue&.city, class: "block hover:underline" do %>
                       <% if standing.points %>
-                        <%= standing.points %>
+                        <%= format_fraction(standing.points) %>
                       <% elsif standing.match.playing_date %>
                         <span class="text-xs"><%= l standing.match.playing_date, format: :short %></span>
                       <% else %>
@@ -51,8 +51,8 @@
                 <% end %>
               <% end %>
             <% end %>
-            <td class="px-1 py-1 text-center font-semibold"><%= team.score %></td>
-            <td class="px-1 py-1 text-center font-semibold"><%= team.points %></td>
+            <td class="px-1 py-1 text-center font-semibold"><%= format_fraction(team.score) %></td>
+            <td class="px-1 py-1 text-center font-semibold"><%= format_fraction(team.points) %></td>
           </tr>
         <% end %>
       </tbody>

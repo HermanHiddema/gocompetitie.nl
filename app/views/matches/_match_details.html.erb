@@ -9,7 +9,7 @@
   <div class="flex items-center justify-between border-b border-slate-200 pb-2 font-semibold">
     <span><%= link_to match.black_team.name, match.black_team, class: "hover:underline" %> &ndash;
       <%= link_to match.white_team.name, match.white_team, class: "hover:underline" %></span>
-    <%= link_to match.result, match, class: "hover:underline" %>
+    <%= link_to format_match_result(match), match, class: "hover:underline" %>
   </div>
 
   <ol class="mt-2 space-y-1">

@@ -1,4 +1,13 @@
 module ApplicationHelper
+  FRACTION_LABELS = {
+    2 => { 1 => "½" },
+    3 => { 1 => "⅓", 2 => "⅔" },
+    4 => { 1 => "¼", 3 => "¾" },
+    5 => { 1 => "⅕", 2 => "⅖", 3 => "⅗", 4 => "⅘" },
+    6 => { 1 => "⅙", 5 => "⅚" },
+    8 => { 1 => "⅛", 3 => "⅜", 5 => "⅝", 7 => "⅞" }
+  }.freeze
+
   MARKDOWN_RENDERER = Redcarpet::Render::HTML.new(
     filter_html: true, hard_wrap: true, link_attributes: { rel: "nofollow" }
   )
@@ -14,6 +23,31 @@ module ApplicationHelper
     tag.div class: "markdown" do
       sanitize Redcarpet::Markdown.new(MARKDOWN_RENDERER, MARKDOWN_EXTENSIONS).render(text)
     end
+  end
+
+  def format_fraction(value)
+    return if value.nil?
+
+    number = value.to_f
+    magnitude = number.abs
+    whole = magnitude.truncate
+    fraction = magnitude - whole
+    sign = number.negative? ? "-" : ""
+
+    return "#{sign}#{whole}" if fraction.zero?
+
+    FRACTION_LABELS.each do |denominator, labels|
+      numerator = (fraction * denominator).round
+      next unless labels[numerator] && (fraction - numerator.fdiv(denominator)).abs < Float::EPSILON * 10
+
+      return "#{sign}#{whole unless whole.zero?}#{labels[numerator]}"
+    end
+
+    number.to_s
+  end
+
+  def format_match_result(match)
+    [match.black_points, match.white_points].map { |points| format_fraction(points) || "?" }.join("-")
   end
 
   # Only links out to http(s) urls, so a stored javascript: url can never be
