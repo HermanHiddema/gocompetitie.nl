@@ -6,6 +6,8 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
   test "new" do
     get new_session_path
     assert_response :success
+    assert_select "meta[name=?][content=?]", "turbo-cache-control", "no-cache"
+    assert_select "form[action=?][data-turbo=?]", session_path, "false"
   end
 
   test "create with valid credentials" do
@@ -17,6 +19,8 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
     get edit_league_path(leagues(:top))
 
     assert_response :success
+    assert_select "details summary", /#{Regexp.escape(@user.email_address)}/
+    assert_select "details form[action=?] button", session_path, "Uitloggen"
   end
 
   test "create with invalid credentials" do
