@@ -38,5 +38,27 @@ class SeasonsControllerTest < ActionDispatch::IntegrationTest
     assert_difference -> { Season.count }, 1 do
       post seasons_url, params: { season: { name: "Najaar 2026" } }
     end
+
+    assert_redirected_to season_url(Season.find_by(slug: "najaar-2026"))
+  end
+
+  test "admins can open the form for a new season" do
+    sign_in_as users(:admin)
+
+    get new_season_url
+
+    assert_response :success
+    assert_select "form"
+  end
+
+  test "creating a season without a name renders the form again" do
+    sign_in_as users(:admin)
+
+    assert_no_difference -> { Season.count } do
+      post seasons_url, params: { season: { name: "" } }
+    end
+
+    assert_response :unprocessable_content
+    assert_select "form"
   end
 end
