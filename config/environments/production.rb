@@ -1,6 +1,17 @@
 require "active_support/core_ext/integer/time"
 
 Rails.application.configure do
+  production_build = ENV.key?("SECRET_KEY_BASE_DUMMY")
+  fetch_production_env = lambda do |name, build_default = nil|
+    if ENV.key?(name)
+      ENV.fetch(name)
+    elsif production_build && !build_default.nil?
+      build_default
+    else
+      ENV.fetch(name)
+    end
+  end
+
   # Settings specified here will take precedence over those in config/application.rb.
 
   # Code is not reloaded between requests.
@@ -59,20 +70,20 @@ Rails.application.configure do
 
   # Set host to be used by links generated in mailer templates.
   config.action_mailer.default_url_options = {
-    host: ENV.fetch("APP_HOST"),
-    protocol: ENV.fetch("APP_PROTOCOL", "https")
+    host: fetch_production_env.call("APP_HOST", "example.com"),
+    protocol: fetch_production_env.call("APP_PROTOCOL", "https")
   }
 
   # Specify outgoing SMTP server via environment variables.
   config.action_mailer.delivery_method = :smtp
   config.action_mailer.smtp_settings = {
-    address: ENV.fetch("SMTP_ADDRESS"),
-    port: ENV.fetch("SMTP_PORT"),
-    domain: ENV.fetch("SMTP_DOMAIN"),
-    user_name: ENV.fetch("SMTP_USERNAME"),
-    password: ENV.fetch("SMTP_PASSWORD"),
-    authentication: ENV.fetch("SMTP_AUTHENTICATION").to_sym,
-    enable_starttls_auto: ENV.fetch("SMTP_ENABLE_STARTTLS_AUTO") == "true"
+    address: fetch_production_env.call("SMTP_ADDRESS", "smtp.example.com"),
+    port: fetch_production_env.call("SMTP_PORT", "587"),
+    domain: fetch_production_env.call("SMTP_DOMAIN", "example.com"),
+    user_name: fetch_production_env.call("SMTP_USERNAME", "user"),
+    password: fetch_production_env.call("SMTP_PASSWORD", "password"),
+    authentication: fetch_production_env.call("SMTP_AUTHENTICATION", "plain").to_sym,
+    enable_starttls_auto: fetch_production_env.call("SMTP_ENABLE_STARTTLS_AUTO", "true") == "true"
   }
 
   # Enable locale fallbacks for I18n (makes lookups for any locale fall back to
@@ -87,7 +98,9 @@ Rails.application.configure do
 
   # Enable DNS rebinding protection and other `Host` header attacks by listing
   # allowed hosts via a comma-separated RAILS_ALLOWED_HOSTS environment variable.
-  config.hosts.concat(ENV.fetch("RAILS_ALLOWED_HOSTS").split(","))
+  config.hosts.concat(
+    fetch_production_env.call("RAILS_ALLOWED_HOSTS", "example.com").split(",").map(&:strip).reject(&:empty?)
+  )
 
   # Skip DNS rebinding protection for the default health check endpoint.
   config.host_authorization = { exclude: ->(request) { request.path == "/up" } }

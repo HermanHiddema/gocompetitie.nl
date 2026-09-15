@@ -76,4 +76,4 @@ ENTRYPOINT ["/rails/bin/docker-entrypoint"]
 # HTTP_PORT uses Railway's dynamic $PORT, while Puma listens internally on
 # TARGET_PORT (see config/puma.rb).
 EXPOSE 80
-CMD ["/bin/sh", "-c", "HTTP_PORT=${PORT} ./bin/thrust ./bin/rails server"]
+CMD ["./bin/thrust", "./bin/rails", "server"]
