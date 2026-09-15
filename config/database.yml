@@ -12,16 +12,42 @@
 # Configure Using Gemfile
 # gem "pg"
 #
+<%
+require "uri"
+
+production_build = ENV.key?("SECRET_KEY_BASE_DUMMY")
+
+fetch_production_env = lambda do |name, build_default|
+  if ENV.key?(name)
+    ENV.fetch(name)
+  elsif production_build
+    build_default
+  else
+    ENV.fetch(name)
+  end
+end
+
+database_url_for = lambda do |env_name, suffix|
+  if ENV.key?(env_name)
+    ENV.fetch(env_name)
+  elsif ENV["DATABASE_URL"]
+    uri = URI.parse(ENV.fetch("DATABASE_URL")).dup
+    uri.path = "#{uri.path}#{suffix}"
+    uri.to_s
+  end
+end
+%>
+
 default: &default
   adapter: postgresql
   encoding: unicode
   # For details on connection pooling, see Rails configuration guide
   # https://guides.rubyonrails.org/configuring.html#database-pooling
-  max_connections: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+  max_connections: <%= ENV.fetch("RAILS_MAX_THREADS", 3) %>
   <% if ENV["DB_HOST"] %>
   host: <%= ENV["DB_HOST"] %>
-  username: postgres
-  password: postgres
+  username: <%= ENV.fetch("DB_USERNAME") %>
+  password: <%= ENV.fetch("DB_PASSWORD") %>
   <% end %>
 
 
@@ -90,20 +116,54 @@ test:
 # for a full overview on how database connection configuration can be specified.
 #
 production:
-  primary: &primary_production
+  primary:
     <<: *default
-    database: go_competitie_production
-    username: go_competitie
-    password: <%= ENV["GO_COMPETITIE_DATABASE_PASSWORD"] %>
+    <% if ENV["RAILS_ENV"] == "production" %>
+    <% if ENV["DATABASE_URL"] %>
+    url: <%= ENV["DATABASE_URL"] %>
+    <% else %>
+    host: <%= fetch_production_env.call("DB_HOST", "localhost") %>
+    database: <%= fetch_production_env.call("DB_NAME", "go_competitie_production") %>
+    username: <%= fetch_production_env.call("DB_USERNAME", "postgres") %>
+    password: <%= fetch_production_env.call("DB_PASSWORD", "postgres") %>
+    <% end %>
+    <% end %>
   cache:
-    <<: *primary_production
-    database: go_competitie_production_cache
+    <<: *default
+    <% if ENV["RAILS_ENV"] == "production" %>
+    <% if (cache_database_url = database_url_for.call("CACHE_DATABASE_URL", "_cache")) %>
+    url: <%= cache_database_url %>
+    <% else %>
+    host: <%= fetch_production_env.call("DB_HOST", "localhost") %>
+    database: <%= "#{fetch_production_env.call("DB_NAME", "go_competitie_production")}_cache" %>
+    username: <%= fetch_production_env.call("DB_USERNAME", "postgres") %>
+    password: <%= fetch_production_env.call("DB_PASSWORD", "postgres") %>
+    <% end %>
+    <% end %>
     migrations_paths: db/cache_migrate
   queue:
-    <<: *primary_production
-    database: go_competitie_production_queue
+    <<: *default
+    <% if ENV["RAILS_ENV"] == "production" %>
+    <% if (queue_database_url = database_url_for.call("QUEUE_DATABASE_URL", "_queue")) %>
+    url: <%= queue_database_url %>
+    <% else %>
+    host: <%= fetch_production_env.call("DB_HOST", "localhost") %>
+    database: <%= "#{fetch_production_env.call("DB_NAME", "go_competitie_production")}_queue" %>
+    username: <%= fetch_production_env.call("DB_USERNAME", "postgres") %>
+    password: <%= fetch_production_env.call("DB_PASSWORD", "postgres") %>
+    <% end %>
+    <% end %>
     migrations_paths: db/queue_migrate
   cable:
-    <<: *primary_production
-    database: go_competitie_production_cable
+    <<: *default
+    <% if ENV["RAILS_ENV"] == "production" %>
+    <% if (cable_database_url = database_url_for.call("CABLE_DATABASE_URL", "_cable")) %>
+    url: <%= cable_database_url %>
+    <% else %>
+    host: <%= fetch_production_env.call("DB_HOST", "localhost") %>
+    database: <%= "#{fetch_production_env.call("DB_NAME", "go_competitie_production")}_cable" %>
+    username: <%= fetch_production_env.call("DB_USERNAME", "postgres") %>
+    password: <%= fetch_production_env.call("DB_PASSWORD", "postgres") %>
+    <% end %>
+    <% end %>
     migrations_paths: db/cable_migrate

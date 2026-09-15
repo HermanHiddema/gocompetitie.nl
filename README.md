@@ -34,6 +34,21 @@ bin/rails db:seed    # demo season with clubs, teams and a round robin schedule
 bin/dev              # or: run the server together with the Tailwind watcher
 ```
 
+Local database and application variables are loaded from `.env` by dotenv.
+Create it from `.env.example` before running setup if it does not exist:
+
+```bash
+cp .env.example .env
+```
+
+Rails credentials are encrypted with `config/master.key`, which is ignored by
+Git. Keep that key in a password manager and set its value as `RAILS_MASTER_KEY`
+in Railway. Add encrypted secrets locally with:
+
+```bash
+bin/rails credentials:edit
+```
+
 The seeds create an administrator, `admin@example.com` with password `secret123456`,
 in the development environment.
 
@@ -44,3 +59,27 @@ bin/rails test       # unit and integration tests
 bin/rubocop          # style
 bin/brakeman         # static security analysis
 ```
+
+## Deploying to Railway
+
+The app builds from the included `Dockerfile` and requires its production
+configuration through environment variables. Missing required variables make
+the application fail during boot:
+
+| Variable | Required | Purpose |
+| --- | --- | --- |
+| `DATABASE_URL` | yes, unless using the `DB_*` fallback below | Primary Postgres connection string; when the role-specific URLs below are unset, the app derives separate `_cache`, `_queue`, and `_cable` database URLs from it. |
+| `CACHE_DATABASE_URL`, `QUEUE_DATABASE_URL`, `CABLE_DATABASE_URL` | no | Optional overrides for the Solid Cache, Queue, and Cable databases. Each must point at a separate database. |
+| `DB_HOST`, `DB_NAME`, `DB_USERNAME`, `DB_PASSWORD` | alternative to `DATABASE_URL` | Credentials for deployments that connect without `DATABASE_URL`; `DB_NAME` is used as the base name and the app adds `_cache`, `_queue`, and `_cable` for the non-primary databases. |
+| `RAILS_MASTER_KEY` or `SECRET_KEY_BASE` | yes | Decrypts `config/credentials.yml.enc` / signs sessions. |
+| `APP_HOST` | yes | Public host used in mailer links. |
+| `APP_PROTOCOL` | no | Public protocol used in mailer links (defaults to `https`). |
+| `RAILS_ALLOWED_HOSTS` | yes | Comma-separated list of allowed `Host` headers. |
+| `SMTP_ADDRESS`, `SMTP_PORT`, `SMTP_DOMAIN`, `SMTP_USERNAME`, `SMTP_PASSWORD`, `SMTP_AUTHENTICATION`, `SMTP_ENABLE_STARTTLS_AUTO` | yes | SMTP delivery configuration. |
+| `MAILER_FROM_ADDRESS` | yes | From-address for password reset emails. |
+| `SOLID_QUEUE_IN_PUMA` | yes | Set to `true` to run the Solid Queue worker inside the web process. |
+| `SOLID_QUEUE_DISPATCHER_POLLING_INTERVAL`, `SOLID_QUEUE_DISPATCHER_BATCH_SIZE`, `SOLID_QUEUE_THREADS`, `JOB_CONCURRENCY`, `SOLID_QUEUE_WORKER_POLLING_INTERVAL` | no | Solid Queue worker configuration (defaults: `1`, `500`, `3`, `1`, `1`). |
+| `PORT` | auto-set | Railway's public port. |
+| `TARGET_PORT` | no | Puma's internal port (defaults to `3000`). |
+| `RAILS_MAX_THREADS` | no | Puma/database thread count (defaults to `3`). |
+| `RAILS_LOG_LEVEL` | no | Rails log level (defaults to `info`). |

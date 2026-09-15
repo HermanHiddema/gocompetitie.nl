@@ -1,6 +1,17 @@
 require "active_support/core_ext/integer/time"
 
 Rails.application.configure do
+  production_build = ENV.key?("SECRET_KEY_BASE_DUMMY")
+  fetch_production_env = lambda do |name, build_default = nil|
+    if ENV.key?(name)
+      ENV.fetch(name)
+    elsif production_build && !build_default.nil?
+      build_default
+    else
+      ENV.fetch(name)
+    end
+  end
+
   # Settings specified here will take precedence over those in config/application.rb.
 
   # Code is not reloaded between requests.
@@ -58,16 +69,22 @@ Rails.application.configure do
   # config.action_mailer.raise_delivery_errors = false
 
   # Set host to be used by links generated in mailer templates.
-  config.action_mailer.default_url_options = { host: "gocompetitie.nl", protocol: "https" }
+  config.action_mailer.default_url_options = {
+    host: fetch_production_env.call("APP_HOST", "example.com"),
+    protocol: ENV.fetch("APP_PROTOCOL", "https")
+  }
 
-  # Specify outgoing SMTP server. Remember to add smtp/* credentials via bin/rails credentials:edit.
-  # config.action_mailer.smtp_settings = {
-  #   user_name: Rails.application.credentials.dig(:smtp, :user_name),
-  #   password: Rails.application.credentials.dig(:smtp, :password),
-  #   address: "smtp.example.com",
-  #   port: 587,
-  #   authentication: :plain
-  # }
+  # Specify outgoing SMTP server via environment variables.
+  config.action_mailer.delivery_method = :smtp
+  config.action_mailer.smtp_settings = {
+    address: fetch_production_env.call("SMTP_ADDRESS", "smtp.example.com"),
+    port: fetch_production_env.call("SMTP_PORT", "587"),
+    domain: fetch_production_env.call("SMTP_DOMAIN", "example.com"),
+    user_name: fetch_production_env.call("SMTP_USERNAME", "user"),
+    password: fetch_production_env.call("SMTP_PASSWORD", "password"),
+    authentication: fetch_production_env.call("SMTP_AUTHENTICATION", "plain").to_sym,
+    enable_starttls_auto: fetch_production_env.call("SMTP_ENABLE_STARTTLS_AUTO", "true") == "true"
+  }
 
   # Enable locale fallbacks for I18n (makes lookups for any locale fall back to
   # the I18n.default_locale when a translation cannot be found).
@@ -79,12 +96,12 @@ Rails.application.configure do
   # Only use :id for inspections in production.
   config.active_record.attributes_for_inspect = [:id]
 
-  # Enable DNS rebinding protection and other `Host` header attacks.
-  # config.hosts = [
-  #   "example.com",     # Allow requests from example.com
-  #   /.*\.example\.com/ # Allow requests from subdomains like `www.example.com`
-  # ]
-  #
+  # Enable DNS rebinding protection and other `Host` header attacks by listing
+  # allowed hosts via a comma-separated RAILS_ALLOWED_HOSTS environment variable.
+  config.hosts.concat(
+    fetch_production_env.call("RAILS_ALLOWED_HOSTS", "example.com").split(",").map(&:strip).reject(&:empty?)
+  )
+
   # Skip DNS rebinding protection for the default health check endpoint.
-  # config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
+  config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
 end

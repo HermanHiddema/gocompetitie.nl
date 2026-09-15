@@ -29,13 +29,15 @@ threads_count = ENV.fetch("RAILS_MAX_THREADS", 3)
 threads threads_count, threads_count
 
 # Specifies the `port` that Puma will listen on to receive requests; default is 3000.
-port ENV.fetch("PORT", 3000)
+# Kept separate from Thruster's public-facing PORT/HTTP_PORT so platforms like Railway
+# (which assign a dynamic PORT) can proxy through Thruster to this fixed internal port.
+port ENV.fetch("TARGET_PORT", 3000)
 
 # Allow puma to be restarted by `bin/rails restart` command.
 plugin :tmp_restart
 
 # Run the Solid Queue supervisor inside of Puma for single-server deployments.
-plugin :solid_queue if ENV["SOLID_QUEUE_IN_PUMA"]
+plugin :solid_queue if ENV.fetch("SOLID_QUEUE_IN_PUMA", "false") == "true"
 
 # Specify the PID file. Defaults to tmp/pids/server.pid in development.
 # In other environments, only set the PID file if requested.
