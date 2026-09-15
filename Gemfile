@@ -22,6 +22,9 @@ gem "jbuilder"
 # Render markdown stored in club, venue and season descriptions [https://github.com/vmg/redcarpet]
 gem "redcarpet", "~> 3.6"
 
+# Deliver transactional email through Mailgun [https://github.com/mailgun/mailgun-ruby]
+gem "mailgun-ruby", "~> 1.4"
+
 # Dutch translations for the Rails defaults [https://github.com/svenfuchs/rails-i18n]
 gem "rails-i18n"
 

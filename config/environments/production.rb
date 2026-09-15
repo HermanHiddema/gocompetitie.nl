@@ -74,16 +74,12 @@ Rails.application.configure do
     protocol: ENV.fetch("APP_PROTOCOL", "https")
   }
 
-  # Specify outgoing SMTP server via environment variables.
-  config.action_mailer.delivery_method = :smtp
-  config.action_mailer.smtp_settings = {
-    address: fetch_production_env.call("SMTP_ADDRESS", "smtp.example.com"),
-    port: fetch_production_env.call("SMTP_PORT", "587"),
-    domain: fetch_production_env.call("SMTP_DOMAIN", "example.com"),
-    user_name: fetch_production_env.call("SMTP_USERNAME", "user"),
-    password: fetch_production_env.call("SMTP_PASSWORD", "password"),
-    authentication: fetch_production_env.call("SMTP_AUTHENTICATION", "plain").to_sym,
-    enable_starttls_auto: fetch_production_env.call("SMTP_ENABLE_STARTTLS_AUTO", "true") == "true"
+  # Deliver email through the Mailgun API via environment variables.
+  config.action_mailer.delivery_method = :mailgun
+  config.action_mailer.mailgun_settings = {
+    api_key: fetch_production_env.call("MAILGUN_API_KEY", "key-example"),
+    domain: fetch_production_env.call("MAILGUN_DOMAIN", "example.com"),
+    api_host: ENV.fetch("MAILGUN_API_HOST", "api.mailgun.net")
   }
 
   # Enable locale fallbacks for I18n (makes lookups for any locale fall back to
