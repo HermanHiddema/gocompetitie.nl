@@ -75,7 +75,8 @@ the application fail during boot:
 | `APP_HOST` | yes | Public host used in mailer links. |
 | `APP_PROTOCOL` | no | Public protocol used in mailer links (defaults to `https`). |
 | `RAILS_ALLOWED_HOSTS` | yes | Comma-separated list of allowed `Host` headers. |
-| `SMTP_ADDRESS`, `SMTP_PORT`, `SMTP_DOMAIN`, `SMTP_USERNAME`, `SMTP_PASSWORD`, `SMTP_AUTHENTICATION`, `SMTP_ENABLE_STARTTLS_AUTO` | yes | SMTP delivery configuration. |
+| `MAILGUN_API_KEY`, `MAILGUN_DOMAIN` | yes | Mailgun API credentials and sending domain used to deliver email. |
+| `MAILGUN_API_HOST` | no | Mailgun API host (defaults to `api.mailgun.net`, use `api.eu.mailgun.net` for the EU region). |
 | `MAILER_FROM_ADDRESS` | yes | From-address for password reset emails. |
 | `SOLID_QUEUE_IN_PUMA` | yes | Set to `true` to run the Solid Queue worker inside the web process. |
 | `SOLID_QUEUE_DISPATCHER_POLLING_INTERVAL`, `SOLID_QUEUE_DISPATCHER_BATCH_SIZE`, `SOLID_QUEUE_THREADS`, `JOB_CONCURRENCY`, `SOLID_QUEUE_WORKER_POLLING_INTERVAL` | no | Solid Queue worker configuration (defaults: `1`, `500`, `3`, `1`, `1`). |
