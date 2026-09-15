@@ -71,7 +71,7 @@ Rails.application.configure do
   # Set host to be used by links generated in mailer templates.
   config.action_mailer.default_url_options = {
     host: fetch_production_env.call("APP_HOST", "example.com"),
-    protocol: fetch_production_env.call("APP_PROTOCOL", "https")
+    protocol: ENV.fetch("APP_PROTOCOL", "https")
   }
 
   # Specify outgoing SMTP server via environment variables.

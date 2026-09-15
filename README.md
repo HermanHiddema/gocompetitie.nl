@@ -68,9 +68,9 @@ the application fail during boot:
 
 | Variable | Required | Purpose |
 | --- | --- | --- |
-| `DATABASE_URL` | yes | Primary Postgres connection string; when the role-specific URLs below are unset, the app derives separate `_cache`, `_queue`, and `_cable` database URLs from it. |
+| `DATABASE_URL` | yes, unless using the `DB_*` fallback below | Primary Postgres connection string; when the role-specific URLs below are unset, the app derives separate `_cache`, `_queue`, and `_cable` database URLs from it. |
 | `CACHE_DATABASE_URL`, `QUEUE_DATABASE_URL`, `CABLE_DATABASE_URL` | no | Optional overrides for the Solid Cache, Queue, and Cable databases. Each must point at a separate database. |
-| `DB_HOST`, `DB_NAME`, `DB_USERNAME`, `DB_PASSWORD` | production fallback only | Credentials for deployments that connect without `DATABASE_URL`; `DB_NAME` is used as the base name and the app adds `_cache`, `_queue`, and `_cable` for the non-primary databases. |
+| `DB_HOST`, `DB_NAME`, `DB_USERNAME`, `DB_PASSWORD` | alternative to `DATABASE_URL` | Credentials for deployments that connect without `DATABASE_URL`; `DB_NAME` is used as the base name and the app adds `_cache`, `_queue`, and `_cable` for the non-primary databases. |
 | `RAILS_MASTER_KEY` or `SECRET_KEY_BASE` | yes | Decrypts `config/credentials.yml.enc` / signs sessions. |
 | `APP_HOST` | yes | Public host used in mailer links. |
 | `APP_PROTOCOL` | no | Public protocol used in mailer links (defaults to `https`). |
