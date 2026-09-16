@@ -35,8 +35,9 @@ class League < ApplicationRecord
   # Teams are ranked by match points and board points. Teams that are still
   # tied are separated by their mutual results, see #break_tie.
   def ranked_teams
-    sorted = teams.to_a.sort_by(&:placement_criteria).reverse
-    sorted.chunk_while { |team, other| team.placement_criteria == other.placement_criteria }
+    criteria = teams.to_a.to_h { |team| [team, team.placement_criteria] }
+    sorted = criteria.keys.sort_by { |team| criteria[team] }.reverse
+    sorted.chunk_while { |team, other| criteria[team] == criteria[other] }
           .flat_map { |tied| break_tie(tied, Match::BOARD_COUNT) }
   end
 

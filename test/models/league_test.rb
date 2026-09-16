@@ -96,6 +96,19 @@ class LeagueTest < ActiveSupport::TestCase
     assert_equal [gamma, alpha, beta], league.ranked_teams
   end
 
+  test "tied subgroups are recomputed from their own mutual matches" do
+    league = leagues(:first)
+    alpha, beta, gamma, delta, epsilon, zeta = create_teams(league, %w[Alpha Beta Gamma Delta Epsilon Zeta])
+    play(league, alpha, beta, %w[1-0 1-0 0-1])
+    play(league, alpha, gamma, %w[0-1 0-1 0-1])
+    play(league, beta, gamma, %w[1-0])
+    play(league, alpha, delta, %w[1-0 1-0])
+    play(league, beta, epsilon, %w[1-0 1-0])
+    play(league, gamma, zeta, %w[1-0])
+
+    assert_equal [gamma, alpha, beta], league.ranked_teams.first(3)
+  end
+
   test "teams without a tie breaker are all ranked" do
     league = leagues(:first)
     alpha, beta, gamma = create_teams(league, %w[Alpha Beta Gamma])
