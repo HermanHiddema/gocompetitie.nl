@@ -115,7 +115,12 @@ class MatchesControllerTest < ActionDispatch::IntegrationTest
     assert_select "a[href=?]", edit_match_path(@match)
     assert_select "form[action=?]", match_path(@match), count: 0
 
-    get new_match_url
+    assert_no_difference -> { Match.count } do
+      post matches_url, params: { match: { league_id: leagues(:top).id, black_team_id: teams(:amsterdam).id,
+        white_team_id: teams(:rotterdam).id, venue_id: venues(:amsterdam).id,
+        playing_date: "2026-04-01", playing_time: "20:00" } }
+    end
+
     assert_response :unauthorized
 
     assert_no_difference -> { Match.count } do

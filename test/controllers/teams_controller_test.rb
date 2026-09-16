@@ -35,10 +35,13 @@ class TeamsControllerTest < ActionDispatch::IntegrationTest
 
   test "captains cannot edit teams" do
     sign_in_as users(:member)
+    team = teams(:amsterdam)
 
-    get edit_team_url(teams(:amsterdam))
+    patch team_url(team), params: { team: { name: "Changed Team", abbrev: team.abbrev, club_id: team.club_id,
+      league_id: team.league_id, captain_id: team.captain_id } }
 
     assert_response :unauthorized
+    assert_equal "Amsterdam 1", team.reload.name
   end
 
   test "admins can create a team with members" do

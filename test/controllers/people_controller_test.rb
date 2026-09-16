@@ -15,7 +15,7 @@ class PeopleControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "contact details are visible when signed in" do
-    sign_in_as users(:admin)
+    sign_in_as users(:member)
 
     get person_url(people(:anna))
 
