@@ -87,6 +87,50 @@ class GameTest < ActiveSupport::TestCase
     assert_equal 0, @game.black_rating_change
   end
 
+  test "handicap defaults to the rating difference minus 300, rounded half down" do
+    @game.black_player.rating = 2350
+    @game.white_player.rating = 2000
+    assert_equal 0, @game.default_handicap # 0.5 rounds down
+
+    @game.white_player.rating = 1900
+    assert_equal 1, @game.default_handicap # 1.5 rounds down
+
+    @game.white_player.rating = 1800
+    assert_equal 2, @game.default_handicap # 2.5 rounds down
+
+    @game.white_player.rating = 2300
+    assert_equal 0, @game.default_handicap
+
+    @unplayed.black_player.rating = nil
+    assert_equal 0, @unplayed.default_handicap
+  end
+
+  test "an entered handicap overrides the default handicap" do
+    @game.handicap = 4
+
+    assert_equal 4, @game.handicap
+    assert_equal 4, @game.entered_handicap
+
+    @game.handicap = nil
+    assert_equal @game.default_handicap, @game.handicap
+    assert_nil @game.entered_handicap
+  end
+
+  test "handicaps outside the allowed range are invalid" do
+    @game.handicap = 10
+    assert_not @game.valid?
+
+    @game.handicap = 2
+    assert @game.valid?
+  end
+
+  test "egd handicap lists the color of the player" do
+    @game.handicap = 3
+
+    assert_equal "/b3", @game.egd_handicap(:black)
+    assert_equal "/w3", @game.egd_handicap(:white)
+  end
+
   test "board numbers are required, limited to the boards of a match and unique" do
     game = matches(:amsterdam_utrecht).games.build
 

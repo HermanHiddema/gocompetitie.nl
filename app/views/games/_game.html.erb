@@ -2,5 +2,8 @@
   <span class="min-w-0 flex-1 truncate">
     <%= game.black_player&.fullname || "?" %> &ndash; <%= game.white_player&.fullname || "?" %>
   </span>
+  <% if game.handicap.positive? %>
+    <span class="text-slate-500">H<%= game.handicap %></span>
+  <% end %>
   <span class="w-16 text-right font-medium"><%= game.result %></span>
 </div>

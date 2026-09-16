@@ -4,11 +4,14 @@ class Game < ApplicationRecord
   POINTS = { "0" => 0, "½" => 1, "1" => 2 }.freeze
   POINT_LABELS = POINTS.invert.freeze
 
+  HANDICAPS = (0..9).freeze
+
   belongs_to :match
   belongs_to :black_player, class_name: "Participant", foreign_key: :black_id, optional: true, inverse_of: :black_games
   belongs_to :white_player, class_name: "Participant", foreign_key: :white_id, optional: true, inverse_of: :white_games
 
   validates :board_number, presence: true, inclusion: { in: 1..Match::BOARD_COUNT }, uniqueness: { scope: :match_id }
+  validates :handicap, numericality: { only_integer: true, in: HANDICAPS }, allow_nil: true
   validate :players_are_distinct
   validate :players_are_unique_in_match
   validate :players_play_in_the_season
@@ -53,6 +56,32 @@ class Game < ApplicationRecord
     return :black if black_player&.id == player.id
     return :white if white_player&.id == player.id
     nil
+  end
+
+  # The handicap of the game, defaulting to the handicap that follows from the
+  # rating difference of the players.
+  def handicap
+    self[:handicap] || default_handicap
+  end
+
+  # The handicap as it was entered, nil when the default handicap is used.
+  def entered_handicap
+    self[:handicap]
+  end
+
+  # The rating difference minus 300 points, divided by 100 and rounded to the
+  # nearest whole number, rounding halves down.
+  def default_handicap
+    return 0 if black_rating.blank? || white_rating.blank?
+
+    handicap = (((black_rating - white_rating).abs - 300) / 100.0).round(half: :down)
+    handicap.clamp(HANDICAPS.min, HANDICAPS.max)
+  end
+
+  # The color and handicap of a player as they are written in the result list
+  # of the European Go Database, e.g. "/w3" for white with three stones.
+  def egd_handicap(color)
+    "/#{color == :black ? "b" : "w"}#{handicap}"
   end
 
   def result

@@ -61,6 +61,16 @@ class LeagueTest < ActiveSupport::TestCase
     assert_equal teams(:amsterdam), @league.ranked_teams.first
   end
 
+  test "results list the color and handicap of every game" do
+    games(:board_one).update!(handicap: 2)
+
+    lines = @league.results
+
+    assert lines.any? { |line| line.include?("4+/b2") }
+    assert lines.any? { |line| line.include?("1-/w2") }
+    assert lines.any? { |line| line.include?("/b0") }
+  end
+
   test "results list every player grouped by team" do
     lines = @league.results
 

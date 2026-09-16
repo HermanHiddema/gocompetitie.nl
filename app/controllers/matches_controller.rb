@@ -83,6 +83,6 @@ class MatchesController < ApplicationController
     end
 
     def match_update_params
-      params.expect(match: [:venue_id, :playing_date, :playing_time, games_attributes: [[:id, :black_id, :white_id, :result]]])
+      params.expect(match: [:venue_id, :playing_date, :playing_time, games_attributes: [[:id, :black_id, :white_id, :result, :handicap]]])
     end
 end
