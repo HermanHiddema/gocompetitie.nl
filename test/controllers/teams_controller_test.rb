@@ -34,7 +34,7 @@ class TeamsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "captains cannot edit teams" do
-    sign_in_as users(:captain)
+    sign_in_as users(:member)
 
     get edit_team_url(teams(:amsterdam))
 

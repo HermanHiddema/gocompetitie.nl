@@ -59,10 +59,5 @@ season.leagues.each { |league| league.make_pairing if league.matches.none? }
 
 User.find_or_create_by!(email_address: "admin@example.com") do |user|
   user.password = "secret123456"
-  user.role = :admin
-end
-
-User.find_or_create_by!(email_address: "captain@teams.gocompetitie.nl") do |user|
-  user.password = "secret123456"
-  user.role = :captain
+  user.admin = true
 end

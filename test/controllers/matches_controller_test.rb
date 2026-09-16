@@ -53,7 +53,7 @@ class MatchesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "edit lists selectable players without creating boards" do
-    sign_in_as users(:captain)
+    sign_in_as users(:member)
     @match.games.destroy_all
 
     assert_no_difference -> { @match.games.count } do
@@ -73,7 +73,7 @@ class MatchesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "captains can enter results" do
-    sign_in_as users(:captain)
+    sign_in_as users(:member)
     game = @match.games.find_by(board_number: 1)
 
     patch match_url(@match), params: { match: { playing_time: "19:00", games_attributes: {
@@ -86,7 +86,7 @@ class MatchesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "captains can swap players between boards" do
-    sign_in_as users(:captain)
+    sign_in_as users(:member)
     first, second = @match.games.by_board.first(2)
 
     patch match_url(@match), params: { match: { games_attributes: {
@@ -109,7 +109,7 @@ class MatchesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "captains cannot schedule or delete matches" do
-    sign_in_as users(:captain)
+    sign_in_as users(:member)
 
     get match_url(@match)
     assert_select "a[href=?]", edit_match_path(@match)
