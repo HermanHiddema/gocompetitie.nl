@@ -39,11 +39,7 @@ class Team < ApplicationRecord
   end
 
   def placement_criteria
-    [score, points, unplayed_matches, direct_comparison]
-  end
-
-  def direct_comparison
-    0
+    [score, points, unplayed_matches]
   end
 
   def to_s
