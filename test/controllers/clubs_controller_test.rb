@@ -38,7 +38,7 @@ class ClubsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "signed in users can create a club" do
-    sign_in_as users(:member)
+    sign_in_as users(:admin)
 
     assert_difference -> { Club.count }, 1 do
       post clubs_url, params: { club: { name: "Go Club Delft", abbrev: "Delf" } }
@@ -48,7 +48,7 @@ class ClubsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "season-scoped club forms keep the selected season in their action" do
-    sign_in_as users(:member)
+    sign_in_as users(:admin)
     slug = seasons(:previous).slug
 
     get new_club_url(season_slug: slug)
@@ -59,7 +59,7 @@ class ClubsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "invalid clubs are rendered again" do
-    sign_in_as users(:member)
+    sign_in_as users(:admin)
 
     assert_no_difference -> { Club.count } do
       post clubs_url, params: { club: { name: "" } }
@@ -69,7 +69,7 @@ class ClubsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "signed in users can update and destroy a club" do
-    sign_in_as users(:member)
+    sign_in_as users(:admin)
     club = clubs(:rotterdam)
 
     patch club_url(club), params: { club: { name: "Go Club Rotterdam Zuid" } }

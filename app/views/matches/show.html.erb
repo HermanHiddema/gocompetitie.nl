@@ -11,7 +11,9 @@
 <% if current_user %>
   <div class="mt-6 flex gap-3">
     <%= button_link_to "Bewerken", edit_match_path(@match) %>
-    <%= button_to "Verwijderen", match_path(@match), method: :delete, class: button_classes(:danger),
-          form: { data: { turbo_confirm: "Weet je het zeker?" } } %>
+    <% if admin? %>
+      <%= button_to "Verwijderen", match_path(@match), method: :delete, class: button_classes(:danger),
+            form: { data: { turbo_confirm: "Weet je het zeker?" } } %>
+    <% end %>
   </div>
 <% end %>

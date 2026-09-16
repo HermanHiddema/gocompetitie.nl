@@ -15,7 +15,7 @@ class PeopleControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "contact details are visible when signed in" do
-    sign_in_as users(:member)
+    sign_in_as users(:admin)
 
     get person_url(people(:anna))
 
@@ -23,7 +23,7 @@ class PeopleControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "signed in users can create a person" do
-    sign_in_as users(:member)
+    sign_in_as users(:admin)
 
     assert_difference -> { Person.count }, 1 do
       post people_url, params: { person: { firstname: "Nieuw", lastname: "Persoon", email: "nieuw@example.com" } }

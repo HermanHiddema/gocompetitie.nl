@@ -3,9 +3,9 @@
 admin:
   email_address: admin@example.com
   password_digest: <%= password_digest %>
-  admin: true
+  role: admin
 
-member:
-  email_address: member@example.com
+captain:
+  email_address: captain@teams.gocompetitie.nl
   password_digest: <%= password_digest %>
-  admin: false
+  role: captain

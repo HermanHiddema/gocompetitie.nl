@@ -2,6 +2,7 @@ class PeopleController < ApplicationController
   allow_unauthenticated_access only: %i[index show]
 
   before_action :set_person, only: %i[show edit update destroy]
+  before_action :require_admin!, only: %i[new create edit update destroy]
 
   def index
     @people = Person.includes(:club).ordered

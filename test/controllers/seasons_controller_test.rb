@@ -30,7 +30,7 @@ class SeasonsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "only admins can create seasons" do
-    sign_in_as users(:member)
+    sign_in_as users(:captain)
     get new_season_url
     assert_response :unauthorized
 

@@ -22,8 +22,8 @@ class MatchesControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to new_session_url
   end
 
-  test "signed in users can schedule a match, which fills the boards" do
-    sign_in_as users(:member)
+  test "admins can schedule a match, which fills the boards" do
+    sign_in_as users(:admin)
 
     assert_difference -> { Match.count }, 1 do
       post matches_url, params: { match: { league_id: leagues(:top).id, black_team_id: teams(:amsterdam).id,
@@ -37,7 +37,7 @@ class MatchesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "historical season match links and forms keep the selected season" do
-    sign_in_as users(:member)
+    sign_in_as users(:admin)
     previous = seasons(:previous)
     league = previous.leagues.create!(name: "Hoofdklasse", position: 0)
     black_team = league.teams.create!(name: "Amsterdam 9", abbrev: "Amst9", club: clubs(:amsterdam))
@@ -53,7 +53,7 @@ class MatchesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "edit lists selectable players without creating boards" do
-    sign_in_as users(:member)
+    sign_in_as users(:captain)
     @match.games.destroy_all
 
     assert_no_difference -> { @match.games.count } do
@@ -64,7 +64,7 @@ class MatchesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "edit can list all participants of the season" do
-    sign_in_as users(:member)
+    sign_in_as users(:admin)
 
     get edit_match_url(@match, all: 1)
 
@@ -72,8 +72,8 @@ class MatchesControllerTest < ActionDispatch::IntegrationTest
     assert_select "option", text: /Rotterdam/
   end
 
-  test "signed in users can enter results" do
-    sign_in_as users(:member)
+  test "captains can enter results" do
+    sign_in_as users(:captain)
     game = @match.games.find_by(board_number: 1)
 
     patch match_url(@match), params: { match: { playing_time: "19:00", games_attributes: {
@@ -85,8 +85,8 @@ class MatchesControllerTest < ActionDispatch::IntegrationTest
     assert_equal "19:00", @match.reload.playing_time
   end
 
-  test "signed in users can swap players between boards" do
-    sign_in_as users(:member)
+  test "captains can swap players between boards" do
+    sign_in_as users(:captain)
     first, second = @match.games.by_board.first(2)
 
     patch match_url(@match), params: { match: { games_attributes: {
@@ -98,13 +98,30 @@ class MatchesControllerTest < ActionDispatch::IntegrationTest
     assert_equal participants(:amsterdam_1).id, second.reload.black_id
   end
 
-  test "signed in users can delete a match" do
-    sign_in_as users(:member)
+  test "admins can delete a match" do
+    sign_in_as users(:admin)
 
     assert_difference -> { Match.count }, -1 do
       delete match_url(@match)
     end
 
     assert_redirected_to matches_url(season_slug: @match.season.slug)
+  end
+
+  test "captains cannot schedule or delete matches" do
+    sign_in_as users(:captain)
+
+    get match_url(@match)
+    assert_select "a[href=?]", edit_match_path(@match)
+    assert_select "form[action=?]", match_path(@match), count: 0
+
+    get new_match_url
+    assert_response :unauthorized
+
+    assert_no_difference -> { Match.count } do
+      delete match_url(@match)
+    end
+
+    assert_response :unauthorized
   end
 end

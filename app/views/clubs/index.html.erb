@@ -17,7 +17,7 @@
         clubs_path(all: params[:all] ? nil : 1, **season_url_options), class: "underline" %>
 </p>
 
-<% if current_user %>
+<% if admin? %>
   <div class="mt-6">
     <%= button_link_to "Club toevoegen", new_club_path(**season_url_options) %>
   </div>

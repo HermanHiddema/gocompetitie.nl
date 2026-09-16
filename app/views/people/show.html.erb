@@ -16,7 +16,7 @@
   </dl>
 </section>
 
-<% if current_user %>
+<% if admin? %>
   <div class="flex gap-3">
     <%= button_link_to "Persoon bewerken", edit_person_path(@person) %>
   </div>

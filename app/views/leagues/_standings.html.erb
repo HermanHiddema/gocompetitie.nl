@@ -31,7 +31,7 @@
                 <% standing = league.standing(team, opponent) %>
                 <% if standing.nil? %>
                   <td class="px-1 py-1 text-center">
-                    <% if current_user %>
+                    <% if admin? %>
                       <%= link_to "+", new_match_path(league_id: league.id, black_team_id: team.id, white_team_id: opponent.id, **season_url_options),
                             class: "text-slate-400 hover:text-slate-900", title: "Wedstrijd plannen" %>
                     <% end %>
