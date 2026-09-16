@@ -1,6 +1,6 @@
 <div class="flex w-full items-center justify-between gap-3">
   <span class="min-w-0 flex-1 truncate">
-    <%= game.black_player&.fullname || "?" %> &ndash; <%= game.white_player&.fullname || "?" %>
+    <%= game.home_player&.fullname || "?" %> &ndash; <%= game.away_player&.fullname || "?" %>
   </span>
   <% if game.handicap.positive? %>
     <span class="text-slate-500">H<%= game.handicap %></span>

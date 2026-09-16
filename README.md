@@ -21,6 +21,9 @@ application on Rails 8, with the same business logic and a new Tailwind CSS fron
   most board points. Individual performance is calculated with the EGF rating formula.
   A game can be played with a handicap, which defaults to the rating difference minus
   300, divided by 100 and rounded to the nearest whole number (halves round down).
+  Games and matches are stored per side (`home` and `away`), not per color: with a
+  handicap the weaker player takes black, otherwise the home team plays black on the
+  odd boards and white on the even ones.
 
 League and season results can be exported in the tab separated format used by the
 European Go Database by requesting the text format, e.g. `/leagues/1.text`.

@@ -7,8 +7,8 @@
   </h3>
 
   <div class="flex items-center justify-between border-b border-slate-200 pb-2 font-semibold">
-    <span><%= link_to match.black_team.name, match.black_team, class: "hover:underline" %> &ndash;
-      <%= link_to match.white_team.name, match.white_team, class: "hover:underline" %></span>
+    <span><%= link_to match.home_team.name, match.home_team, class: "hover:underline" %> &ndash;
+      <%= link_to match.away_team.name, match.away_team, class: "hover:underline" %></span>
     <%= link_to format_match_result(match), match, class: "hover:underline" %>
   </div>
 

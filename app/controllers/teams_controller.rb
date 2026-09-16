@@ -12,7 +12,7 @@ class TeamsController < ApplicationController
 
   def show
     @members = @team.team_members.includes(:participant).by_board
-    @matches = @team.matches.includes(:venue, :black_team, :white_team, games: %i[black_player white_player]).scheduled
+    @matches = @team.matches.includes(:venue, :home_team, :away_team, games: %i[home_player away_player]).scheduled
   end
 
   def new

@@ -35,7 +35,7 @@ class ParticipantTest < ActiveSupport::TestCase
   end
 
   test "rating change adds up the game rating changes" do
-    assert_in_delta @participant.black_games.played.sum(&:black_rating_change), @participant.rating_change, 0.0001
+    assert_in_delta @participant.home_games.played.sum(&:home_rating_change), @participant.rating_change, 0.0001
     assert_match(/%\z/, @participant.rating_performance)
   end
 

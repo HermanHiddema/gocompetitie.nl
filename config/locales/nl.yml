@@ -28,8 +28,9 @@ nl:
         info: Informatie
         contact_person: Contactpersoon
       game:
-        black_player: Zwart
-        white_player: Wit
+        home_player: Thuis
+        away_player: Uit
+        handicap: Handicap
         result: Resultaat
         board_number: Bord
       league:
@@ -39,8 +40,8 @@ nl:
       match:
         league: Poule
         venue: Speellocatie
-        black_team: Zwart
-        white_team: Wit
+        home_team: Thuis
+        away_team: Uit
         playing_date: Speeldatum
         playing_time: Aanvangstijd
       participant:

@@ -1,7 +1,7 @@
-<% content_for :title, "#{@match.black_team.name} - #{@match.white_team.name}" %>
+<% content_for :title, "#{@match.home_team.name} - #{@match.away_team.name}" %>
 
 <h1 class="mb-6 text-2xl font-bold">
-  <%= @match.black_team.name %> &ndash; <%= @match.white_team.name %>
+  <%= @match.home_team.name %> &ndash; <%= @match.away_team.name %>
 </h1>
 
 <section class="rounded-lg bg-white p-4 shadow-sm ring-1 ring-slate-200">

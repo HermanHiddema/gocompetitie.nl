@@ -7,8 +7,8 @@ class Participant < ApplicationRecord
 
   has_one :team_member, dependent: :destroy
   has_one :team, through: :team_member
-  has_many :black_games, class_name: "Game", foreign_key: :black_id, dependent: :nullify, inverse_of: :black_player
-  has_many :white_games, class_name: "Game", foreign_key: :white_id, dependent: :nullify, inverse_of: :white_player
+  has_many :home_games, class_name: "Game", foreign_key: :home_id, dependent: :nullify, inverse_of: :home_player
+  has_many :away_games, class_name: "Game", foreign_key: :away_id, dependent: :nullify, inverse_of: :away_player
 
   validates :firstname, :lastname, presence: true
 
@@ -27,21 +27,21 @@ class Participant < ApplicationRecord
   end
 
   def games
-    Game.where(black_id: id).or(Game.where(white_id: id))
+    Game.where(home_id: id).or(Game.where(away_id: id))
   end
 
   def played_games
-    if black_games.loaded? && white_games.loaded?
-      (black_games + white_games).select(&:played?)
+    if home_games.loaded? && away_games.loaded?
+      (home_games + away_games).select(&:played?)
     else
       games.played
     end
   end
 
   def rating_change
-    black = black_games.loaded? ? black_games.select(&:played?) : black_games.played
-    white = white_games.loaded? ? white_games.select(&:played?) : white_games.played
-    black.sum(&:black_rating_change) + white.sum(&:white_rating_change)
+    home = home_games.loaded? ? home_games.select(&:played?) : home_games.played
+    away = away_games.loaded? ? away_games.select(&:played?) : away_games.played
+    home.sum(&:home_rating_change) + away.sum(&:away_rating_change)
   end
 
   def rating_performance

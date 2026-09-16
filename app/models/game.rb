@@ -7,8 +7,8 @@ class Game < ApplicationRecord
   HANDICAPS = (0..9).freeze
 
   belongs_to :match
-  belongs_to :black_player, class_name: "Participant", foreign_key: :black_id, optional: true, inverse_of: :black_games
-  belongs_to :white_player, class_name: "Participant", foreign_key: :white_id, optional: true, inverse_of: :white_games
+  belongs_to :home_player, class_name: "Participant", foreign_key: :home_id, optional: true, inverse_of: :home_games
+  belongs_to :away_player, class_name: "Participant", foreign_key: :away_id, optional: true, inverse_of: :away_games
 
   validates :board_number, presence: true, inclusion: { in: 1..Match::BOARD_COUNT }, uniqueness: { scope: :match_id }
   validates :handicap, numericality: { only_integer: true, in: HANDICAPS }, allow_nil: true
@@ -16,14 +16,14 @@ class Game < ApplicationRecord
   validate :players_are_unique_in_match
   validate :players_play_in_the_season
 
-  delegate :rating, to: :black_player, prefix: :black, allow_nil: true
-  delegate :rating, to: :white_player, prefix: :white, allow_nil: true
+  delegate :rating, to: :home_player, prefix: :home, allow_nil: true
+  delegate :rating, to: :away_player, prefix: :away, allow_nil: true
 
-  scope :played, -> { where.not(black_points: nil).where.not(white_points: nil) }
+  scope :played, -> { where.not(home_points: nil).where.not(away_points: nil) }
   scope :by_board, -> { order(:board_number) }
 
   def played?
-    black_points.present? && white_points.present?
+    home_points.present? && away_points.present?
   end
 
   def unplayed?
@@ -33,29 +33,65 @@ class Game < ApplicationRecord
   # A game without points for either player is not a game that was played on
   # the board, so it is treated like a forfeit: unrated and not exported.
   def forfeit?
-    reason.present? || (played? && black_points.zero? && white_points.zero?)
+    reason.present? || (played? && home_points.zero? && away_points.zero?)
   end
 
   def players?
-    black_player.present? && white_player.present?
+    home_player.present? && away_player.present?
   end
 
   # A rated game is played on the board by two players with a rating, so it
   # counts for the rating calculation and is included in the rated game report.
   def rated?
-    played? && !forfeit? && players? && black_rating.present? && white_rating.present?
+    played? && !forfeit? && players? && home_rating.present? && away_rating.present?
   end
 
-  def swap_colors
-    self.black_points, self.white_points = white_points, black_points
-    self.black_player, self.white_player = white_player, black_player
+  def swap_sides
+    self.home_points, self.away_points = away_points, home_points
+    self.home_player, self.away_player = away_player, home_player
     save
   end
 
-  def color_of(player)
-    return :black if black_player&.id == player.id
-    return :white if white_player&.id == player.id
+  def side_of(player)
+    return :home if home_player&.id == player.id
+    return :away if away_player&.id == player.id
     nil
+  end
+
+  # The colors are not stored: with a handicap the weaker player takes black,
+  # otherwise the home team plays black on the odd boards and white on the
+  # even ones.
+  def home_color
+    if handicap.positive? && home_rating.present? && away_rating.present? && home_rating != away_rating
+      home_rating < away_rating ? :black : :white
+    else
+      board_number.to_i.odd? ? :black : :white
+    end
+  end
+
+  def away_color
+    home_color == :black ? :white : :black
+  end
+
+  def color_of(player)
+    side = side_of(player)
+    public_send(:"#{side}_color") if side
+  end
+
+  def black_player
+    home_color == :black ? home_player : away_player
+  end
+
+  def white_player
+    home_color == :black ? away_player : home_player
+  end
+
+  def black_result
+    home_color == :black ? home_result : away_result
+  end
+
+  def white_result
+    home_color == :black ? away_result : home_result
   end
 
   # The handicap of the game, defaulting to the handicap that follows from the
@@ -72,9 +108,9 @@ class Game < ApplicationRecord
   # The rating difference minus 300 points, divided by 100 and rounded to the
   # nearest whole number, rounding halves down.
   def default_handicap
-    return 0 if black_rating.blank? || white_rating.blank?
+    return 0 if home_rating.blank? || away_rating.blank?
 
-    handicap = (((black_rating - white_rating).abs - 300) / 100.0).round(half: :down)
+    handicap = (((home_rating - away_rating).abs - 300) / 100.0).round(half: :down)
     handicap.clamp(HANDICAPS.min, HANDICAPS.max)
   end
 
@@ -84,67 +120,75 @@ class Game < ApplicationRecord
     "/#{color == :black ? "b" : "w"}#{handicap}"
   end
 
+  def home_handicap
+    egd_handicap(home_color)
+  end
+
+  def away_handicap
+    egd_handicap(away_color)
+  end
+
   def result
-    "#{POINT_LABELS.fetch(black_points, "?")}-#{POINT_LABELS.fetch(white_points, "?")}#{reason}"
+    "#{POINT_LABELS.fetch(home_points, "?")}-#{POINT_LABELS.fetch(away_points, "?")}#{reason}"
   end
 
   def result=(value)
     value = value.to_s
     if RESULTS.include?(value) && (match = /\A([0½1?])-([0½1?])(!?)\z/.match(value))
-      self.black_points = POINTS[match[1]]
-      self.white_points = POINTS[match[2]]
+      self.home_points = POINTS[match[1]]
+      self.away_points = POINTS[match[2]]
       self.reason = match[3] == "!" ? "!" : nil
     else
-      self.black_points = nil
-      self.white_points = nil
+      self.home_points = nil
+      self.away_points = nil
       self.reason = nil
     end
   end
 
-  def black_score
-    score_for(black_points, white_points)
+  def home_score
+    score_for(home_points, away_points)
   end
 
-  def white_score
-    score_for(white_points, black_points)
+  def away_score
+    score_for(away_points, home_points)
   end
 
-  def black_result
-    result_symbol(black_score)
+  def home_result
+    result_symbol(home_score)
   end
 
-  def white_result
-    result_symbol(white_score)
+  def away_result
+    result_symbol(away_score)
   end
 
   # Rating change according to the EGF rating formula, expressed as the
   # difference between the achieved and the expected score.
-  def black_rating_change
-    rated? ? black_score - black_score_exp : 0
+  def home_rating_change
+    rated? ? home_score - home_score_exp : 0
   end
 
-  def white_rating_change
-    rated? ? white_score - white_score_exp : 0
+  def away_rating_change
+    rated? ? away_score - away_score_exp : 0
   end
 
-  def black_score_exp
-    score_exp(white_rating - black_rating)
+  def home_score_exp
+    score_exp(away_rating - home_rating)
   end
 
-  def white_score_exp
-    score_exp(black_rating - white_rating)
+  def away_score_exp
+    score_exp(home_rating - away_rating)
   end
 
   private
     def players_are_distinct
-      errors.add(:white_player, "must be different from black player") if black_id.present? && black_id == white_id
+      errors.add(:away_player, "must be different from the home player") if home_id.present? && home_id == away_id
     end
 
     def players_are_unique_in_match
       return if match.blank?
 
       player_ids = other_player_ids
-      { black_player: black_id, white_player: white_id }.each do |attribute, player_id|
+      { home_player: home_id, away_player: away_id }.each do |attribute, player_id|
         errors.add(attribute, "must be unique in the match") if player_id.present? && player_ids.include?(player_id)
       end
     end
@@ -162,20 +206,20 @@ class Game < ApplicationRecord
     end
 
     def other_player_ids
-      other_games.flat_map { |game| [game.black_id, game.white_id] }.compact
+      other_games.flat_map { |game| [game.home_id, game.away_id] }.compact
     end
 
     def players_play_in_the_season
       season_id = match&.league&.season_id
       return if season_id.blank?
 
-      { black_player: black_player, white_player: white_player }.each do |attribute, player|
+      { home_player: home_player, away_player: away_player }.each do |attribute, player|
         errors.add(attribute, "must play in the season of the match") if player && player.season_id != season_id
       end
     end
 
     def score_exp(rating_difference)
-      weaker_rating = [black_rating, white_rating].min
+      weaker_rating = [home_rating, away_rating].min
       a = 200 - (weaker_rating - 100) / 20.0 # a from the EGF GoR formula
       1.0 / (Math.exp(rating_difference / a) + 1)
     end

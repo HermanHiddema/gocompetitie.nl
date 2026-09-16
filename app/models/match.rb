@@ -2,14 +2,14 @@ class Match < ApplicationRecord
   BOARD_COUNT = 3
   belongs_to :league
   belongs_to :venue, optional: true
-  belongs_to :black_team, class_name: "Team", inverse_of: :black_matches
-  belongs_to :white_team, class_name: "Team", inverse_of: :white_matches
+  belongs_to :home_team, class_name: "Team", inverse_of: :home_matches
+  belongs_to :away_team, class_name: "Team", inverse_of: :away_matches
 
   has_many :games, dependent: :destroy
 
   accepts_nested_attributes_for :games
 
-  validates :black_team, :white_team, :league, presence: true
+  validates :home_team, :away_team, :league, presence: true
   validate :teams_are_distinct
   validate :teams_belong_to_league
   validate :team_pair_is_unique
@@ -26,32 +26,32 @@ class Match < ApplicationRecord
   end
 
   def self.find_by_team_ids(team1_id, team2_id)
-    find_by(black_team_id: team1_id, white_team_id: team2_id) ||
-      find_by(black_team_id: team2_id, white_team_id: team1_id)
+    find_by(home_team_id: team1_id, away_team_id: team2_id) ||
+      find_by(home_team_id: team2_id, away_team_id: team1_id)
   end
 
   def fill_games
     (1..BOARD_COUNT).each do |board_number|
-      black = black_team.team_members.find_by(board_number: board_number)
-      white = white_team.team_members.find_by(board_number: board_number)
+      home = home_team.team_members.find_by(board_number: board_number)
+      away = away_team.team_members.find_by(board_number: board_number)
       games.create(
         board_number: board_number,
-        black_player: black&.participant,
-        white_player: white&.participant
+        home_player: home&.participant,
+        away_player: away&.participant
       )
     end
   end
 
-  def swap_colors
-    self.black_team, self.white_team = white_team, black_team
-    games.each(&:swap_colors)
+  def swap_sides
+    self.home_team, self.away_team = away_team, home_team
+    games.each(&:swap_sides)
     save
   end
 
   def opponent(team)
     case team.id
-    when black_team_id then white_team
-    when white_team_id then black_team
+    when home_team_id then away_team
+    when away_team_id then home_team
     end
   end
 
@@ -59,28 +59,28 @@ class Match < ApplicationRecord
     games.any?(&:played?)
   end
 
-  def black_score
-    winner_score(black_points, white_points)
+  def home_score
+    winner_score(home_points, away_points)
   end
 
-  def white_score
-    winner_score(white_points, black_points)
+  def away_score
+    winner_score(away_points, home_points)
   end
 
-  def black_points
-    points_for(:black_points)
+  def home_points
+    points_for(:home_points)
   end
 
-  def white_points
-    points_for(:white_points)
+  def away_points
+    points_for(:away_points)
   end
 
   def result
-    [black_points, white_points].map { |points| points ? format("%g", points) : "?" }.join("-")
+    [home_points, away_points].map { |points| points ? format("%g", points) : "?" }.join("-")
   end
 
   def to_s
-    "#{black_team.name} - #{white_team.name}"
+    "#{home_team.name} - #{away_team.name}"
   end
 
   private
@@ -95,21 +95,21 @@ class Match < ApplicationRecord
     end
 
     def teams_are_distinct
-      errors.add(:white_team, "must be different from black team") if black_team_id.present? && black_team_id == white_team_id
+      errors.add(:away_team, "must be different from the home team") if home_team_id.present? && home_team_id == away_team_id
     end
 
     def teams_belong_to_league
-      [black_team, white_team].compact.each do |team|
+      [home_team, away_team].compact.each do |team|
         errors.add(:league, "teams must belong to the league") if league && team.league_id != league_id
       end
     end
 
     def team_pair_is_unique
-      return unless league && black_team_id && white_team_id
+      return unless league && home_team_id && away_team_id
 
       duplicate = league.matches.where.not(id: id).where(
-        "(black_team_id = :black AND white_team_id = :white) OR (black_team_id = :white AND white_team_id = :black)",
-        black: black_team_id, white: white_team_id
+        "(home_team_id = :home AND away_team_id = :away) OR (home_team_id = :away AND away_team_id = :home)",
+        home: home_team_id, away: away_team_id
       ).exists?
       errors.add(:base, "teams already have a match in this league") if duplicate
     end

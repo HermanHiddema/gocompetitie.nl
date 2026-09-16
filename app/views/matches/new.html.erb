@@ -9,13 +9,13 @@
     <p><%= Match.human_attribute_name(:league) %>: <%= @league&.name %></p>
 
     <div>
-      <%= form.label :black_team_id, Match.human_attribute_name(:black_team), class: label_classes %>
-      <%= form.collection_select :black_team_id, @teams, :id, :name, { include_blank: true }, class: field_classes %>
+      <%= form.label :home_team_id, Match.human_attribute_name(:home_team), class: label_classes %>
+      <%= form.collection_select :home_team_id, @teams, :id, :name, { include_blank: true }, class: field_classes %>
     </div>
 
     <div>
-      <%= form.label :white_team_id, Match.human_attribute_name(:white_team), class: label_classes %>
-      <%= form.collection_select :white_team_id, @teams, :id, :name, { include_blank: true }, class: field_classes %>
+      <%= form.label :away_team_id, Match.human_attribute_name(:away_team), class: label_classes %>
+      <%= form.collection_select :away_team_id, @teams, :id, :name, { include_blank: true }, class: field_classes %>
     </div>
 
     <div>

@@ -62,13 +62,14 @@ class LeagueTest < ActiveSupport::TestCase
   end
 
   test "results list the color and handicap of every game" do
-    games(:board_one).update!(handicap: 2)
+    games(:board_one).update!(handicap: 2) # the weaker away player takes black
 
     lines = @league.results
 
-    assert lines.any? { |line| line.include?("4+/b2") }
-    assert lines.any? { |line| line.include?("1-/w2") }
-    assert lines.any? { |line| line.include?("/b0") }
+    assert lines.any? { |line| line.include?("4+/w2") }
+    assert lines.any? { |line| line.include?("1-/b2") }
+    assert lines.any? { |line| line.include?("2+/b0") } # even board, so the away player is black
+    assert lines.any? { |line| line.include?("6+/b0") } # odd board, so the home player is black
   end
 
   test "results list every player grouped by team" do

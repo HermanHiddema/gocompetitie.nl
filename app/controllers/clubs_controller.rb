@@ -11,10 +11,10 @@ class ClubsController < ApplicationController
   end
 
   def show
-    @participants = @club.participants.where(season: @season).includes(:club, :black_games, :white_games, team_member: :team).by_rating
+    @participants = @club.participants.where(season: @season).includes(:club, :home_games, :away_games, team_member: :team).by_rating
     @teams = @club.teams.includes(:league, :club).where(league: @season ? @season.leagues : League.none).ordered
-    @matches = Match.where(black_team: @teams).or(Match.where(white_team: @teams))
-      .includes(:venue, :black_team, :white_team, :games).scheduled
+    @matches = Match.where(home_team: @teams).or(Match.where(away_team: @teams))
+      .includes(:venue, :home_team, :away_team, :games).scheduled
   end
 
   def new

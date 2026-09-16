@@ -26,8 +26,8 @@ class MatchesControllerTest < ActionDispatch::IntegrationTest
     sign_in_as users(:member)
 
     assert_difference -> { Match.count }, 1 do
-      post matches_url, params: { match: { league_id: leagues(:top).id, black_team_id: teams(:amsterdam).id,
-        white_team_id: teams(:rotterdam).id, venue_id: venues(:amsterdam).id,
+      post matches_url, params: { match: { league_id: leagues(:top).id, home_team_id: teams(:amsterdam).id,
+        away_team_id: teams(:rotterdam).id, venue_id: venues(:amsterdam).id,
         playing_date: "2026-04-01", playing_time: "20:00" } }
     end
 
@@ -40,13 +40,13 @@ class MatchesControllerTest < ActionDispatch::IntegrationTest
     sign_in_as users(:member)
     previous = seasons(:previous)
     league = previous.leagues.create!(name: "Hoofdklasse", position: 0)
-    black_team = league.teams.create!(name: "Amsterdam 9", abbrev: "Amst9", club: clubs(:amsterdam))
-    white_team = league.teams.create!(name: "Utrecht 9", abbrev: "Utre9", club: clubs(:utrecht))
+    home_team = league.teams.create!(name: "Amsterdam 9", abbrev: "Amst9", club: clubs(:amsterdam))
+    away_team = league.teams.create!(name: "Utrecht 9", abbrev: "Utre9", club: clubs(:utrecht))
 
     get matches_url(season_slug: previous.slug)
     assert_select "a[href=?]", new_match_path(season_slug: previous.slug)
 
-    get new_match_url(season_slug: previous.slug, league_id: league.id, black_team_id: black_team.id, white_team_id: white_team.id)
+    get new_match_url(season_slug: previous.slug, league_id: league.id, home_team_id: home_team.id, away_team_id: away_team.id)
     assert_select "form[action=?]", matches_path(season_slug: previous.slug)
     assert_select "option", text: "Amsterdam 9"
     assert_select "footer", /Najaar 2025/
@@ -77,7 +77,7 @@ class MatchesControllerTest < ActionDispatch::IntegrationTest
     game = @match.games.find_by(board_number: 1)
 
     patch match_url(@match), params: { match: { playing_time: "19:00", games_attributes: {
-      "0" => { id: game.id, black_id: game.black_id, white_id: game.white_id, result: "0-1!" } } } }
+      "0" => { id: game.id, home_id: game.home_id, away_id: game.away_id, result: "0-1!" } } } }
 
     assert_redirected_to match_url(@match)
     assert_equal "0-1!", game.reload.result
@@ -90,7 +90,7 @@ class MatchesControllerTest < ActionDispatch::IntegrationTest
     game = @match.games.find_by(board_number: 1)
 
     patch match_url(@match), params: { match: { games_attributes: {
-      "0" => { id: game.id, black_id: game.black_id, white_id: game.white_id, result: "1-0", handicap: "3" } } } }
+      "0" => { id: game.id, home_id: game.home_id, away_id: game.away_id, result: "1-0", handicap: "3" } } } }
 
     assert_redirected_to match_url(@match)
     assert_equal 3, game.reload.handicap
@@ -101,12 +101,12 @@ class MatchesControllerTest < ActionDispatch::IntegrationTest
     first, second = @match.games.by_board.first(2)
 
     patch match_url(@match), params: { match: { games_attributes: {
-      "0" => { id: first.id, black_id: second.black_id, white_id: second.white_id },
-      "1" => { id: second.id, black_id: first.black_id, white_id: first.white_id } } } }
+      "0" => { id: first.id, home_id: second.home_id, away_id: second.away_id },
+      "1" => { id: second.id, home_id: first.home_id, away_id: first.away_id } } } }
 
     assert_redirected_to match_url(@match)
-    assert_equal participants(:amsterdam_2).id, first.reload.black_id
-    assert_equal participants(:amsterdam_1).id, second.reload.black_id
+    assert_equal participants(:amsterdam_2).id, first.reload.home_id
+    assert_equal participants(:amsterdam_1).id, second.reload.home_id
   end
 
   test "signed in users can delete a match" do

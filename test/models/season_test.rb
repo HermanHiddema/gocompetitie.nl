@@ -27,7 +27,7 @@ class SeasonTest < ActiveSupport::TestCase
     reserves = 2.times.map do |index|
       season.participants.create!(firstname: "Reserve#{index}", lastname: "Speler", rating: 1800, club: clubs(:amsterdam))
     end
-    games(:board_three).update!(black_player: reserves.first, white_player: reserves.second)
+    games(:board_three).update!(home_player: reserves.first, away_player: reserves.second)
 
     lines = season.results
 
