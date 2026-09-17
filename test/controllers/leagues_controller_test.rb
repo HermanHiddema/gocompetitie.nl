@@ -9,7 +9,7 @@ class LeaguesControllerTest < ActionDispatch::IntegrationTest
     assert_select "table.table-auto"
     assert_select "table.table-fixed", count: 0
     assert_select "table span.whitespace-nowrap"
-    assert_select "div.overflow-x-auto", count: 0
+    assert_select "div.overflow-x-auto"
   end
 
   test "show lists the teams alphabetically" do
