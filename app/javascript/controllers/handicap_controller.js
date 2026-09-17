@@ -13,13 +13,12 @@ export default class extends Controller {
     const maxHandicap = this.defaultHandicap()
 
     this.handicapTarget.options[0].text = `auto (${maxHandicap})`
+    if (Number(this.handicapTarget.value) > maxHandicap) {
+      this.handicapTarget.value = ""
+    }
 
     for (const option of Array.from(this.handicapTarget.options).slice(1)) {
       option.disabled = Number(option.value) > maxHandicap
-
-      if (option.disabled && option.selected) {
-        this.handicapTarget.value = ""
-      }
     }
   }
 

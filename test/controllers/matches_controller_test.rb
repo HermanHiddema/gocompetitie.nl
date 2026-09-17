@@ -99,6 +99,19 @@ class MatchesControllerTest < ActionDispatch::IntegrationTest
     assert_select "select[data-handicap-target='handicap'] option[disabled]", count: Match::BOARD_COUNT * Game::HANDICAPS.max
   end
 
+  test "edit keeps an over-limit selected handicap enabled until javascript recalculates it" do
+    sign_in_as users(:member)
+    game = @match.games.find_by(board_number: 1)
+    game.away_player.update!(rating: 1500)
+    game.update!(handicap: 3)
+    game.away_player.update!(rating: 2000)
+
+    get edit_match_url(@match)
+
+    assert_response :success
+    assert_select "select[data-handicap-target='handicap'] option[selected][value='3']:not([disabled])", count: 1
+  end
+
   test "captains can enter results" do
     sign_in_as users(:member)
     game = @match.games.find_by(board_number: 1)

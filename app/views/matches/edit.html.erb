@@ -35,7 +35,10 @@
     <div class="divide-y divide-slate-200 sm:space-y-4 sm:divide-y-0">
       <%= form.fields_for :games, @games do |game_form| %>
         <% default_handicap = game_form.object.default_handicap %>
-        <% handicap_options = Game::HANDICAPS.map { |handicap| [handicap, handicap, { disabled: handicap > default_handicap }] } %>
+        <% selected_handicap = game_form.object.entered_handicap %>
+        <% handicap_options = Game::HANDICAPS.map do |handicap|
+             [handicap, handicap, { disabled: handicap > default_handicap && handicap != selected_handicap }]
+           end %>
         <div class="grid gap-3 py-4 first:pt-0 last:pb-0 sm:grid-cols-[1fr_1fr_8rem_8rem] sm:py-0" data-controller="handicap">
           <%= game_form.label :home_id, "Bord #{game_form.object.board_number} thuis", class: "sr-only" %>
           <%= game_form.select :home_id, options_for_select(home_player_options, game_form.object.home_id), { include_blank: true },
