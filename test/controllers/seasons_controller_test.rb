@@ -14,6 +14,7 @@ class SeasonsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "h1", "Stand Voorjaar 2026"
     assert_select "table"
+    assert_select "div.grid > section.min-w-0", count: seasons(:current).leagues.count
   end
 
   test "the front page redirects to the most recent season" do

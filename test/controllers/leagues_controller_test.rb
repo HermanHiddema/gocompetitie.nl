@@ -6,6 +6,10 @@ class LeaguesControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_select "h1", "Hoofdklasse"
+    assert_select "table.table-auto"
+    assert_select "table.table-fixed", count: 0
+    assert_select "table span.whitespace-nowrap"
+    assert_select "div.overflow-x-auto"
   end
 
   test "show lists the teams alphabetically" do
