@@ -61,6 +61,64 @@ class LeagueTest < ActiveSupport::TestCase
     assert_equal teams(:amsterdam), @league.ranked_teams.first
   end
 
+  test "tied teams are ranked by the match points of their mutual matches" do
+    league = leagues(:first)
+    alpha, beta, gamma, delta = create_teams(league, %w[Alpha Beta Gamma Delta])
+    play(league, alpha, beta, %w[1-0 1-0 0-1])
+    play(league, alpha, gamma, %w[1-0 0-1 0-1])
+    play(league, beta, gamma, %w[1-0 1-0 0-1])
+    play(league, gamma, delta, %w[1-0 1-0 1-0])
+
+    assert_equal [gamma, alpha, beta, delta], league.ranked_teams
+  end
+
+  test "tied teams with equal mutual match points are ranked by their mutual board points" do
+    league = leagues(:first)
+    alpha, beta, gamma, delta, epsilon = create_teams(league, %w[Alpha Beta Gamma Delta Epsilon])
+    play(league, alpha, beta, %w[1-0 1-0 0-1])
+    play(league, alpha, gamma, [])
+    play(league, alpha, delta, %w[1-0 0-1 0-1])
+    play(league, beta, gamma, %w[1-0 1-0 0-1])
+    play(league, beta, delta, [])
+    play(league, gamma, delta, %w[1-0 1-0 0-1])
+    play(league, delta, epsilon, %w[1-0 1-0 1-0])
+
+    assert_equal [delta, beta, alpha, gamma, epsilon], league.ranked_teams
+  end
+
+  test "teams that remain tied are compared without the results of the last boards" do
+    league = leagues(:first)
+    alpha, beta, gamma = create_teams(league, %w[Alpha Beta Gamma])
+    play(league, alpha, beta, %w[1-0 0-1 ½-½])
+    play(league, alpha, gamma, %w[0-1 0-1 1-0])
+    play(league, beta, gamma, %w[0-1 0-1 1-0])
+
+    assert_equal [gamma, alpha, beta], league.ranked_teams
+  end
+
+  test "tied subgroups are recomputed from their own mutual matches" do
+    league = leagues(:first)
+    alpha, beta, gamma, delta, epsilon, zeta = create_teams(league, %w[Alpha Beta Gamma Delta Epsilon Zeta])
+    play(league, alpha, beta, %w[1-0 1-0 0-1])
+    play(league, alpha, gamma, %w[0-1 0-1 0-1])
+    play(league, beta, gamma, %w[1-0])
+    play(league, alpha, delta, %w[1-0 1-0])
+    play(league, beta, epsilon, %w[1-0 1-0])
+    play(league, gamma, zeta, %w[1-0])
+
+    assert_equal [gamma, alpha, beta], league.ranked_teams.first(3)
+  end
+
+  test "teams without a tie breaker are all ranked" do
+    league = leagues(:first)
+    alpha, beta, gamma = create_teams(league, %w[Alpha Beta Gamma])
+    play(league, alpha, beta, %w[½-½ ½-½ ½-½])
+    play(league, alpha, gamma, %w[½-½ ½-½ ½-½])
+    play(league, beta, gamma, %w[½-½ ½-½ ½-½])
+
+    assert_equal [alpha, beta, gamma], league.ranked_teams.sort_by(&:name)
+  end
+
   test "results list every player grouped by team" do
     lines = @league.results
 
@@ -68,4 +126,17 @@ class LeagueTest < ActiveSupport::TestCase
     assert_equal 3, lines.count { |line| line.start_with?(";") }
     assert lines.any? { |line| line.include?("Amsterdam Speler1") }
   end
+
+  private
+    def create_teams(league, names)
+      names.map { |name| league.teams.create!(name: name, abbrev: name[0, 4], club: clubs(:amsterdam)) }
+    end
+
+    # Play a match between two teams, with one result per board, seen from the
+    # first (black) team.
+    def play(league, black_team, white_team, results)
+      match = league.matches.create!(black_team: black_team, white_team: white_team)
+      match.games.by_board.each_with_index { |game, index| game.update!(result: results[index]) }
+      match
+    end
 end
