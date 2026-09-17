@@ -24,6 +24,9 @@ application on Rails 8, with the same business logic and a new Tailwind CSS fron
   Games and matches are stored per side (`home` and `away`), not per color: with a
   handicap the weaker player takes black, otherwise the home team plays black on the
   odd boards and white on the even ones.
+* **User** – an account to sign in with. Ordinary users are team captains, who may only
+  edit matches (date, time, venue, players and results). Users flagged as `admin`
+  maintain everything else.
 
 League and season results can be exported in the tab separated format used by the
 European Go Database by requesting the text format, e.g. `/leagues/1.text`.

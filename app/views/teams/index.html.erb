@@ -5,7 +5,7 @@
   <%= render @teams %>
 </section>
 
-<% if current_user && @season %>
+<% if admin? && @season %>
   <div class="mt-6">
     <%= button_link_to "Team toevoegen", new_team_path(**season_url_options) %>
   </div>

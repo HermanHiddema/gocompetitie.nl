@@ -4,6 +4,7 @@ class TeamsController < ApplicationController
   BOARDS = 3
 
   before_action :set_team, only: %i[show edit update destroy]
+  before_action :require_admin!, only: %i[new create edit update destroy]
   before_action :require_season!, only: %i[new create]
 
   def index

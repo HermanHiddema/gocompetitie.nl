@@ -15,7 +15,7 @@ class ParticipantsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "signed in users can add a participant to the current season" do
-    sign_in_as users(:member)
+    sign_in_as users(:admin)
 
     assert_difference -> { seasons(:current).participants.count }, 1 do
       post participants_url, params: { participant: { firstname: "Nieuwe", lastname: "Speler", rating: 1600, rank: "5k",
@@ -28,7 +28,7 @@ class ParticipantsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "historical season participant links and forms keep the selected season" do
-    sign_in_as users(:member)
+    sign_in_as users(:admin)
     previous = seasons(:previous)
 
     get participants_url(season_slug: previous.slug)
@@ -48,7 +48,7 @@ class ParticipantsControllerTest < ActionDispatch::IntegrationTest
 
   test "adding a participant requires a season" do
     Season.destroy_all
-    sign_in_as users(:member)
+    sign_in_as users(:admin)
 
     get new_participant_url
 

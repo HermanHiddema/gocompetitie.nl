@@ -7,7 +7,9 @@
     <dd>
       <%= @team.captain_name %>
       <% if current_user && @team.captain %>
-        <%= link_to "bewerken", edit_person_path(@team.captain), class: "text-slate-500 underline" %>
+        <% if admin? %>
+          <%= link_to "bewerken", edit_person_path(@team.captain), class: "text-slate-500 underline" %>
+        <% end %>
         <% if @team.captain.email_addresses.any? %>
           <br><span class="text-slate-600">E-mail: <%= @team.captain.email_addresses.join(" of ") %></span>
         <% end %>
@@ -42,7 +44,7 @@
   <%= render partial: "matches/match_details", collection: @matches, as: :match %>
 </section>
 
-<% if current_user %>
+<% if admin? %>
   <div class="flex gap-3">
     <%= button_link_to "Team bewerken", edit_team_path(@team) %>
   </div>

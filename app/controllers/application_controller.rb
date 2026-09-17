@@ -9,7 +9,7 @@ class ApplicationController < ActionController::Base
 
   before_action :set_current_season
 
-  helper_method :current_user, :current_season
+  helper_method :current_user, :current_season, :admin?
 
   private
     attr_reader :current_season, :season
@@ -18,6 +18,12 @@ class ApplicationController < ActionController::Base
     # here to be able to show editing links to signed in users.
     def current_user
       Current.user if authenticated?
+    end
+
+    # Only admins maintain the competition data, captains are limited to
+    # editing matches.
+    def admin?
+      current_user&.admin? || false
     end
 
     # Season pages carry the season slug in their path, e.g.
@@ -39,7 +45,7 @@ class ApplicationController < ActionController::Base
     end
 
     def require_admin!
-      head :unauthorized unless current_user&.admin?
+      head :unauthorized unless admin?
     end
 
     # Editing competition data is only possible within a season, which does not

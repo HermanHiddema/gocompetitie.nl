@@ -32,8 +32,13 @@ class League < ApplicationRecord
     NAMES[position] || "Poule #{position + 1}"
   end
 
+  # Teams are ranked by match points and board points. Teams that are still
+  # tied are separated by their mutual results, see #break_tie.
   def ranked_teams
-    teams.to_a.sort_by(&:placement_criteria).reverse
+    criteria = teams.to_a.to_h { |team| [team, team.placement_criteria] }
+    sorted = criteria.keys.sort_by { |team| criteria[team] }.reverse
+    sorted.chunk_while { |team, other| criteria[team] == criteria[other] }
+          .flat_map { |tied| break_tie(tied, Match::BOARD_COUNT) }
   end
 
   def participants
@@ -117,6 +122,53 @@ class League < ApplicationRecord
   end
 
   private
+    # Tied teams are separated by the match points and board points they scored
+    # against each other. Teams that remain tied are compared again on the
+    # results of their mutual matches with the last board removed, then the
+    # last two boards, and so on. Teams that are still tied when no boards are
+    # left keep their current order.
+    def break_tie(tied, boards)
+      return tied if tied.length < 2 || boards < 1
+
+      criteria = mutual_criteria(tied, boards)
+      tied.sort_by { |team| criteria[team.id] }.reverse
+          .chunk_while { |team, other| criteria[team.id] == criteria[other.id] }
+          .flat_map do |group|
+            group.length == tied.length ? break_tie(group, boards - 1) : break_tie(group, Match::BOARD_COUNT)
+          end
+    end
+
+    # The match points and board points the tied teams scored against each
+    # other, counting only the games on the first given number of boards.
+    def mutual_criteria(tied, boards)
+      team_ids = tied.map(&:id)
+      criteria = team_ids.index_with { [0.0, 0.0] }
+
+      matches.includes(:games).each do |match|
+        next unless team_ids.include?(match.home_team_id) && team_ids.include?(match.away_team_id)
+
+        games = match.games.select { |game| game.board_number <= boards && game.played? }
+        next if games.empty?
+
+        home_points = games.sum { |game| game.home_points.to_f } / 2.0
+        away_points = games.sum { |game| game.away_points.to_f } / 2.0
+        criteria[match.home_team_id] = add_result(criteria[match.home_team_id], home_points, away_points)
+        criteria[match.away_team_id] = add_result(criteria[match.away_team_id], away_points, home_points)
+      end
+
+      criteria
+    end
+
+    def add_result(criteria, points, opponent_points)
+      score = case points <=> opponent_points
+      when 1 then 1.0
+      when -1 then 0.0
+      else 0.5
+      end
+
+      [criteria.first + score, criteria.last + points]
+    end
+
     def ordered_participants
       team_groups = ranked_teams.map { |team| team.team_members.includes(:participant).by_board.map(&:participant) }
       roster = team_groups.flatten
