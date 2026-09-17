@@ -1,9 +1,17 @@
-<div class="flex w-full items-center justify-between gap-3">
-  <span class="min-w-0 flex-1 truncate">
-    <%= game.home_player&.fullname || "?" %> &ndash; <%= game.away_player&.fullname || "?" %>
+<div class="grid min-w-0 flex-1 grid-cols-[minmax(0,1fr)_4rem] items-center gap-3">
+  <span class="flex min-w-0 flex-col gap-1 sm:grid sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] sm:items-center sm:gap-1.5">
+    <% [[game.home_player, game.home_color], [game.away_player, game.away_color]].each_with_index do |(player, color), index| %>
+      <span class="flex min-w-0 items-center gap-1">
+        <span class="inline-flex size-5 shrink-0 items-center justify-center rounded-full text-xs font-semibold <%= color == :black ? "bg-slate-900 text-white" : "bg-white text-slate-900 ring-1 ring-inset ring-slate-400" %>"
+              role="img" aria-label="<%= color == :black ? "Zwart" : "Wit" %><%= ", handicap #{game.handicap}" if color == :black && game.handicap.positive? %>">
+          <%= game.handicap if color == :black && game.handicap.positive? %>
+        </span>
+        <span class="truncate"><%= player&.fullname || "?" %></span>
+      </span>
+      <% unless index == 1 %>
+        <span class="hidden sm:inline" aria-hidden="true">&ndash;</span>
+      <% end %>
+    <% end %>
   </span>
-  <% if game.handicap.positive? %>
-    <span class="text-slate-500">H<%= game.handicap %></span>
-  <% end %>
   <span class="w-16 text-right font-medium"><%= game.result %></span>
 </div>

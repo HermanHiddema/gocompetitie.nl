@@ -26,24 +26,32 @@
     <div class="hidden gap-3 text-sm font-medium text-slate-500 sm:grid sm:grid-cols-[1fr_1fr_8rem_8rem]">
       <span>Thuis: <%= @match.home_team.name %></span>
       <span>Uit: <%= @match.away_team.name %></span>
-      <span>Resultaat</span>
       <span>Handicap</span>
+      <span>Resultaat</span>
     </div>
 
-    <%= form.fields_for :games, @games do |game_form| %>
-      <div class="grid gap-3 sm:grid-cols-[1fr_1fr_8rem_8rem]">
-        <%= game_form.label :home_id, "Bord #{game_form.object.board_number} thuis", class: "sr-only" %>
-        <%= game_form.collection_select :home_id, @home_players, :id, :name, { include_blank: true }, class: field_classes %>
-        <%= game_form.label :away_id, "Bord #{game_form.object.board_number} uit", class: "sr-only" %>
-        <%= game_form.collection_select :away_id, @away_players, :id, :name, { include_blank: true }, class: field_classes %>
-        <%= game_form.label :result, "Bord #{game_form.object.board_number} resultaat", class: "sr-only" %>
-        <%= game_form.select :result, Game::RESULTS, { selected: game_form.object.result }, class: field_classes %>
-        <%= game_form.label :handicap, "Bord #{game_form.object.board_number} handicap", class: "sr-only" %>
-        <%= game_form.select :handicap, Game::HANDICAPS.to_a,
-              { selected: game_form.object.entered_handicap, include_blank: "auto (#{game_form.object.default_handicap})" },
-              class: field_classes %>
-      </div>
-    <% end %>
+    <div class="divide-y divide-slate-200 sm:space-y-4 sm:divide-y-0">
+      <%= form.fields_for :games, @games do |game_form| %>
+        <div class="grid gap-3 py-4 first:pt-0 last:pb-0 sm:grid-cols-[1fr_1fr_8rem_8rem] sm:py-0">
+          <%= game_form.label :home_id, "Bord #{game_form.object.board_number} thuis", class: "sr-only" %>
+          <%= game_form.collection_select :home_id, @home_players, :id, :name, { include_blank: true }, class: field_classes %>
+          <%= game_form.label :away_id, "Bord #{game_form.object.board_number} uit", class: "sr-only" %>
+          <%= game_form.collection_select :away_id, @away_players, :id, :name, { include_blank: true }, class: field_classes %>
+          <div class="grid max-w-sm grid-cols-[auto_minmax(0,1fr)_minmax(0,1fr)] items-center gap-2 sm:contents">
+            <div class="contents sm:block">
+              <%= game_form.label :handicap, "Handicap", class: "text-sm font-medium text-slate-500 sm:sr-only" %>
+              <%= game_form.select :handicap, Game::HANDICAPS.to_a,
+                    { selected: game_form.object.entered_handicap, include_blank: "auto (#{game_form.object.default_handicap})" },
+                    class: field_classes %>
+            </div>
+            <div class="min-w-0">
+              <%= game_form.label :result, "Resultaat", class: "sr-only" %>
+              <%= game_form.select :result, Game::RESULTS, { selected: game_form.object.result }, class: field_classes %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
 
     <p class="text-sm text-slate-500">
       <%= link_to params[:all] ? "Alleen clubspelers tonen" : "Alle deelnemers tonen",

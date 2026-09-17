@@ -72,6 +72,20 @@ class MatchesControllerTest < ActionDispatch::IntegrationTest
     assert_select "option", text: /Rotterdam/
   end
 
+  test "edit puts labeled handicap controls before results" do
+    sign_in_as users(:member)
+
+    get edit_match_url(@match)
+
+    assert_response :success
+    assert_select "label:not(.sr-only)", text: "Handicap", count: Match::BOARD_COUNT
+    assert_select "label.sr-only", text: "Resultaat", count: Match::BOARD_COUNT
+
+    field_names = css_select("select").filter_map { |select| select["name"] if select["name"]&.include?("games_attributes") }
+    assert_operator field_names.index { |name| name.end_with?("[handicap]") }, :<,
+      field_names.index { |name| name.end_with?("[result]") }
+  end
+
   test "captains can enter results" do
     sign_in_as users(:member)
     game = @match.games.find_by(board_number: 1)
