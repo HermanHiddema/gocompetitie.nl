@@ -21,6 +21,8 @@ application on Rails 8, with the same business logic and a new Tailwind CSS fron
   most board points. Individual performance is calculated with the EGF rating formula.
   A game can be played with a handicap, which defaults to the rating difference minus
   300, divided by 100 and rounded to the nearest whole number (halves round down).
+  The rating calculation counts each handicap stone as 100 rating points for the
+  player who receives them.
   Games and matches are stored per side (`home` and `away`), not per color: with a
   handicap the weaker player takes black, otherwise the home team plays black on the
   odd boards and white on the even ones.

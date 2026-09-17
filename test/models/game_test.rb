@@ -103,6 +103,22 @@ class GameTest < ActiveSupport::TestCase
     assert_in_delta(-upset.away_rating_change, upset.home_rating_change, 0.0001)
   end
 
+  test "a handicap credits the weaker player with 100 rating points per stone" do
+    @game.handicap = 3 # home player is the stronger one, so the away player is black
+
+    assert_equal @game.home_rating, @game.home_handicap_rating
+    assert_equal @game.away_rating + 300, @game.away_handicap_rating
+  end
+
+  test "a handicap evens out the expected scores" do
+    assert_operator @game.away_score_exp, :<, 0.5 # the away player is 100 points weaker
+
+    @game.handicap = 1 # one stone compensates those 100 points
+
+    assert_in_delta 0.5, @game.home_score_exp, 0.0001
+    assert_in_delta 0.5, @game.away_score_exp, 0.0001
+  end
+
   test "expected scores of both players add up to one" do
     assert_in_delta 1.0, @game.home_score_exp + @game.away_score_exp, 0.0001
   end

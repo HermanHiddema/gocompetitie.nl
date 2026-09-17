@@ -161,6 +161,17 @@ class Game < ApplicationRecord
     result_symbol(away_score)
   end
 
+  # The rating a player enters the game with, where the player who receives the
+  # handicap stones is credited 100 rating points per stone. Those stones are
+  # given to black, who is the weaker player whenever there is a handicap.
+  def home_handicap_rating
+    handicap_rating(home_rating, home_color)
+  end
+
+  def away_handicap_rating
+    handicap_rating(away_rating, away_color)
+  end
+
   # Rating change according to the EGF rating formula, expressed as the
   # difference between the achieved and the expected score.
   def home_rating_change
@@ -172,11 +183,11 @@ class Game < ApplicationRecord
   end
 
   def home_score_exp
-    score_exp(away_rating - home_rating)
+    score_exp(away_handicap_rating - home_handicap_rating)
   end
 
   def away_score_exp
-    score_exp(home_rating - away_rating)
+    score_exp(home_handicap_rating - away_handicap_rating)
   end
 
   private
@@ -216,6 +227,12 @@ class Game < ApplicationRecord
       { home_player: home_player, away_player: away_player }.each do |attribute, player|
         errors.add(attribute, "must play in the season of the match") if player && player.season_id != season_id
       end
+    end
+
+    def handicap_rating(rating, color)
+      return rating if rating.blank? || color == :white
+
+      rating + 100 * handicap
     end
 
     def score_exp(rating_difference)
