@@ -11,7 +11,7 @@ class ParticipantsController < ApplicationController
   end
 
   def show
-    @games = @participant.games.includes(:home_player, :away_player, match: %i[home_team away_team])
+    @games = @participant.games.includes(:home_player, :away_player, match: [{ league: :season }, :home_team, :away_team])
   end
 
   def new

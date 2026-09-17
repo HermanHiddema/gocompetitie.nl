@@ -27,7 +27,11 @@ class Season < ApplicationRecord
   end
 
   def results
-    ResultsExport.new(ordered_participants: ordered_participants, games: games.includes(:home_player, :away_player), group_names: ranked_teams.map(&:name)).lines
+    ResultsExport.new(
+      ordered_participants: ordered_participants,
+      games: games.includes(:home_player, :away_player, match: { league: :season }),
+      group_names: ranked_teams.map(&:name)
+    ).lines
   end
 
   def create_leagues(amount = 5)

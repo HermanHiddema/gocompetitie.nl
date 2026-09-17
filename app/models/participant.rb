@@ -7,8 +7,10 @@ class Participant < ApplicationRecord
 
   has_one :team_member, dependent: :destroy
   has_one :team, through: :team_member
-  has_many :home_games, class_name: "Game", foreign_key: :home_id, dependent: :nullify, inverse_of: :home_player
-  has_many :away_games, class_name: "Game", foreign_key: :away_id, dependent: :nullify, inverse_of: :away_player
+  has_many :home_games, -> { includes(match: { league: :season }) },
+    class_name: "Game", foreign_key: :home_id, dependent: :nullify, inverse_of: :home_player
+  has_many :away_games, -> { includes(match: { league: :season }) },
+    class_name: "Game", foreign_key: :away_id, dependent: :nullify, inverse_of: :away_player
 
   validates :firstname, :lastname, presence: true
 

@@ -170,6 +170,21 @@ class MatchesControllerTest < ActionDispatch::IntegrationTest
     assert_nil game.reload.entered_handicap
   end
 
+  test "captains can update games with an existing handicap after handicaps are disabled" do
+    sign_in_as users(:member)
+    game = @match.games.find_by(board_number: 1)
+    game.away_player.update!(rating: 1500)
+    game.update!(handicap: 1)
+    @match.season.update!(handicap_adjustment: nil)
+
+    patch match_url(@match), params: { match: { games_attributes: {
+      "0" => { id: game.id, home_id: game.home_id, away_id: game.away_id, result: "0-1" } } } }
+
+    assert_redirected_to match_url(@match)
+    assert_equal "0-1", game.reload.result
+    assert_equal 1, game.entered_handicap
+  end
+
   test "captains cannot enter a handicap above the automatic value" do
     sign_in_as users(:member)
     game = @match.games.find_by(board_number: 1)

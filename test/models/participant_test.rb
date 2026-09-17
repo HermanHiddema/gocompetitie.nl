@@ -34,8 +34,20 @@ class ParticipantTest < ActiveSupport::TestCase
     assert_equal 0, participants(:rotterdam_1).played_games.count
   end
 
-  test "rating change adds up the game rating changes" do
-    assert_in_delta @participant.home_games.played.sum(&:home_rating_change), @participant.rating_change, 0.0001
+  test "rating change adds up the played home and away game changes" do
+    matches(:utrecht_rotterdam).games.create!(
+      board_number: 2,
+      home_player: participants(:utrecht_2),
+      away_player: @participant,
+      home_points: 0,
+      away_points: 2
+    )
+
+    participant = Participant.includes(:home_games, :away_games).find(@participant.id)
+    expected = participant.home_games.select(&:played?).sum(&:home_rating_change) +
+      participant.away_games.select(&:played?).sum(&:away_rating_change)
+
+    assert_in_delta expected, participant.rating_change, 0.0001
     assert_match(/%\z/, @participant.rating_performance)
   end
 

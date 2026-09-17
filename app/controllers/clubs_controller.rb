@@ -15,7 +15,7 @@ class ClubsController < ApplicationController
     @participants = @club.participants.where(season: @season).includes(:club, :home_games, :away_games, team_member: :team).by_rating
     @teams = @club.teams.includes(:league, :club).where(league: @season ? @season.leagues : League.none).ordered
     @matches = Match.where(home_team: @teams).or(Match.where(away_team: @teams))
-      .includes(:venue, :home_team, :away_team, :games).scheduled
+      .includes(:venue, :home_team, :away_team, :games, league: :season).scheduled
   end
 
   def new

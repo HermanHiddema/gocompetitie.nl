@@ -8,7 +8,7 @@ class MatchesController < ApplicationController
   before_action :require_season!, only: %i[new create]
 
   def index
-    @matches = @season ? @season.matches.includes(:venue, :home_team, :away_team, :games).scheduled : Match.none
+    @matches = @season ? @season.matches.includes(:venue, :home_team, :away_team, :games, league: :season).scheduled : Match.none
   end
 
   def show

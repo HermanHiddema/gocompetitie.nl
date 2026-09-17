@@ -13,7 +13,7 @@ class Game < ApplicationRecord
   validates :board_number, presence: true, inclusion: { in: 1..Match::BOARD_COUNT }, uniqueness: { scope: :match_id }
   validates :handicap, numericality: { only_integer: true, in: HANDICAPS }, allow_nil: true, if: :handicap_entered?
   validate :entered_handicap_within_default
-  validate :handicap_allowed
+  validate :handicap_allowed, if: :will_save_change_to_handicap?
   validate :players_are_distinct
   validate :players_are_unique_in_match
   validate :players_play_in_the_season
