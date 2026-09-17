@@ -182,7 +182,7 @@ class MatchesControllerTest < ActionDispatch::IntegrationTest
 
     assert_redirected_to match_url(@match)
     assert_equal "0-1", game.reload.result
-    assert_equal 1, game.entered_handicap
+    assert_equal 1, game.reload[:handicap]
   end
 
   test "captains cannot enter a handicap above the automatic value" do
