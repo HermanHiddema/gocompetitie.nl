@@ -96,6 +96,25 @@ class MatchesControllerTest < ActionDispatch::IntegrationTest
     assert_equal 3, game.reload.handicap
   end
 
+  test "captains can keep or clear the automatic handicap" do
+    sign_in_as users(:member)
+    game = @match.games.find_by(board_number: 1)
+
+    patch match_url(@match), params: { match: { games_attributes: {
+      "0" => { id: game.id, home_id: game.home_id, away_id: game.away_id, result: "1-0", handicap: "" } } } }
+
+    assert_redirected_to match_url(@match)
+    assert_nil game.reload.entered_handicap
+
+    game.update!(handicap: 3)
+
+    patch match_url(@match), params: { match: { games_attributes: {
+      "0" => { id: game.id, home_id: game.home_id, away_id: game.away_id, result: "1-0", handicap: "" } } } }
+
+    assert_redirected_to match_url(@match)
+    assert_nil game.reload.entered_handicap
+  end
+
   test "captains can swap players between boards" do
     sign_in_as users(:member)
     first, second = @match.games.by_board.first(2)

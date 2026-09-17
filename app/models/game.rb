@@ -11,7 +11,7 @@ class Game < ApplicationRecord
   belongs_to :away_player, class_name: "Participant", foreign_key: :away_id, optional: true, inverse_of: :away_games
 
   validates :board_number, presence: true, inclusion: { in: 1..Match::BOARD_COUNT }, uniqueness: { scope: :match_id }
-  validates :handicap, numericality: { only_integer: true, in: HANDICAPS }, allow_nil: true
+  validates :handicap, numericality: { only_integer: true, in: HANDICAPS }, allow_nil: true, if: :handicap_entered?
   validate :players_are_distinct
   validate :players_are_unique_in_match
   validate :players_play_in_the_season
@@ -227,6 +227,10 @@ class Game < ApplicationRecord
       { home_player: home_player, away_player: away_player }.each do |attribute, player|
         errors.add(attribute, "must play in the season of the match") if player && player.season_id != season_id
       end
+    end
+
+    def handicap_entered?
+      self[:handicap].present? || handicap_before_type_cast.present?
     end
 
     def handicap_rating(rating, color)
