@@ -176,6 +176,16 @@ class GameTest < ActiveSupport::TestCase
     assert_not @game.valid?
   end
 
+  test "changing a player clears the stored handicap when the season has no handicaps" do
+    @game.away_player.update!(rating: 1500)
+    @game.update!(handicap: 2)
+    @game.match.season.update!(handicap_adjustment: nil)
+
+    @game.update!(home_player: participants(:rotterdam_2))
+
+    assert_nil @game.reload[:handicap]
+  end
+
   test "an entered handicap overrides the default handicap" do
     @game.handicap = 4
 

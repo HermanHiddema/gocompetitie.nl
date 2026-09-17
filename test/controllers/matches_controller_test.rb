@@ -185,6 +185,22 @@ class MatchesControllerTest < ActionDispatch::IntegrationTest
     assert_equal 1, game.reload[:handicap]
   end
 
+  test "changing a player clears the handicap after handicaps are disabled" do
+    sign_in_as users(:member)
+    first, second = @match.games.by_board.first(2)
+    first.away_player.update!(rating: 1500)
+    first.update!(handicap: 1)
+    @match.season.update!(handicap_adjustment: nil)
+
+    patch match_url(@match), params: { match: { games_attributes: {
+      "0" => { id: first.id, home_id: second.home_id, away_id: first.away_id },
+      "1" => { id: second.id, home_id: first.home_id, away_id: second.away_id } } } }
+
+    assert_redirected_to match_url(@match)
+    assert_equal participants(:amsterdam_2).id, first.reload.home_id
+    assert_nil first[:handicap]
+  end
+
   test "captains cannot enter a handicap above the automatic value" do
     sign_in_as users(:member)
     game = @match.games.find_by(board_number: 1)

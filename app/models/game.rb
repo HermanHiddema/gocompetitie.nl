@@ -10,6 +10,8 @@ class Game < ApplicationRecord
   belongs_to :home_player, class_name: "Participant", foreign_key: :home_id, optional: true, inverse_of: :home_games
   belongs_to :away_player, class_name: "Participant", foreign_key: :away_id, optional: true, inverse_of: :away_games
 
+  before_validation :clear_handicap_if_players_change_without_handicaps
+
   validates :board_number, presence: true, inclusion: { in: 1..Match::BOARD_COUNT }, uniqueness: { scope: :match_id }
   validates :handicap, numericality: { only_integer: true, in: HANDICAPS }, allow_nil: true, if: :handicap_entered?
   validate :entered_handicap_within_default
@@ -239,6 +241,10 @@ class Game < ApplicationRecord
 
     def handicap_adjustment
       match&.handicap_adjustment
+    end
+
+    def clear_handicap_if_players_change_without_handicaps
+      self[:handicap] = nil if handicap_adjustment.nil? && (will_save_change_to_home_id? || will_save_change_to_away_id?)
     end
 
     def handicap_allowed
