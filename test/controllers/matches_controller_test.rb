@@ -86,6 +86,19 @@ class MatchesControllerTest < ActionDispatch::IntegrationTest
       field_names.index { |name| name.end_with?("[result]") }
   end
 
+  test "edit keeps automatic handicap previews in sync with player choices" do
+    sign_in_as users(:member)
+
+    get edit_match_url(@match)
+
+    assert_response :success
+    assert_select "[data-controller='handicap']", count: Match::BOARD_COUNT
+    assert_select "select[data-handicap-target='home'][data-action='change->handicap#update']", count: Match::BOARD_COUNT
+    assert_select "select[data-handicap-target='away'][data-action='change->handicap#update']", count: Match::BOARD_COUNT
+    assert_select "select[data-handicap-target='handicap'] option[value='']", text: "auto (0)", count: Match::BOARD_COUNT
+    assert_select "select[data-handicap-target='handicap'] option[disabled]", count: Match::BOARD_COUNT * Game::HANDICAPS.max
+  end
+
   test "captains can enter results" do
     sign_in_as users(:member)
     game = @match.games.find_by(board_number: 1)
@@ -102,6 +115,7 @@ class MatchesControllerTest < ActionDispatch::IntegrationTest
   test "captains can enter the handicap that was used" do
     sign_in_as users(:member)
     game = @match.games.find_by(board_number: 1)
+    game.away_player.update!(rating: 1500)
 
     patch match_url(@match), params: { match: { games_attributes: {
       "0" => { id: game.id, home_id: game.home_id, away_id: game.away_id, result: "1-0", handicap: "3" } } } }
@@ -113,6 +127,7 @@ class MatchesControllerTest < ActionDispatch::IntegrationTest
   test "captains can keep or clear the automatic handicap" do
     sign_in_as users(:member)
     game = @match.games.find_by(board_number: 1)
+    game.away_player.update!(rating: 1500)
 
     patch match_url(@match), params: { match: { games_attributes: {
       "0" => { id: game.id, home_id: game.home_id, away_id: game.away_id, result: "1-0", handicap: "" } } } }
@@ -126,6 +141,17 @@ class MatchesControllerTest < ActionDispatch::IntegrationTest
       "0" => { id: game.id, home_id: game.home_id, away_id: game.away_id, result: "1-0", handicap: "" } } } }
 
     assert_redirected_to match_url(@match)
+    assert_nil game.reload.entered_handicap
+  end
+
+  test "captains cannot enter a handicap above the automatic value" do
+    sign_in_as users(:member)
+    game = @match.games.find_by(board_number: 1)
+
+    patch match_url(@match), params: { match: { games_attributes: {
+      "0" => { id: game.id, home_id: game.home_id, away_id: game.away_id, result: "1-0", handicap: "1" } } } }
+
+    assert_response :unprocessable_content
     assert_nil game.reload.entered_handicap
   end
 

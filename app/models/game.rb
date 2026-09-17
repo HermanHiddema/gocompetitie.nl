@@ -12,6 +12,7 @@ class Game < ApplicationRecord
 
   validates :board_number, presence: true, inclusion: { in: 1..Match::BOARD_COUNT }, uniqueness: { scope: :match_id }
   validates :handicap, numericality: { only_integer: true, in: HANDICAPS }, allow_nil: true, if: :handicap_entered?
+  validate :entered_handicap_within_default
   validate :players_are_distinct
   validate :players_are_unique_in_match
   validate :players_play_in_the_season
@@ -231,6 +232,12 @@ class Game < ApplicationRecord
 
     def handicap_entered?
       self[:handicap].present? || handicap_before_type_cast.present?
+    end
+
+    def entered_handicap_within_default
+      return if errors.include?(:handicap) || entered_handicap.blank? || entered_handicap <= default_handicap
+
+      errors.add(:handicap, "must be at most #{default_handicap}")
     end
 
     def handicap_rating(rating, color)

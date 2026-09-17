@@ -5,6 +5,8 @@
 <section class="rounded-lg bg-white p-5 shadow-sm ring-1 ring-slate-200">
   <%= form_with model: @match, class: "space-y-4" do |form| %>
     <%= render "shared/errors", record: @match %>
+    <% home_player_options = @home_players.map { |player| [player.name, player.id, { data: { rating: player.rating } }] } %>
+    <% away_player_options = @away_players.map { |player| [player.name, player.id, { data: { rating: player.rating } }] } %>
 
     <div>
       <%= form.label :venue_id, Match.human_attribute_name(:venue), class: label_classes %>
@@ -32,17 +34,21 @@
 
     <div class="divide-y divide-slate-200 sm:space-y-4 sm:divide-y-0">
       <%= form.fields_for :games, @games do |game_form| %>
-        <div class="grid gap-3 py-4 first:pt-0 last:pb-0 sm:grid-cols-[1fr_1fr_8rem_8rem] sm:py-0">
+        <% default_handicap = game_form.object.default_handicap %>
+        <% handicap_options = Game::HANDICAPS.map { |handicap| [handicap, handicap, { disabled: handicap > default_handicap }] } %>
+        <div class="grid gap-3 py-4 first:pt-0 last:pb-0 sm:grid-cols-[1fr_1fr_8rem_8rem] sm:py-0" data-controller="handicap">
           <%= game_form.label :home_id, "Bord #{game_form.object.board_number} thuis", class: "sr-only" %>
-          <%= game_form.collection_select :home_id, @home_players, :id, :name, { include_blank: true }, class: field_classes %>
+          <%= game_form.select :home_id, options_for_select(home_player_options, game_form.object.home_id), { include_blank: true },
+                class: field_classes, data: { action: "change->handicap#update", handicap_target: "home" } %>
           <%= game_form.label :away_id, "Bord #{game_form.object.board_number} uit", class: "sr-only" %>
-          <%= game_form.collection_select :away_id, @away_players, :id, :name, { include_blank: true }, class: field_classes %>
+          <%= game_form.select :away_id, options_for_select(away_player_options, game_form.object.away_id), { include_blank: true },
+                class: field_classes, data: { action: "change->handicap#update", handicap_target: "away" } %>
           <div class="grid max-w-sm grid-cols-[auto_minmax(0,1fr)_minmax(0,1fr)] items-center gap-2 sm:contents">
             <div class="contents sm:block">
               <%= game_form.label :handicap, "Handicap", class: "text-sm font-medium text-slate-500 sm:sr-only" %>
-              <%= game_form.select :handicap, Game::HANDICAPS.to_a,
-                    { selected: game_form.object.entered_handicap, include_blank: "auto (#{game_form.object.default_handicap})" },
-                    class: field_classes %>
+              <%= game_form.select :handicap, options_for_select(handicap_options, game_form.object.entered_handicap),
+                    { include_blank: "auto (#{default_handicap})" },
+                    class: field_classes, data: { handicap_target: "handicap" } %>
             </div>
             <div class="min-w-0">
               <%= game_form.label :result, "Resultaat", class: "sr-only" %>

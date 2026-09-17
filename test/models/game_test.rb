@@ -167,11 +167,27 @@ class GameTest < ActiveSupport::TestCase
   end
 
   test "handicaps outside the allowed range are invalid" do
+    @game.away_player.rating = 1600
     @game.handicap = 10
     assert_not @game.valid?
 
     @game.handicap = 2
     assert @game.valid?
+  end
+
+  test "an entered handicap cannot exceed the automatic handicap" do
+    @game.away_player.rating = 1600
+    @game.handicap = 3
+    assert_not @game.valid?
+    assert_includes @game.errors[:handicap], "must be at most 2"
+
+    @game.handicap = 2
+    assert @game.valid?
+
+    @game.away_player.rating = nil
+    @game.handicap = 1
+    assert_not @game.valid?
+    assert_includes @game.errors[:handicap], "must be at most 0"
   end
 
   test "egd handicap lists the color of the player" do
