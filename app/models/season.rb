@@ -7,6 +7,7 @@ class Season < ApplicationRecord
 
   validates :name, presence: true
   validates :slug, presence: true, uniqueness: true
+  validates :handicap_adjustment, numericality: { only_integer: true, in: Game::HANDICAPS }, allow_nil: true
 
   before_validation :update_slug
 
@@ -15,6 +16,10 @@ class Season < ApplicationRecord
 
   def update_slug
     self.slug = name.to_s.parameterize
+  end
+
+  def handicaps?
+    handicap_adjustment.present?
   end
 
   def ranked_teams

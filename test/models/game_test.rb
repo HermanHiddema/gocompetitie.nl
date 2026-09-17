@@ -155,6 +155,27 @@ class GameTest < ActiveSupport::TestCase
     assert_equal 0, @unplayed.default_handicap
   end
 
+  test "the season adjusts the rating difference used for automatic handicap" do
+    @game.home_player.rating = 2350
+    @game.away_player.rating = 1800
+
+    @game.match.season.update!(handicap_adjustment: 3)
+    assert_equal 2, @game.default_handicap
+
+    @game.match.season.update!(handicap_adjustment: 1)
+    assert_equal 4, @game.default_handicap
+  end
+
+  test "a season without a handicap strategy disables handicaps" do
+    @game.match.season.update!(handicap_adjustment: nil)
+    @game[:handicap] = 2
+
+    assert_equal 0, @game.handicap
+    assert_equal 0, @game.default_handicap
+    assert_nil @game.entered_handicap
+    assert_not @game.valid?
+  end
+
   test "an entered handicap overrides the default handicap" do
     @game.handicap = 4
 

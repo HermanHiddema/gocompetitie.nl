@@ -12,6 +12,12 @@
     <p class="mt-1 text-xs text-slate-500">Markdown wordt ondersteund.</p>
   </div>
 
+  <div>
+    <%= form.label :handicap_adjustment, "Handicapcorrectie", class: label_classes %>
+    <%= form.select :handicap_adjustment, Game::HANDICAPS.to_a,
+          { include_blank: "Geen handicap" }, class: field_classes %>
+  </div>
+
   <div class="flex gap-3">
     <%= form.submit "Opslaan", class: button_classes %>
     <%= button_link_to "Annuleren", seasons_path, style: :secondary %>

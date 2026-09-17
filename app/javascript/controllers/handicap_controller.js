@@ -4,6 +4,7 @@ import { Controller } from "@hotwired/stimulus"
 // the currently selected players.
 export default class extends Controller {
   static targets = ["home", "away", "handicap"]
+  static values = { adjustment: Number }
 
   connect() {
     this.update()
@@ -30,7 +31,8 @@ export default class extends Controller {
       return 0
     }
 
-    return Math.max(0, Math.min(9, Math.ceil((Math.abs(homeRating - awayRating) - 350) / 100)))
+    const threshold = this.adjustmentValue * 100 + 50
+    return Math.max(0, Math.min(9, Math.ceil((Math.abs(homeRating - awayRating) - threshold) / 100)))
   }
 
   selectedRating(select) {

@@ -62,7 +62,9 @@ class LeagueTest < ActiveSupport::TestCase
   end
 
   test "results list the color and handicap of every game" do
-    games(:board_one).update!(handicap: 2) # the weaker away player takes black
+    game = games(:board_one)
+    game.away_player.update!(rating: game.home_rating - 500)
+    game.update!(handicap: 2) # the weaker away player takes black
 
     lines = @league.results
 

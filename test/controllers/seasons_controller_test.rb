@@ -49,6 +49,17 @@ class SeasonsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_select "form"
+    assert_select "select[name='season[handicap_adjustment]'] option[selected][value='3']"
+  end
+
+  test "admins can disable handicaps for a season" do
+    sign_in_as users(:admin)
+    season = seasons(:current)
+
+    patch season_url(season), params: { season: { name: season.name, handicap_adjustment: "" } }
+
+    assert_redirected_to season_url(season)
+    assert_nil season.reload.handicap_adjustment
   end
 
   test "creating a season without a name renders the form again" do

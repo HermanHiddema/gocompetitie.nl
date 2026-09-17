@@ -92,11 +92,24 @@ class MatchesControllerTest < ActionDispatch::IntegrationTest
     get edit_match_url(@match)
 
     assert_response :success
-    assert_select "[data-controller='handicap']", count: Match::BOARD_COUNT
+    assert_select "[data-controller='handicap'][data-handicap-adjustment-value='3']", count: Match::BOARD_COUNT
     assert_select "select[data-handicap-target='home'][data-action='change->handicap#update']", count: Match::BOARD_COUNT
     assert_select "select[data-handicap-target='away'][data-action='change->handicap#update']", count: Match::BOARD_COUNT
     assert_select "select[data-handicap-target='handicap'] option[value='']", text: "auto (0)", count: Match::BOARD_COUNT
     assert_select "select[data-handicap-target='handicap'] option[disabled]", count: Match::BOARD_COUNT * Game::HANDICAPS.max
+  end
+
+  test "edit omits handicap controls when the season disables handicaps" do
+    sign_in_as users(:member)
+    @match.season.update!(handicap_adjustment: nil)
+
+    get edit_match_url(@match)
+
+    assert_response :success
+    assert_select "[data-controller='handicap']", count: 0
+    assert_select "label", text: "Handicap", count: 0
+    assert_select "select[name$='[handicap]']", count: 0
+    assert_select "select[name$='[result]']", count: Match::BOARD_COUNT
   end
 
   test "edit keeps an over-limit selected handicap enabled until javascript recalculates it" do

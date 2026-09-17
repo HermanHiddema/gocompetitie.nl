@@ -56,6 +56,6 @@ class SeasonsController < ApplicationController
     end
 
     def season_params
-      params.expect(season: [:name, :information])
+      params.expect(season: [:name, :information, :handicap_adjustment])
     end
 end

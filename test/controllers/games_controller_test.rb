@@ -11,7 +11,9 @@ class GamesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "index puts the handicap in the black disc" do
-    games(:board_one).update!(handicap: 2)
+    game = games(:board_one)
+    game.away_player.update!(rating: game.home_rating - 500)
+    game.update!(handicap: 2)
 
     get games_url
 

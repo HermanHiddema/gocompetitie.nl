@@ -1,6 +1,25 @@
 require "test_helper"
 
 class SeasonTest < ActiveSupport::TestCase
+  test "new seasons default to a three stone handicap adjustment" do
+    assert_equal 3, Season.new.handicap_adjustment
+  end
+
+  test "handicap adjustment is optional and limited to valid stone counts" do
+    season = seasons(:current)
+
+    season.handicap_adjustment = nil
+    assert season.valid?
+    assert_not season.handicaps?
+
+    season.handicap_adjustment = 10
+    assert_not season.valid?
+
+    season.handicap_adjustment = 0
+    assert season.valid?
+    assert season.handicaps?
+  end
+
   test "the slug is derived from the name" do
     season = Season.create!(name: "Voorjaar 2027")
 

@@ -13,6 +13,7 @@ class Game < ApplicationRecord
   validates :board_number, presence: true, inclusion: { in: 1..Match::BOARD_COUNT }, uniqueness: { scope: :match_id }
   validates :handicap, numericality: { only_integer: true, in: HANDICAPS }, allow_nil: true, if: :handicap_entered?
   validate :entered_handicap_within_default
+  validate :handicap_allowed
   validate :players_are_distinct
   validate :players_are_unique_in_match
   validate :players_play_in_the_season
@@ -98,20 +99,22 @@ class Game < ApplicationRecord
   # The handicap of the game, defaulting to the handicap that follows from the
   # rating difference of the players.
   def handicap
+    return 0 if handicap_adjustment.nil?
+
     self[:handicap] || default_handicap
   end
 
   # The handicap as it was entered, nil when the default handicap is used.
   def entered_handicap
-    self[:handicap]
+    self[:handicap] if handicap_adjustment.present?
   end
 
   # The rating difference minus 300 points, divided by 100 and rounded to the
   # nearest whole number, rounding halves down.
   def default_handicap
-    return 0 if home_rating.blank? || away_rating.blank?
+    return 0 if handicap_adjustment.nil? || home_rating.blank? || away_rating.blank?
 
-    handicap = (((home_rating - away_rating).abs - 300) / 100.0).round(half: :down)
+    handicap = (((home_rating - away_rating).abs - handicap_adjustment * 100) / 100.0).round(half: :down)
     handicap.clamp(HANDICAPS.min, HANDICAPS.max)
   end
 
@@ -232,6 +235,14 @@ class Game < ApplicationRecord
 
     def handicap_entered?
       self[:handicap].present? || handicap_before_type_cast.present?
+    end
+
+    def handicap_adjustment
+      match&.handicap_adjustment
+    end
+
+    def handicap_allowed
+      errors.add(:handicap, "is not available for this season") if handicap_entered? && handicap_adjustment.nil?
     end
 
     def entered_handicap_within_default
