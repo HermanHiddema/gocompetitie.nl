@@ -2,6 +2,7 @@ class VenuesController < ApplicationController
   allow_unauthenticated_access only: %i[index show]
 
   before_action :set_venue, only: %i[show edit update destroy]
+  before_action :require_admin!, only: %i[new create edit update destroy]
 
   # Venues exist outside of a season, so they are all shown as long as there is
   # no season to filter them by.

@@ -31,7 +31,7 @@ class LeaguesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "signed in users can create a league" do
-    sign_in_as users(:member)
+    sign_in_as users(:admin)
 
     assert_difference -> { League.count }, 1 do
       post leagues_url, params: { league: { name: "Tweede klasse", position: 2, season_id: seasons(:current).id } }

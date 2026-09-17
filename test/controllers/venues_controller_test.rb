@@ -23,7 +23,7 @@ class VenuesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "signed in users can create a venue" do
-    sign_in_as users(:member)
+    sign_in_as users(:admin)
 
     assert_difference -> { Venue.count }, 1 do
       post venues_url, params: { venue: { club_id: clubs(:amsterdam).id, name: "Nieuw lokaal", address: "Straat 1",
@@ -32,7 +32,7 @@ class VenuesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "season-scoped venue forms keep the selected season in their action" do
-    sign_in_as users(:member)
+    sign_in_as users(:admin)
     slug = seasons(:previous).slug
 
     get new_venue_url(season_slug: slug)

@@ -33,8 +33,19 @@ class TeamsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to new_session_url
   end
 
-  test "signed in users can create a team with members" do
+  test "captains cannot edit teams" do
     sign_in_as users(:member)
+    team = teams(:amsterdam)
+
+    patch team_url(team), params: { team: { name: "Changed Team", abbrev: team.abbrev, club_id: team.club_id,
+      league_id: team.league_id, captain_id: team.captain_id } }
+
+    assert_response :unauthorized
+    assert_equal "Amsterdam 1", team.reload.name
+  end
+
+  test "admins can create a team with members" do
+    sign_in_as users(:admin)
     participant = seasons(:current).participants.create!(firstname: "Nieuwe", lastname: "Speler", rating: 1800, club: clubs(:amsterdam))
 
     assert_difference -> { Team.count }, 1 do
@@ -47,7 +58,7 @@ class TeamsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "historical season team links and forms keep the selected season" do
-    sign_in_as users(:member)
+    sign_in_as users(:admin)
     previous = seasons(:previous)
     league = previous.leagues.create!(name: "Hoofdklasse", position: 0)
 
@@ -61,7 +72,7 @@ class TeamsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "a team without a name is rendered again" do
-    sign_in_as users(:member)
+    sign_in_as users(:admin)
 
     post teams_url, params: { team: { name: "", abbrev: "", club_id: clubs(:amsterdam).id, league_id: leagues(:first).id } }
 

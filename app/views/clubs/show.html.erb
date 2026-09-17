@@ -51,7 +51,7 @@
   <%= render partial: "participants/participant", collection: @participants %>
 </section>
 
-<% if current_user %>
+<% if admin? %>
   <div class="flex gap-3">
     <%= button_link_to "Bewerken", edit_club_path(@club, **season_url_options) %>
   </div>

@@ -19,7 +19,7 @@
   <%= render "matches/grid", matches: @matches %>
 </section>
 
-<% if current_user %>
+<% if admin? %>
   <div class="flex gap-3">
     <%= button_link_to "Locatie bewerken", edit_venue_path(@venue, **season_url_options) %>
   </div>

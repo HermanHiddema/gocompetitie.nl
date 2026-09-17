@@ -4,6 +4,7 @@ class MatchesController < ApplicationController
   BOARDS = 3
 
   before_action :set_match, only: %i[show edit update destroy]
+  before_action :require_admin!, only: %i[new create destroy]
   before_action :require_season!, only: %i[new create]
 
   def index
