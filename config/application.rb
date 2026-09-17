@@ -21,6 +21,11 @@ module GoCompetitie
     # These settings can be overridden in specific environments using the files
     # in config/environments, which are processed later.
     #
+    # Domain cookies are set on. The default `:all` uses the registered domain,
+    # so that signing in on www.gocompetitie.nl also signs you in on
+    # gocompetitie.nl and vice versa. Set COOKIE_DOMAIN to override it.
+    config.x.cookie_domain = ENV["COOKIE_DOMAIN"].presence || :all
+
     config.time_zone = "Amsterdam"
     config.i18n.default_locale = :nl
     config.i18n.available_locales = %i[nl en]

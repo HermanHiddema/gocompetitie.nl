@@ -23,6 +23,14 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
     assert_select "details form[action=?] button", session_path, "Uitloggen"
   end
 
+  test "create sets the session cookie for subdomains" do
+    post session_path, params: { email_address: @user.email_address, password: "password" }
+
+    set_cookies = Array(response.headers["Set-Cookie"]).join("\n")
+
+    assert_match(/session_id=[^;\n]+;[^\n]*domain=\.?example\.com/i, set_cookies)
+  end
+
   test "create with invalid credentials" do
     post session_path, params: { email_address: @user.email_address, password: "wrong" }
 
