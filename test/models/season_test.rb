@@ -148,4 +148,11 @@ class SeasonTest < ActiveSupport::TestCase
     assert_equal({ leagues: 2, clubs: 3, teams: 3, participants: 7 }, season.statistics)
     assert_equal({ leagues: 0, clubs: 0, teams: 0, participants: 0 }, seasons(:previous).statistics)
   end
+
+  test "statistics for multiple seasons are grouped by season" do
+    statistics = Season.statistics_for(Season.where(id: [seasons(:current).id, seasons(:previous).id]))
+
+    assert_equal({ leagues: 2, clubs: 3, teams: 3, participants: 7 }, statistics.fetch(seasons(:current).id))
+    assert_equal({ leagues: 0, clubs: 0, teams: 0, participants: 0 }, statistics.fetch(seasons(:previous).id))
+  end
 end

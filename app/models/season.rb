@@ -22,6 +22,40 @@ class Season < ApplicationRecord
   scope :recent, -> { order(created_at: :desc) }
   scope :published, -> { where.not(phase: :draft) }
 
+  def self.preload_statistics(seasons)
+    statistics = statistics_for(seasons)
+    empty_statistics = { leagues: 0, clubs: 0, teams: 0, participants: 0 }
+
+    seasons.each do |season|
+      season.instance_variable_set(:@statistics, statistics.fetch(season.id, empty_statistics))
+    end
+  end
+
+  def self.statistics_for(seasons)
+    season_ids = seasons.map(&:id)
+    statistics = season_ids.to_h { |id| [id, { leagues: 0, clubs: 0, teams: 0, participants: 0 }] }
+    return statistics if season_ids.empty?
+
+    League.where(season_id: season_ids).group(:season_id).count.each do |season_id, count|
+      statistics[season_id][:leagues] = count
+    end
+
+    Team.joins(:league).where(leagues: { season_id: season_ids }).group("leagues.season_id").count.each do |season_id, count|
+      statistics[season_id][:teams] = count
+    end
+
+    Team.joins(:league).where(leagues: { season_id: season_ids }).group("leagues.season_id").distinct.count(:club_id).each do |season_id, count|
+      statistics[season_id][:clubs] = count
+    end
+
+    Participant.joins("INNER JOIN games ON games.home_id = participants.id OR games.away_id = participants.id")
+      .where(season_id: season_ids).group(:season_id).distinct.count(:id).each do |season_id, count|
+      statistics[season_id][:participants] = count
+    end
+
+    statistics
+  end
+
   # The season the site shows by default: the season that is being played, or
   # the season that was finished most recently.
   def self.current

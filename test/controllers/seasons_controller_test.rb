@@ -18,6 +18,19 @@ class SeasonsControllerTest < ActionDispatch::IntegrationTest
     assert_select "section div", text: "7 deelnemers", count: 1
   end
 
+  test "index pluralizes singular season statistics" do
+    season = Season.create!(name: "Najaar 2026", phase: :finished)
+    league = season.leagues.create!(name: "Hoofdklasse", position: 0)
+    league.teams.create!(name: "Amsterdam 1", abbrev: "Amst1", club: clubs(:amsterdam))
+
+    get seasons_url
+
+    assert_response :success
+    assert_select "section div", text: "1 poule", count: 1
+    assert_select "section div", text: "1 club", count: 1
+    assert_select "section div", text: "1 team", count: 1
+  end
+
   test "index only offers admins an edit link for editable seasons" do
     get seasons_url
     assert_select "a[href=?]", edit_season_path(seasons(:current)), count: 0
