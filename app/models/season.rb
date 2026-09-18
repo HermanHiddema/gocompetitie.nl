@@ -61,6 +61,21 @@ class Season < ApplicationRecord
     handicap_adjustment.present?
   end
 
+  # Counts for the seasons list: the leagues, teams and participants with at
+  # least one game played or scheduled, and the clubs that field a team.
+  def statistics
+    scheduled_matches = matches.where(id: games.select(:match_id))
+
+    {
+      leagues: leagues.where(id: scheduled_matches.select(:league_id)).count,
+      clubs: Club.where(id: teams.select(:club_id)).count,
+      teams: Team.where(id: scheduled_matches.select(:home_team_id))
+        .or(Team.where(id: scheduled_matches.select(:away_team_id))).count,
+      participants: participants.where(id: games.select(:home_id))
+        .or(participants.where(id: games.select(:away_id))).count
+    }
+  end
+
   def ranked_teams
     leagues.ordered.flat_map(&:ranked_teams)
   end

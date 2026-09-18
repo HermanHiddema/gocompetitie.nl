@@ -8,6 +8,27 @@ class SeasonsControllerTest < ActionDispatch::IntegrationTest
     assert_select "a", text: "Voorjaar 2026"
   end
 
+  test "index shows the statistics of each season" do
+    get seasons_url
+
+    assert_response :success
+    assert_select "section div", text: "1 poules", count: 1
+    assert_select "section div", text: "3 clubs", count: 1
+    assert_select "section div", text: "3 teams", count: 1
+    assert_select "section div", text: "7 deelnemers", count: 1
+  end
+
+  test "index only offers admins an edit link for editable seasons" do
+    get seasons_url
+    assert_select "a[href=?]", edit_season_path(seasons(:current)), count: 0
+
+    sign_in_as users(:admin)
+    get seasons_url
+
+    assert_select "a[href=?]", edit_season_path(seasons(:current)), count: 1
+    assert_select "a[href=?]", edit_season_path(seasons(:previous)), count: 0
+  end
+
   test "show renders the standings of the season" do
     get season_url(seasons(:current))
 

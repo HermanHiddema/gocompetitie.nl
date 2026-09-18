@@ -139,4 +139,13 @@ class SeasonTest < ActiveSupport::TestCase
   ensure
     file&.unlink
   end
+
+  test "statistics count what takes part in the season" do
+    season = seasons(:current)
+
+    # Only the top league has matches with games, all three clubs field a team
+    # and seven participants have a game played or scheduled.
+    assert_equal({ leagues: 1, clubs: 3, teams: 3, participants: 7 }, season.statistics)
+    assert_equal({ leagues: 0, clubs: 0, teams: 0, participants: 0 }, seasons(:previous).statistics)
+  end
 end

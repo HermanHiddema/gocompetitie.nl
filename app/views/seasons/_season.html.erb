@@ -1,9 +1,21 @@
-<div class="border-b border-slate-100 py-2 text-sm last:border-0">
-  <%= link_to season.name, season, class: "font-medium hover:underline" %>
-  <% unless season.active? %>
-    <span class="ml-1 text-xs text-slate-500">(<%= season_phase_name(season) %>)</span>
-  <% end %>
-  <% if admin? %>
-    <%= link_to "bewerken", edit_season_path(season), class: "ml-2 text-slate-500 underline" %>
-  <% end %>
+<% statistics = season.statistics %>
+<div class="grid grid-cols-2 gap-x-4 gap-y-1 border-b border-slate-100 py-2 text-sm last:border-0 md:grid-cols-6">
+  <div class="md:col-span-2">
+    <%= link_to season.name, season, class: "font-medium hover:underline" %>
+    <% unless season.active? %>
+      <span class="ml-1 text-xs text-slate-500">(<%= season_phase_name(season) %>)</span>
+    <% end %>
+    <% if admin? && season.editable? %>
+      <%= link_to edit_season_path(season), class: "ml-1 inline-block align-middle text-slate-500 hover:text-slate-800",
+            title: "Seizoen bewerken", "aria-label": "Seizoen bewerken" do %>
+        <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 3.487a1.72 1.72 0 0 1 2.432 2.432L7.5 17.713l-3.25.813.813-3.25 11.812-11.539Z" />
+        </svg>
+      <% end %>
+    <% end %>
+  </div>
+  <div class="text-slate-600"><%= statistics[:leagues] %> poules</div>
+  <div class="text-slate-600"><%= statistics[:clubs] %> clubs</div>
+  <div class="text-slate-600"><%= statistics[:teams] %> teams</div>
+  <div class="text-slate-600"><%= statistics[:participants] %> deelnemers</div>
 </div>
