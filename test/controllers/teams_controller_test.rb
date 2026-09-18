@@ -8,6 +8,13 @@ class TeamsControllerTest < ActionDispatch::IntegrationTest
     assert_select "a", text: "Amsterdam 1"
   end
 
+  test "index does not list the league name behind the team name" do
+    get teams_url
+
+    assert_response :success
+    assert_not_includes response.body, leagues(:top).name
+  end
+
   test "index lists the teams of the season alphabetically, across leagues" do
     teams(:amsterdam).update!(name: "Zwolle 1")
     leagues(:first).teams.create!(name: "Almere 1", abbrev: "Alme", club: clubs(:amsterdam))
