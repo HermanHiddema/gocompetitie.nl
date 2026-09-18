@@ -24,4 +24,17 @@ class ApplicationHelperTest < ActionView::TestCase
 
     assert_equal "1½-1½", format_match_result(match.reload)
   end
+
+  test "shows the phase of a season as an icon" do
+    season = seasons(:current)
+
+    season.phase = :draft
+    assert_dom_equal %(<span role="img" aria-label="concept" title="concept">📄</span>), season_phase_badge(season)
+
+    season.phase = :active
+    assert_dom_equal %(<span role="img" aria-label="lopend" title="lopend">🔄</span>), season_phase_badge(season)
+
+    season.phase = :finished
+    assert_dom_equal %(<span role="img" aria-label="afgesloten" title="afgesloten">✅</span>), season_phase_badge(season)
+  end
 end

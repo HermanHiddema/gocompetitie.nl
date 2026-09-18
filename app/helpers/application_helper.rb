@@ -56,6 +56,18 @@ module ApplicationHelper
     SEASON_PHASE_NAMES.fetch(season.phase, season.phase)
   end
 
+  SEASON_PHASE_ICONS = { "draft" => "📄", "active" => "🔄", "finished" => "✅" }.freeze
+
+  # Shows the phase of a season as an icon, with its name for screen readers
+  # and as a tooltip.
+  def season_phase_badge(season, **options)
+    name = season_phase_name(season)
+    icon = SEASON_PHASE_ICONS[season.phase]
+    return tag.span(name, **options) if icon.nil?
+
+    tag.span(icon, title: name, role: "img", "aria-label": name, **options)
+  end
+
   # Finishing a season records the games that were never played as 0-0, so the
   # confirmation says how many games that are.
   def season_finish_confirmation(season)
