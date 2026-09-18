@@ -26,7 +26,9 @@
   <div class="flex flex-wrap gap-3">
     <% if admin? %>
       <%= button_link_to "Poule bewerken", edit_league_path(@league) %>
-      <%= button_link_to "Team toevoegen", new_team_path(league_id: @league.id, **season_url_options), style: :secondary %>
+      <% if @league.season.draft? %>
+        <%= button_link_to "Team toevoegen", new_team_path(league_id: @league.id, **season_url_options), style: :secondary %>
+      <% end %>
     <% end %>
     <%= button_link_to "Resultaten (EGD)", league_path(@league, format: :text), style: :secondary %>
   </div>
