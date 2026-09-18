@@ -4,8 +4,11 @@ return unless Rails.env.development?
 # scheduled round robin.
 season = Season.find_or_create_by!(name: "Voorjaar #{Date.today.year}") do |record|
   record.information = "Welkom bij de Nederlandse Go Competitie."
-  record.phase = :active
 end
+
+Season.active.where.not(id: season.id).find_each(&:finish!)
+season.phase = :active
+season.save! if season.changed?
 
 CLUBS = {
   "Amsterdam" => { abbrev: "Amst", day: 2, time: "20:00", address: "Da Costakade 158", city: "Amsterdam" },

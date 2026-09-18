@@ -30,6 +30,8 @@ class ParticipantsControllerTest < ActionDispatch::IntegrationTest
   test "historical season participant links and forms keep the selected season" do
     sign_in_as users(:admin)
     previous = seasons(:previous)
+    seasons(:current).update!(phase: :draft)
+    previous.update!(phase: :active)
 
     get participants_url(season_slug: previous.slug)
     assert_select "a[href=?]", new_participant_path(season_slug: previous.slug)
@@ -58,5 +60,23 @@ class ParticipantsControllerTest < ActionDispatch::IntegrationTest
   test "editing requires authentication" do
     get edit_participant_url(participants(:amsterdam_1))
     assert_redirected_to new_session_url
+  end
+
+  test "finished seasons can no longer change participants" do
+    sign_in_as users(:admin)
+    participant = participants(:amsterdam_1)
+    participant.season.update!(phase: :finished)
+
+    patch participant_url(participant), params: { participant: { firstname: "Gewijzigd", lastname: participant.lastname,
+      rating: participant.rating, egd_pin: participant.egd_pin, club_id: participant.club_id, rank: participant.rank } }
+
+    assert_redirected_to season_url(participant.season)
+    assert_equal "Speler1", participant.reload.firstname
+
+    assert_no_difference -> { Participant.count } do
+      delete participant_url(participant)
+    end
+
+    assert_redirected_to season_url(participant.season)
   end
 end

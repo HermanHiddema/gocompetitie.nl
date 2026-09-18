@@ -3,6 +3,7 @@ class SeasonsController < ApplicationController
 
   before_action :set_season, only: %i[show edit update destroy start finish]
   before_action :require_admin!, only: %i[new create edit update destroy start finish]
+  before_action :require_editable_season!, only: %i[edit update destroy]
 
   # The front page shows the season that is being played, or the season that
   # was finished most recently.
@@ -47,16 +48,18 @@ class SeasonsController < ApplicationController
   end
 
   def start
-    if @season.update(phase: :active)
+    if @season.start!
       redirect_to @season, notice: "Seizoen is gestart."
-    else
-      redirect_to @season, alert: @season.errors.full_messages.to_sentence
     end
+  rescue ActiveRecord::RecordInvalid
+    redirect_to @season, alert: @season.errors.full_messages.to_sentence
   end
 
   def finish
     @season.finish!
     redirect_to @season, notice: "Seizoen is afgesloten."
+  rescue ActiveRecord::RecordInvalid
+    redirect_to @season, alert: @season.errors.full_messages.to_sentence
   end
 
   def destroy

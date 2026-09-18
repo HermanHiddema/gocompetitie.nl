@@ -57,9 +57,29 @@ class TeamsControllerTest < ActionDispatch::IntegrationTest
     assert_equal 1, Team.last.team_members.count
   end
 
+  test "finished seasons can no longer change teams" do
+    sign_in_as users(:admin)
+    team = teams(:amsterdam)
+    team.season.update!(phase: :finished)
+
+    patch team_url(team), params: { team: { name: "Gewijzigd", abbrev: team.abbrev, club_id: team.club_id,
+      league_id: team.league_id, captain_id: team.captain_id } }
+
+    assert_redirected_to season_url(team.season)
+    assert_equal "Amsterdam 1", team.reload.name
+
+    assert_no_difference -> { Team.count } do
+      delete team_url(team)
+    end
+
+    assert_redirected_to season_url(team.season)
+  end
+
   test "historical season team links and forms keep the selected season" do
     sign_in_as users(:admin)
     previous = seasons(:previous)
+    seasons(:current).update!(phase: :draft)
+    previous.update!(phase: :active)
     league = previous.leagues.create!(name: "Hoofdklasse", position: 0)
 
     get teams_url(season_slug: previous.slug)

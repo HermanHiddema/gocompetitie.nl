@@ -28,6 +28,10 @@ class Season < ApplicationRecord
     with_slug.active.recent.first || with_slug.finished.recent.first
   end
 
+  def start!
+    transition_to!(:active, from: :draft)
+  end
+
   # Games without a result in both columns, which are set to 0-0 when the
   # season is finished.
   def unplayed_games
@@ -38,6 +42,7 @@ class Season < ApplicationRecord
   # are recorded as 0-0.
   def finish!
     transaction do
+      ensure_transition_from!(:active, action: "afgesloten")
       unplayed_games.update_all(home_points: 0, away_points: 0, reason: nil, updated_at: Time.current)
       update!(phase: :finished)
     end
@@ -108,6 +113,21 @@ class Season < ApplicationRecord
   end
 
   private
+    def transition_to!(phase, from:)
+      ensure_transition_from!(from, action: phase == :active ? "gestart" : "afgesloten")
+      update!(phase: phase)
+    rescue ActiveRecord::RecordNotUnique
+      errors.add(:phase, "is al in gebruik door een ander seizoen")
+      raise ActiveRecord::RecordInvalid, self
+    end
+
+    def ensure_transition_from!(phase, action:)
+      return if public_send("#{phase}?")
+
+      errors.add(:base, "Alleen een seizoen in de fase #{phase} kan worden #{action}.")
+      raise ActiveRecord::RecordInvalid, self
+    end
+
     def only_one_active_season
       return unless active?
 

@@ -78,6 +78,29 @@ class SeasonsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "0-0", games(:unplayed).reload.result
   end
 
+  test "finished seasons cannot be started again" do
+    sign_in_as users(:admin)
+    season = seasons(:current)
+
+    post finish_season_url(season)
+    post start_season_url(season)
+
+    assert_redirected_to season_url(season)
+    assert season.reload.finished?
+    assert_equal "Alleen een seizoen in de fase draft kan worden gestart.", flash[:alert]
+  end
+
+  test "draft seasons cannot be finished" do
+    sign_in_as users(:admin)
+    draft = Season.create!(name: "Najaar 2026")
+
+    post finish_season_url(draft)
+
+    assert_redirected_to season_url(draft)
+    assert draft.reload.draft?
+    assert_equal "Alleen een seizoen in de fase active kan worden afgesloten.", flash[:alert]
+  end
+
   test "only admins can finish a season" do
     sign_in_as users(:member)
 
@@ -94,6 +117,16 @@ class SeasonsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_select "form[action=?][data-turbo-confirm*=?]", finish_season_path(seasons(:current)), "1 ongespeelde partij"
+  end
+
+  test "finished seasons no longer show schedule links in the standings" do
+    sign_in_as users(:admin)
+    seasons(:current).update!(phase: :finished)
+
+    get season_url(seasons(:current))
+
+    assert_response :success
+    assert_select "a", text: "+", count: 0
   end
 
   test "show renders the EGD result list as text" do

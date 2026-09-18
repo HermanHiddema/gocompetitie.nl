@@ -43,4 +43,20 @@ class LeaguesControllerTest < ActionDispatch::IntegrationTest
 
     assert_redirected_to league_url(League.last)
   end
+
+  test "finished seasons can no longer be changed" do
+    sign_in_as users(:admin)
+    league = leagues(:top)
+    league.season.update!(phase: :finished)
+
+    patch league_url(league), params: { league: { name: "Gewijzigd", position: league.position } }
+    assert_redirected_to season_url(league.season)
+    assert_equal "Hoofdklasse", league.reload.name
+
+    assert_no_difference -> { League.count } do
+      delete league_url(league)
+    end
+
+    assert_redirected_to season_url(league.season)
+  end
 end

@@ -37,6 +37,21 @@ class SeasonTest < ActiveSupport::TestCase
     assert_empty season.unplayed_games
   end
 
+  test "starting a season requires a draft" do
+    season = seasons(:current)
+
+    assert_raises(ActiveRecord::RecordInvalid) { season.start! }
+
+    season.update!(phase: :finished)
+    assert_raises(ActiveRecord::RecordInvalid) { season.start! }
+  end
+
+  test "finishing a season requires it to be active" do
+    season = Season.create!(name: "Najaar 2028")
+
+    assert_raises(ActiveRecord::RecordInvalid) { season.finish! }
+  end
+
   test "new seasons default to a three stone handicap adjustment" do
     assert_equal 3, Season.new.handicap_adjustment
   end

@@ -52,6 +52,22 @@ class MatchesControllerTest < ActionDispatch::IntegrationTest
     assert_equal 3, match.games.count
   end
 
+  test "matches can only be created inside the selected season" do
+    sign_in_as users(:admin)
+    previous = seasons(:previous)
+    league = previous.leagues.create!(name: "Hoofdklasse", position: 0)
+    home_team = league.teams.create!(name: "Amsterdam 9", abbrev: "Amst9", club: clubs(:amsterdam))
+    away_team = league.teams.create!(name: "Utrecht 9", abbrev: "Utre9", club: clubs(:utrecht))
+
+    assert_no_difference -> { Match.count } do
+      post matches_url, params: { match: { league_id: league.id, home_team_id: home_team.id,
+        away_team_id: away_team.id, venue_id: venues(:amsterdam).id,
+        playing_date: "2026-04-01", playing_time: "20:00" } }
+    end
+
+    assert_response :unprocessable_content
+  end
+
   test "historical season match links and forms keep the selected season" do
     sign_in_as users(:admin)
     previous = seasons(:previous)

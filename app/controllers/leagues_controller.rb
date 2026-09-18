@@ -4,6 +4,7 @@ class LeaguesController < ApplicationController
   before_action :set_league, only: %i[show edit update destroy]
   before_action :require_admin!, only: %i[new create edit update destroy]
   before_action :require_season!, only: %i[new create]
+  before_action :require_editable_season!, only: %i[new create edit update destroy]
 
   def show
     @teams = @league.teams.includes(:league, :club, team_members: :participant).ordered
