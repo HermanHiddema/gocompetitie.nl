@@ -161,7 +161,9 @@ class SeasonTest < ActiveSupport::TestCase
 
     Season.preload_statistics(seasons)
 
-    assert_equal({ leagues: 2, clubs: 3, teams: 3, participants: 7 }, seasons.first.statistics)
-    assert_equal({ leagues: 0, clubs: 0, teams: 0, participants: 0 }, seasons.second.statistics)
+    seasons_by_id = seasons.index_by(&:id)
+
+    assert_equal({ leagues: 2, clubs: 3, teams: 3, participants: 7 }, seasons_by_id.fetch(seasons(:current).id).statistics)
+    assert_equal({ leagues: 0, clubs: 0, teams: 0, participants: 0 }, seasons_by_id.fetch(seasons(:previous).id).statistics)
   end
 end
