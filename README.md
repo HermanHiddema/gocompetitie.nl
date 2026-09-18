@@ -13,7 +13,9 @@ application on Rails 8, with the same business logic and a new Tailwind CSS fron
   played and *finished* once it is closed. There is at most one active season and the
   front page redirects to it, or to the season that was finished most recently.
   Drafts are only visible to admins, and the results of a finished season can no
-  longer be changed: finishing a season records its unplayed games as 0-0.
+  longer be changed: finishing a season records its unplayed games as 0-0. Leagues
+  and teams are set up while the season is a draft; once it has started no more of
+  them can be added.
 * **League** (*poule*) – a group of teams within a season that play a round robin.
 * **Club**, **Venue** (*speellocatie*) and **Person** – the organisations, playing
   locations and contact persons. Clubs and venues outlive a season, so their pages

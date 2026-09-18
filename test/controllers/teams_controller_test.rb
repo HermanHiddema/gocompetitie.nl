@@ -46,10 +46,12 @@ class TeamsControllerTest < ActionDispatch::IntegrationTest
 
   test "admins can create a team with members" do
     sign_in_as users(:admin)
-    participant = seasons(:current).participants.create!(firstname: "Nieuwe", lastname: "Speler", rating: 1800, club: clubs(:amsterdam))
+    season = seasons(:current)
+    season.update!(phase: :draft)
+    participant = season.participants.create!(firstname: "Nieuwe", lastname: "Speler", rating: 1800, club: clubs(:amsterdam))
 
     assert_difference -> { Team.count }, 1 do
-      post teams_url, params: { team: { name: "Amsterdam 2", abbrev: "Amst2", club_id: clubs(:amsterdam).id,
+      post teams_url(season_slug: season.slug), params: { team: { name: "Amsterdam 2", abbrev: "Amst2", club_id: clubs(:amsterdam).id,
         league_id: leagues(:first).id, captain_id: people(:anna).id,
         team_members_attributes: { "0" => { board_number: 1, participant_id: participant.id } } } }
     end
@@ -59,10 +61,12 @@ class TeamsControllerTest < ActionDispatch::IntegrationTest
 
   test "teams can only be created inside the selected season" do
     sign_in_as users(:admin)
+    season = seasons(:current)
+    season.update!(phase: :draft)
     league = seasons(:previous).leagues.create!(name: "Hoofdklasse", position: 0)
 
     assert_no_difference -> { Team.count } do
-      post teams_url, params: { team: { name: "Amsterdam 9", abbrev: "Amst9", club_id: clubs(:amsterdam).id, league_id: league.id } }
+      post teams_url(season_slug: season.slug), params: { team: { name: "Amsterdam 9", abbrev: "Amst9", club_id: clubs(:amsterdam).id, league_id: league.id } }
     end
 
     assert_response :unprocessable_content
@@ -115,7 +119,7 @@ class TeamsControllerTest < ActionDispatch::IntegrationTest
     sign_in_as users(:admin)
     previous = seasons(:previous)
     seasons(:current).update!(phase: :draft)
-    previous.update!(phase: :active)
+    previous.update!(phase: :draft)
     league = previous.leagues.create!(name: "Hoofdklasse", position: 0)
 
     get teams_url(season_slug: previous.slug)
@@ -127,10 +131,35 @@ class TeamsControllerTest < ActionDispatch::IntegrationTest
     assert_select "footer", /Najaar 2025/
   end
 
-  test "a team without a name is rendered again" do
+  test "teams can no longer be added once the season has started" do
+    sign_in_as users(:admin)
+    season = seasons(:current)
+
+    get new_team_url(season_slug: season.slug)
+    assert_redirected_to season_url(season)
+
+    assert_no_difference -> { Team.count } do
+      post teams_url(season_slug: season.slug), params: { team: { name: "Amsterdam 2", abbrev: "Amst2",
+        club_id: clubs(:amsterdam).id, league_id: leagues(:first).id } }
+    end
+
+    assert_redirected_to season_url(season)
+  end
+
+  test "index hides the add button once the season has started" do
     sign_in_as users(:admin)
 
-    post teams_url, params: { team: { name: "", abbrev: "", club_id: clubs(:amsterdam).id, league_id: leagues(:first).id } }
+    get teams_url(season_slug: seasons(:current).slug)
+
+    assert_select "a", text: "Team toevoegen", count: 0
+  end
+
+  test "a team without a name is rendered again" do
+    sign_in_as users(:admin)
+    season = seasons(:current)
+    season.update!(phase: :draft)
+
+    post teams_url(season_slug: season.slug), params: { team: { name: "", abbrev: "", club_id: clubs(:amsterdam).id, league_id: leagues(:first).id } }
 
     assert_response :unprocessable_content
   end
