@@ -13,6 +13,7 @@ class SeasonsController < ApplicationController
 
   def index
     @seasons = visible_seasons.recent
+    Season.preload_statistics(@seasons)
   end
 
   def show

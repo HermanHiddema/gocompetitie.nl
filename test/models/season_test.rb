@@ -139,4 +139,31 @@ class SeasonTest < ActiveSupport::TestCase
   ensure
     file&.unlink
   end
+
+  test "statistics count what takes part in the season" do
+    season = seasons(:current)
+
+    # Both leagues and all three teams count, every club fields a team and
+    # seven participants have a game played or scheduled.
+    assert_equal({ leagues: 2, clubs: 3, teams: 3, participants: 7 }, season.statistics)
+    assert_equal({ leagues: 0, clubs: 0, teams: 0, participants: 0 }, seasons(:previous).statistics)
+  end
+
+  test "statistics for multiple seasons are grouped by season" do
+    statistics = Season.statistics_for(Season.where(id: [seasons(:current).id, seasons(:previous).id]))
+
+    assert_equal({ leagues: 2, clubs: 3, teams: 3, participants: 7 }, statistics.fetch(seasons(:current).id))
+    assert_equal({ leagues: 0, clubs: 0, teams: 0, participants: 0 }, statistics.fetch(seasons(:previous).id))
+  end
+
+  test "statistics return preloaded values when available" do
+    seasons = Season.where(id: [seasons(:current).id, seasons(:previous).id]).to_a
+
+    Season.preload_statistics(seasons)
+
+    seasons_by_id = seasons.index_by(&:id)
+
+    assert_equal({ leagues: 2, clubs: 3, teams: 3, participants: 7 }, seasons_by_id.fetch(seasons(:current).id).statistics)
+    assert_equal({ leagues: 0, clubs: 0, teams: 0, participants: 0 }, seasons_by_id.fetch(seasons(:previous).id).statistics)
+  end
 end

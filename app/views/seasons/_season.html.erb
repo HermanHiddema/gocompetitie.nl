@@ -1,9 +1,13 @@
-<div class="border-b border-slate-100 py-2 text-sm last:border-0">
-  <%= link_to season.name, season, class: "font-medium hover:underline" %>
-  <% unless season.active? %>
-    <span class="ml-1 text-xs text-slate-500">(<%= season_phase_name(season) %>)</span>
-  <% end %>
-  <% if admin? %>
-    <%= link_to "bewerken", edit_season_path(season), class: "ml-2 text-slate-500 underline" %>
-  <% end %>
+<% statistics = season.statistics %>
+<div class="grid grid-cols-2 gap-x-4 gap-y-1 border-b border-slate-100 py-2 text-sm last:border-0 md:grid-cols-6">
+  <div class="md:col-span-2">
+    <%= link_to season.name, season, class: "font-medium hover:underline" %>
+    <% unless season.active? %>
+      <span class="ml-1 text-xs text-slate-500">(<%= season_phase_name(season) %>)</span>
+    <% end %>
+  </div>
+  <div class="text-slate-600"><%= pluralize(statistics[:leagues], "poule", "poules") %></div>
+  <div class="text-slate-600"><%= pluralize(statistics[:clubs], "club", "clubs") %></div>
+  <div class="text-slate-600"><%= pluralize(statistics[:teams], "team", "teams") %></div>
+  <div class="text-slate-600"><%= pluralize(statistics[:participants], "deelnemer", "deelnemers") %></div>
 </div>

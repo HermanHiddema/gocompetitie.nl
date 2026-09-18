@@ -8,6 +8,53 @@ class SeasonsControllerTest < ActionDispatch::IntegrationTest
     assert_select "a", text: "Voorjaar 2026"
   end
 
+  test "index shows the statistics of each season" do
+    get seasons_url
+
+    assert_response :success
+    assert_select "section div", text: "2 poules", count: 1
+    assert_select "section div", text: "3 clubs", count: 1
+    assert_select "section div", text: "3 teams", count: 1
+    assert_select "section div", text: "7 deelnemers", count: 1
+  end
+
+  test "index pluralizes singular season statistics" do
+    season = Season.create!(name: "Najaar 2026", phase: :finished)
+    league = season.leagues.create!(name: "Hoofdklasse", position: 0)
+    league.teams.create!(name: "Amsterdam 1", abbrev: "Amst1", club: clubs(:amsterdam))
+
+    get seasons_url
+
+    assert_response :success
+    assert_select "section div", text: "1 poule", count: 1
+    assert_select "section div", text: "1 club", count: 1
+    assert_select "section div", text: "1 team", count: 1
+  end
+
+  test "index does not show season edit links" do
+    get seasons_url
+    assert_select "a[href=?]", edit_season_path(seasons(:current)), count: 0
+
+    sign_in_as users(:admin)
+    get seasons_url
+
+    assert_select "a[href=?]", edit_season_path(seasons(:current)), count: 0
+    assert_select "a[href=?]", edit_season_path(seasons(:previous)), count: 0
+  end
+
+  test "show only offers admins an edit link for editable seasons" do
+    get season_url(seasons(:current))
+    assert_select "a[href=?]", edit_season_path(seasons(:current)), count: 0
+
+    sign_in_as users(:admin)
+    get season_url(seasons(:current))
+
+    assert_select "a[href=?]", edit_season_path(seasons(:current)), count: 1
+
+    get season_url(seasons(:previous))
+    assert_select "a[href=?]", edit_season_path(seasons(:previous)), count: 0
+  end
+
   test "show renders the standings of the season" do
     get season_url(seasons(:current))
 
