@@ -27,7 +27,7 @@ class ParticipantsController < ApplicationController
     @participant.season ||= @season
 
     if @participant.save
-      redirect_to @participant, notice: "Deelnemer is toegevoegd."
+      redirect_to @participant, notice: "Speler is toegevoegd."
     else
       render :new, status: :unprocessable_content
     end
@@ -35,7 +35,7 @@ class ParticipantsController < ApplicationController
 
   def update
     if @participant.update(participant_params)
-      redirect_to @participant, notice: "Deelnemer is bijgewerkt."
+      redirect_to @participant, notice: "Speler is bijgewerkt."
     else
       render :edit, status: :unprocessable_content
     end
@@ -43,7 +43,7 @@ class ParticipantsController < ApplicationController
 
   def destroy
     @participant.destroy!
-    redirect_to participants_url(season_slug: @participant.season.slug), notice: "Deelnemer is verwijderd.", status: :see_other
+    redirect_to participants_url(season_slug: @participant.season.slug), notice: "Speler is verwijderd.", status: :see_other
   end
 
   private
