@@ -98,6 +98,19 @@ class TeamsControllerTest < ActionDispatch::IntegrationTest
     assert_equal leagues(:first), team.reload.league
   end
 
+  test "team edits without league_id keep the existing league" do
+    sign_in_as users(:admin)
+    team = teams(:amsterdam)
+    league = team.league
+
+    patch team_url(team), params: { team: { name: "Gewijzigd", abbrev: team.abbrev, club_id: team.club_id,
+      captain_id: team.captain_id } }
+
+    assert_redirected_to team_url(team)
+    assert_equal "Gewijzigd", team.reload.name
+    assert_equal league, team.league
+  end
+
   test "historical season team links and forms keep the selected season" do
     sign_in_as users(:admin)
     previous = seasons(:previous)

@@ -40,9 +40,14 @@ class TeamsController < ApplicationController
   end
 
   def update
-    @league = @team.season.leagues.find_by(id: team_update_params[:league_id])
+    attributes = team_update_params
+    @league = if attributes.key?(:league_id)
+      @team.season.leagues.find_by(id: attributes[:league_id])
+    else
+      @team.league
+    end
 
-    if @team.update(team_update_params.except(:league_id).merge(league: @league))
+    if @team.update(attributes.except(:league_id).merge(league: @league))
       redirect_to @team, notice: "Team is bijgewerkt."
     else
       build_missing_team_members

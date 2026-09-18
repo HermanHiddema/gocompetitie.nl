@@ -25,7 +25,7 @@ class Season < ApplicationRecord
   # The season the site shows by default: the season that is being played, or
   # the season that was finished most recently.
   def self.current
-    with_slug.active.recent.first || with_slug.finished.recent.first
+    with_slug.active.recent.first || with_slug.finished.order(updated_at: :desc, created_at: :desc).first
   end
 
   def start!

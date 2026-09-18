@@ -23,6 +23,19 @@ class SeasonTest < ActiveSupport::TestCase
     assert_equal seasons(:previous), Season.current
   end
 
+  test "the current season fallback is the most recently finished season" do
+    current = seasons(:current)
+    previous = seasons(:previous)
+    current.update!(phase: :draft)
+    travel 1.second do
+      previous.update!(phase: :draft)
+      previous.start!
+      previous.finish!
+    end
+
+    assert_equal previous, Season.current
+  end
+
   test "finishing a season sets the unplayed games to 0-0" do
     season = seasons(:current)
     game = games(:unplayed)
