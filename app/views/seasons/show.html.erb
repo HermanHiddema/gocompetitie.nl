@@ -32,9 +32,9 @@
   <div class="mt-8 flex flex-wrap gap-3">
     <% if @season.editable? %>
       <%= button_link_to "Seizoen bewerken", edit_season_path(@season) %>
-      <%= button_link_to "Poule toevoegen", new_league_path %>
     <% end %>
     <% if @season.draft? %>
+      <%= button_link_to "Poule toevoegen", new_league_path(season_id: @season.id) %>
       <%= button_to "Seizoen starten", start_season_path(@season), class: button_classes %>
     <% elsif @season.active? %>
       <%= button_to "Seizoen afsluiten", finish_season_path(@season), class: button_classes(:danger),

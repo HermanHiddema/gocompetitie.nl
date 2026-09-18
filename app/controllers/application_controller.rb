@@ -64,6 +64,12 @@ class ApplicationController < ActionController::Base
       redirect_to(season_url(@season), alert: "Dit seizoen is afgesloten.", status: :see_other) unless @season.nil? || @season.editable?
     end
 
+    # A season is played with the leagues and teams it was prepared with, so
+    # they can only be added while the season is still a draft.
+    def require_draft_season!
+      redirect_to(season_url(@season), alert: "Dit seizoen is al gestart.", status: :see_other) unless @season.nil? || @season.draft?
+    end
+
     # Editing competition data is only possible within a season, which does not
     # exist yet on a freshly deployed application.
     def require_season!

@@ -3,8 +3,10 @@ class LeaguesController < ApplicationController
 
   before_action :set_league, only: %i[show edit update destroy]
   before_action :require_admin!, only: %i[new create edit update destroy]
+  before_action :set_selected_season, only: %i[new create]
   before_action :require_season!, only: %i[new create]
   before_action :require_editable_season!, only: %i[new create edit update destroy]
+  before_action :require_draft_season!, only: %i[new create]
 
   def show
     @teams = @league.teams.includes(:league, :club, team_members: :participant).ordered
@@ -25,8 +27,7 @@ class LeaguesController < ApplicationController
   end
 
   def create
-    @league = League.new(league_params)
-    @league.season ||= @season
+    @league = @season.leagues.build(league_params)
 
     if @league.save
       redirect_to @league, notice: "Poule is toegevoegd."
@@ -49,6 +50,11 @@ class LeaguesController < ApplicationController
   end
 
   private
+    def set_selected_season
+      season_id = params[:season_id] || params.dig(:league, :season_id)
+      @season = @current_season = visible_seasons.find(season_id) if season_id.present?
+    end
+
     def set_league
       @league = League.find(params[:id])
       set_current_season_from(@league)
