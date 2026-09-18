@@ -41,8 +41,8 @@ class League < ApplicationRecord
           .flat_map { |tied| break_tie(tied, Match::BOARD_COUNT) }
   end
 
-  # The players of the teams in the league, plus the substitutes that played
-  # in it. Substitutes that are a member of a team are left out, they are
+  # The players of the teams in the league, plus the substitutes that were
+  # fielded in it. Substitutes that are a member of a team are left out, they are
   # already listed with their own team.
   def participants
     members = Participant.joins(:team_member).where(team_members: { team_id: teams.select(:id) })

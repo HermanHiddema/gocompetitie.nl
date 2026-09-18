@@ -145,7 +145,7 @@ class LeagueTest < ActiveSupport::TestCase
     other_team_player = seasons(:current).participants.create!(firstname: "Andere", lastname: "Speler", rating: 1800, club: clubs(:amsterdam))
     other_team = leagues(:first).teams.create!(name: "Amsterdam 2", abbrev: "Ams2", club: clubs(:amsterdam))
     other_team.team_members.create!(participant: other_team_player, board_number: 1)
-    games(:board_three).update!(home_player: substitute, away_player: other_team_player)
+    games(:unplayed).update!(home_player: substitute, away_player: other_team_player)
 
     players = @league.participants.to_a
 
