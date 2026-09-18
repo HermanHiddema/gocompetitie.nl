@@ -140,6 +140,21 @@ class LeagueTest < ActiveSupport::TestCase
     assert lines.any? { |line| line.include?("Amsterdam Speler1") }
   end
 
+  test "participants list the team players and the substitutes without a team" do
+    substitute = seasons(:current).participants.create!(firstname: "Invaller", lastname: "Speler", rating: 1900, club: clubs(:amsterdam))
+    other_team_player = seasons(:current).participants.create!(firstname: "Andere", lastname: "Speler", rating: 1800, club: clubs(:amsterdam))
+    other_team = leagues(:first).teams.create!(name: "Amsterdam 2", abbrev: "Ams2", club: clubs(:amsterdam))
+    other_team.team_members.create!(participant: other_team_player, board_number: 1)
+    games(:board_three).update!(home_player: substitute, away_player: other_team_player)
+
+    players = @league.participants.to_a
+
+    assert_equal 10, players.length
+    assert_includes players, substitute
+    assert_includes players, participants(:amsterdam_1)
+    assert_not_includes players, other_team_player
+  end
+
   private
     def create_teams(league, names)
       names.map { |name| league.teams.create!(name: name, abbrev: name[0, 4], club: clubs(:amsterdam)) }

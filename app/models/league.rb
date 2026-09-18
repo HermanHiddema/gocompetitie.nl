@@ -41,8 +41,15 @@ class League < ApplicationRecord
           .flat_map { |tied| break_tie(tied, Match::BOARD_COUNT) }
   end
 
+  # The players of the teams in the league, plus the substitutes that played
+  # in it. Substitutes that are a member of a team are left out, they are
+  # already listed with their own team.
   def participants
-    Participant.joins(:team_member).where(team_members: { team_id: teams.select(:id) })
+    members = Participant.joins(:team_member).where(team_members: { team_id: teams.select(:id) })
+    substitutes = Participant.where.missing(:team_member)
+    substitutes = substitutes.where(id: games.select(:home_id)).or(substitutes.where(id: games.select(:away_id)))
+
+    Participant.where(id: members).or(Participant.where(id: substitutes))
   end
 
   # Cross table of the league: standings[team][opponent] holds the result of
