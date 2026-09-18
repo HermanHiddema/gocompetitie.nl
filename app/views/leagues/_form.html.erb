@@ -1,5 +1,6 @@
 <%= form_with model: league, class: "space-y-4" do |form| %>
   <%= render "shared/errors", record: league %>
+  <%= form.hidden_field :season_id %>
 
   <div>
     <%= form.label :name, class: label_classes %>

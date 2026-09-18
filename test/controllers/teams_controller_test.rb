@@ -46,11 +46,12 @@ class TeamsControllerTest < ActionDispatch::IntegrationTest
 
   test "admins can create a team with members" do
     sign_in_as users(:admin)
-    seasons(:current).update!(phase: :draft)
-    participant = seasons(:current).participants.create!(firstname: "Nieuwe", lastname: "Speler", rating: 1800, club: clubs(:amsterdam))
+    season = seasons(:current)
+    season.update!(phase: :draft)
+    participant = season.participants.create!(firstname: "Nieuwe", lastname: "Speler", rating: 1800, club: clubs(:amsterdam))
 
     assert_difference -> { Team.count }, 1 do
-      post teams_url, params: { team: { name: "Amsterdam 2", abbrev: "Amst2", club_id: clubs(:amsterdam).id,
+      post teams_url(season_slug: season.slug), params: { team: { name: "Amsterdam 2", abbrev: "Amst2", club_id: clubs(:amsterdam).id,
         league_id: leagues(:first).id, captain_id: people(:anna).id,
         team_members_attributes: { "0" => { board_number: 1, participant_id: participant.id } } } }
     end
@@ -60,11 +61,12 @@ class TeamsControllerTest < ActionDispatch::IntegrationTest
 
   test "teams can only be created inside the selected season" do
     sign_in_as users(:admin)
-    seasons(:current).update!(phase: :draft)
+    season = seasons(:current)
+    season.update!(phase: :draft)
     league = seasons(:previous).leagues.create!(name: "Hoofdklasse", position: 0)
 
     assert_no_difference -> { Team.count } do
-      post teams_url, params: { team: { name: "Amsterdam 9", abbrev: "Amst9", club_id: clubs(:amsterdam).id, league_id: league.id } }
+      post teams_url(season_slug: season.slug), params: { team: { name: "Amsterdam 9", abbrev: "Amst9", club_id: clubs(:amsterdam).id, league_id: league.id } }
     end
 
     assert_response :unprocessable_content
@@ -154,9 +156,10 @@ class TeamsControllerTest < ActionDispatch::IntegrationTest
 
   test "a team without a name is rendered again" do
     sign_in_as users(:admin)
-    seasons(:current).update!(phase: :draft)
+    season = seasons(:current)
+    season.update!(phase: :draft)
 
-    post teams_url, params: { team: { name: "", abbrev: "", club_id: clubs(:amsterdam).id, league_id: leagues(:first).id } }
+    post teams_url(season_slug: season.slug), params: { team: { name: "", abbrev: "", club_id: clubs(:amsterdam).id, league_id: leagues(:first).id } }
 
     assert_response :unprocessable_content
   end
