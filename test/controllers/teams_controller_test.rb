@@ -57,6 +57,17 @@ class TeamsControllerTest < ActionDispatch::IntegrationTest
     assert_equal 1, Team.last.team_members.count
   end
 
+  test "teams can only be created inside the selected season" do
+    sign_in_as users(:admin)
+    league = seasons(:previous).leagues.create!(name: "Hoofdklasse", position: 0)
+
+    assert_no_difference -> { Team.count } do
+      post teams_url, params: { team: { name: "Amsterdam 9", abbrev: "Amst9", club_id: clubs(:amsterdam).id, league_id: league.id } }
+    end
+
+    assert_response :unprocessable_content
+  end
+
   test "finished seasons can no longer change teams" do
     sign_in_as users(:admin)
     team = teams(:amsterdam)
@@ -73,6 +84,18 @@ class TeamsControllerTest < ActionDispatch::IntegrationTest
     end
 
     assert_redirected_to season_url(team.season)
+  end
+
+  test "teams can only move to leagues in their own season" do
+    sign_in_as users(:admin)
+    team = leagues(:first).teams.create!(name: "Amsterdam 9", abbrev: "Amst9", club: clubs(:amsterdam))
+    league = seasons(:previous).leagues.create!(name: "Eerste klasse", position: 1)
+
+    patch team_url(team), params: { team: { name: "Gewijzigd", abbrev: team.abbrev, club_id: team.club_id,
+      league_id: league.id, captain_id: team.captain_id } }
+
+    assert_response :unprocessable_content
+    assert_equal leagues(:first), team.reload.league
   end
 
   test "historical season team links and forms keep the selected season" do
