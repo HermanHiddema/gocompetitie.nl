@@ -5,14 +5,6 @@
     <% unless season.active? %>
       <span class="ml-1 text-xs text-slate-500">(<%= season_phase_name(season) %>)</span>
     <% end %>
-    <% if admin? && season.editable? %>
-      <%= link_to edit_season_path(season), class: "ml-1 inline-block align-middle text-slate-500 hover:text-slate-800",
-            title: "Seizoen bewerken", "aria-label": "Seizoen bewerken" do %>
-        <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 3.487a1.72 1.72 0 0 1 2.432 2.432L7.5 17.713l-3.25.813.813-3.25 11.812-11.539Z" />
-        </svg>
-      <% end %>
-    <% end %>
   </div>
   <div class="text-slate-600"><%= pluralize(statistics[:leagues], "poule", "poules") %></div>
   <div class="text-slate-600"><%= pluralize(statistics[:clubs], "club", "clubs") %></div>

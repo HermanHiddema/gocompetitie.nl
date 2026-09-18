@@ -31,14 +31,27 @@ class SeasonsControllerTest < ActionDispatch::IntegrationTest
     assert_select "section div", text: "1 team", count: 1
   end
 
-  test "index only offers admins an edit link for editable seasons" do
+  test "index does not show season edit links" do
     get seasons_url
     assert_select "a[href=?]", edit_season_path(seasons(:current)), count: 0
 
     sign_in_as users(:admin)
     get seasons_url
 
+    assert_select "a[href=?]", edit_season_path(seasons(:current)), count: 0
+    assert_select "a[href=?]", edit_season_path(seasons(:previous)), count: 0
+  end
+
+  test "show only offers admins an edit link for editable seasons" do
+    get season_url(seasons(:current))
+    assert_select "a[href=?]", edit_season_path(seasons(:current)), count: 0
+
+    sign_in_as users(:admin)
+    get season_url(seasons(:current))
+
     assert_select "a[href=?]", edit_season_path(seasons(:current)), count: 1
+
+    get season_url(seasons(:previous))
     assert_select "a[href=?]", edit_season_path(seasons(:previous)), count: 0
   end
 
