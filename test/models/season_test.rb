@@ -155,4 +155,13 @@ class SeasonTest < ActiveSupport::TestCase
     assert_equal({ leagues: 2, clubs: 3, teams: 3, participants: 7 }, statistics.fetch(seasons(:current).id))
     assert_equal({ leagues: 0, clubs: 0, teams: 0, participants: 0 }, statistics.fetch(seasons(:previous).id))
   end
+
+  test "statistics return preloaded values when available" do
+    seasons = Season.where(id: [seasons(:current).id, seasons(:previous).id]).to_a
+
+    Season.preload_statistics(seasons)
+
+    assert_equal({ leagues: 2, clubs: 3, teams: 3, participants: 7 }, seasons.first.statistics)
+    assert_equal({ leagues: 0, clubs: 0, teams: 0, participants: 0 }, seasons.second.statistics)
+  end
 end

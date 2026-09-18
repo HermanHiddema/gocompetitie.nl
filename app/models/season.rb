@@ -98,6 +98,8 @@ class Season < ApplicationRecord
   # Counts for the seasons list: its leagues and teams, the clubs that field a
   # team and the participants with at least one game played or scheduled.
   def statistics
+    return @statistics if instance_variable_defined?(:@statistics)
+
     {
       leagues: leagues.count,
       clubs: Club.where(id: teams.select(:club_id)).count,
