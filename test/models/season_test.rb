@@ -50,18 +50,21 @@ class SeasonTest < ActiveSupport::TestCase
     assert_empty season.unplayed_games
   end
 
-  test "finishing a season deletes the participants without games" do
+  test "finishing a season deletes the participants without games, except team members" do
     season = seasons(:current)
     playing = participants(:amsterdam_1)
+    team_member = participants(:rotterdam_3)
     gameless = season.participants.create!(firstname: "Speler", lastname: "Zonder")
 
     assert_includes season.gameless_participants, gameless
     assert_not_includes season.gameless_participants, playing
+    assert_not_includes season.gameless_participants, team_member
 
     season.finish!
 
     assert_not Participant.exists?(gameless.id)
     assert Participant.exists?(playing.id)
+    assert Participant.exists?(team_member.id)
   end
 
   test "starting a season requires a draft" do

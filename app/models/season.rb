@@ -72,15 +72,17 @@ class Season < ApplicationRecord
     games.where(home_points: nil).or(games.where(away_points: nil))
   end
 
-  # Participants that never appeared on a board, which are removed when the
-  # season is finished.
+  # Participants that never appeared on a board and play in no team, which are
+  # removed when the season is finished.
   def gameless_participants
-    participants.where.not(id: games.where.not(home_id: nil).select(:home_id))
+    participants.where.missing(:team_member)
+      .where.not(id: games.where.not(home_id: nil).select(:home_id))
       .where.not(id: games.where.not(away_id: nil).select(:away_id))
   end
 
   # Finishing a season closes its results, so the games that were never played
-  # are recorded as 0-0 and the participants without any game are deleted.
+  # are recorded as 0-0 and the participants without any game or team are
+  # deleted.
   def finish!
     transaction do
       ensure_transition_from!(:active, action: "afgesloten")
