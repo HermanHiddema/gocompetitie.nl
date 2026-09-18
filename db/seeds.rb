@@ -4,6 +4,7 @@ return unless Rails.env.development?
 # scheduled round robin.
 season = Season.find_or_create_by!(name: "Voorjaar #{Date.today.year}") do |record|
   record.information = "Welkom bij de Nederlandse Go Competitie."
+  record.phase = :active
 end
 
 CLUBS = {

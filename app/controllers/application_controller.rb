@@ -31,21 +31,37 @@ class ApplicationController < ActionController::Base
     def set_current_season
       @season = @current_season =
         if params.key?(:season_slug)
-          Season.with_slug.find_by!(slug: params[:season_slug])
+          visible_seasons.with_slug.find_by!(slug: params[:season_slug])
         else
-          Season.with_slug.recent.first
+          visible_seasons.with_slug.recent.first
         end
+    end
+
+    # Seasons that are still a draft are only prepared by admins, so they stay
+    # out of sight for everybody else.
+    def visible_seasons
+      admin? ? Season.all : Season.published
     end
 
     # Records are addressed without a season in their path, so the season of
     # the record that is shown becomes the season of the page. This keeps the
     # navigation within the season the visitor is looking at.
     def set_current_season_from(record)
-      @season = @current_season = record.season if record&.season
+      season = record&.season
+      return if season.blank?
+
+      raise ActiveRecord::RecordNotFound if season.draft? && !admin?
+
+      @season = @current_season = season
     end
 
     def require_admin!
       head :unauthorized unless admin?
+    end
+
+    # A finished season keeps its results, so they can no longer be edited.
+    def require_editable_season!
+      redirect_to(season_url(@season), alert: "Dit seizoen is afgesloten.", status: :see_other) unless @season.nil? || @season.editable?
     end
 
     # Editing competition data is only possible within a season, which does not

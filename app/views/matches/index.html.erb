@@ -9,7 +9,7 @@
   <% end %>
 </section>
 
-<% if admin? && @season %>
+<% if admin? && @season&.editable? %>
   <div class="mt-6">
     <%= button_link_to "Wedstrijd toevoegen", new_match_path(**season_url_options) %>
   </div>

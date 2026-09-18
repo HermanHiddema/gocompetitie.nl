@@ -17,6 +17,22 @@ class MatchesControllerTest < ActionDispatch::IntegrationTest
     assert_select "h1", /Amsterdam 1/
   end
 
+  test "matches of a finished season can no longer be edited" do
+    sign_in_as users(:admin)
+    seasons(:current).update!(phase: :finished)
+
+    get edit_match_url(@match)
+    assert_redirected_to season_url(seasons(:current))
+
+    patch match_url(@match), params: { match: { playing_time: "21:00" } }
+    assert_redirected_to season_url(seasons(:current))
+    assert_not_equal "21:00", @match.reload.playing_time
+
+    get match_url(@match)
+    assert_response :success
+    assert_select "a", text: "Bewerken", count: 0
+  end
+
   test "new requires authentication" do
     get new_match_url
     assert_redirected_to new_session_url
@@ -39,6 +55,8 @@ class MatchesControllerTest < ActionDispatch::IntegrationTest
   test "historical season match links and forms keep the selected season" do
     sign_in_as users(:admin)
     previous = seasons(:previous)
+    seasons(:current).update!(phase: :draft)
+    previous.update!(phase: :active)
     league = previous.leagues.create!(name: "Hoofdklasse", position: 0)
     home_team = league.teams.create!(name: "Amsterdam 9", abbrev: "Amst9", club: clubs(:amsterdam))
     away_team = league.teams.create!(name: "Utrecht 9", abbrev: "Utre9", club: clubs(:utrecht))

@@ -1,4 +1,10 @@
 class Season < ApplicationRecord
+  # Seasons are drafted, then played and finally closed. A finished season is
+  # read only and only admins see the seasons that are still a draft.
+  PHASES = %w[draft active finished].freeze
+
+  enum :phase, PHASES.index_by(&:itself), default: :draft, validate: true
+
   has_many :leagues, -> { ordered }, dependent: :destroy, inverse_of: :season
   has_many :teams, through: :leagues
   has_many :matches, through: :leagues
@@ -8,11 +14,39 @@ class Season < ApplicationRecord
   validates :name, presence: true
   validates :slug, presence: true, uniqueness: true
   validates :handicap_adjustment, numericality: { only_integer: true, in: Game::HANDICAPS }, allow_nil: true
+  validate :only_one_active_season
 
   before_validation :update_slug
 
   scope :with_slug, -> { where.not(slug: [nil, ""]) }
   scope :recent, -> { order(created_at: :desc) }
+  scope :published, -> { where.not(phase: :draft) }
+
+  # The season the site shows by default: the season that is being played, or
+  # the season that was finished most recently.
+  def self.current
+    with_slug.active.recent.first || with_slug.finished.recent.first
+  end
+
+  # Games without a result in both columns, which are set to 0-0 when the
+  # season is finished.
+  def unplayed_games
+    games.where(home_points: nil).or(games.where(away_points: nil))
+  end
+
+  # Finishing a season closes its results, so the games that were never played
+  # are recorded as 0-0.
+  def finish!
+    transaction do
+      unplayed_games.update_all(home_points: 0, away_points: 0, reason: nil, updated_at: Time.current)
+      update!(phase: :finished)
+    end
+  end
+
+  # Results may only be changed while the season is being played or prepared.
+  def editable?
+    !finished?
+  end
 
   def update_slug
     self.slug = name.to_s.parameterize
@@ -74,6 +108,12 @@ class Season < ApplicationRecord
   end
 
   private
+    def only_one_active_season
+      return unless active?
+
+      errors.add(:phase, "is al in gebruik door een ander seizoen") if Season.active.where.not(id: id).exists?
+    end
+
     def ordered_participants
       team_participants = leagues.ordered.flat_map do |league|
         league.ranked_teams.map do |team|

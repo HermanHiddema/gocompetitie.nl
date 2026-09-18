@@ -9,7 +9,11 @@ application on Rails 8, with the same business logic and a new Tailwind CSS fron
 * **Season** – a competition season (e.g. *Voorjaar 2026*). Every season has its own
   path, `/season/voorjaar-2026`, which also prefixes the pages of that season, e.g.
   `/season/voorjaar-2026/teams`. Without a season in the path the most recent season
-  is shown; the front page redirects to it.
+  is shown. A season is a *draft* while it is being prepared, *active* while it is
+  played and *finished* once it is closed. There is at most one active season and the
+  front page redirects to it, or to the season that was finished most recently.
+  Drafts are only visible to admins, and the results of a finished season can no
+  longer be changed: finishing a season records its unplayed games as 0-0.
 * **League** (*poule*) – a group of teams within a season that play a round robin.
 * **Club**, **Venue** (*speellocatie*) and **Person** – the organisations, playing
   locations and contact persons. Clubs and venues outlive a season, so their pages

@@ -4,7 +4,12 @@ Rails.application.routes.draw do
 
   resources :leagues, except: :index
   resources :people
-  resources :seasons, param: :slug, path: "season"
+  resources :seasons, param: :slug, path: "season" do
+    member do
+      post :start
+      post :finish
+    end
+  end
 
   # The pages that show the results of a season are addressed with the season
   # slug, e.g. /season/voorjaar-2026/teams. Without a slug the most recent

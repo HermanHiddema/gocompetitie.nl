@@ -6,6 +6,7 @@ class MatchesController < ApplicationController
   before_action :set_match, only: %i[show edit update destroy]
   before_action :require_admin!, only: %i[new create destroy]
   before_action :require_season!, only: %i[new create]
+  before_action :require_editable_season!, only: %i[new create edit update destroy]
 
   def index
     @matches = @season ? @season.matches.includes(:venue, :home_team, :away_team, :games, league: :season).scheduled : Match.none
