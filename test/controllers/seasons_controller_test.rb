@@ -12,7 +12,7 @@ class SeasonsControllerTest < ActionDispatch::IntegrationTest
     get seasons_url
 
     assert_response :success
-    assert_select "section div", text: "1 poules", count: 1
+    assert_select "section div", text: "2 poules", count: 1
     assert_select "section div", text: "3 clubs", count: 1
     assert_select "section div", text: "3 teams", count: 1
     assert_select "section div", text: "7 deelnemers", count: 1
