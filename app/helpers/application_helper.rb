@@ -47,7 +47,7 @@ module ApplicationHelper
   end
 
   def format_match_result(match)
-    [match.black_points, match.white_points].map { |points| format_fraction(points) || "?" }.join("-")
+    [match.home_points, match.away_points].map { |points| format_fraction(points) || "?" }.join("-")
   end
 
   # Only links out to http(s) urls, so a stored javascript: url can never be

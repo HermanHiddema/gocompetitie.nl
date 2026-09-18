@@ -54,7 +54,7 @@ class ResultsExport
         participant.team_member&.board_number || 0,
         format("%.2f", 100 * participant.rating_change),
         results.count { |result| result[:result] == "+" },
-        results.map { |result| "#{result[:opponent_number]}#{result[:result]}" },
+        results.map { |result| "#{result[:opponent_number]}#{result[:result]}#{result[:handicap]}" },
         Array.new(width - results.length) { "0=" }
       ].flatten.map(&:to_s).join("\t")
     end
@@ -65,18 +65,23 @@ class ResultsExport
       table = ordered_participants.to_h { |participant| [participant.id, []] }
 
       games.each do |game|
-        next unless game.played? && game.black_id && game.white_id
+        next unless game.played? && game.home_id && game.away_id
 
-        table[game.black_id] ||= []
-        table[game.white_id] ||= []
+        table[game.home_id] ||= []
+        table[game.away_id] ||= []
 
         slot = 0
-        slot += 1 while table[game.black_id][slot] || table[game.white_id][slot]
-        table[game.black_id][slot] = { game: game, opponent_id: game.white_id, result: game.black_result }
-        table[game.white_id][slot] = { game: game, opponent_id: game.black_id, result: game.white_result }
+        slot += 1 while table[game.home_id][slot] || table[game.away_id][slot]
+        table[game.home_id][slot] = { game: game, opponent_id: game.away_id, result: game.home_result, handicap: handicap_of(game, :home) }
+        table[game.away_id][slot] = { game: game, opponent_id: game.home_id, result: game.away_result, handicap: handicap_of(game, :away) }
       end
 
       number_opponents(table)
+    end
+
+    # Games that were not played on the board have no color and handicap.
+    def handicap_of(game, side)
+      game.public_send(:"#{side}_handicap") unless game.forfeit?
     end
 
     def number_opponents(table)
@@ -94,6 +99,6 @@ class ResultsExport
     end
 
     def participants_by_id(ids)
-      Participant.where(id: ids).includes(:club, :team_member, :black_games, :white_games).index_by(&:id)
+      Participant.where(id: ids).includes(:club, :team_member, :home_games, :away_games).index_by(&:id)
     end
 end

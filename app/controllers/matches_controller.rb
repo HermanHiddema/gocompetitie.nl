@@ -8,28 +8,28 @@ class MatchesController < ApplicationController
   before_action :require_season!, only: %i[new create]
 
   def index
-    @matches = @season ? @season.matches.includes(:venue, :black_team, :white_team, :games).scheduled : Match.none
+    @matches = @season ? @season.matches.includes(:venue, :home_team, :away_team, :games, league: :season).scheduled : Match.none
   end
 
   def show
-    @games = @match.games.includes(:black_player, :white_player).by_board
+    @games = @match.games.includes(:home_player, :away_player).by_board
   end
 
   def new
     @league = @season.leagues.find_by(id: params[:league_id])
-    @league ||= @season.leagues.joins(:teams).find_by(teams: { id: params[:black_team_id] })
+    @league ||= @season.leagues.joins(:teams).find_by(teams: { id: params[:home_team_id] })
     @league ||= @season.leagues.ordered.first
     @match = @league ? @league.matches.build : Match.new
-    @match.black_team_id = params[:black_team_id]
-    @match.white_team_id = params[:white_team_id]
+    @match.home_team_id = params[:home_team_id]
+    @match.away_team_id = params[:away_team_id]
     @leagues = @season.leagues.ordered
     @teams = @league ? @league.teams.ordered : @season.teams.ordered
   end
 
   def edit
-    @games = @match.games.includes(:black_player, :white_player).by_board
-    @black_players = selectable_players(@match.black_team)
-    @white_players = selectable_players(@match.white_team)
+    @games = @match.games.includes(:home_player, :away_player).by_board
+    @home_players = selectable_players(@match.home_team)
+    @away_players = selectable_players(@match.away_team)
   end
 
   def create
@@ -80,10 +80,10 @@ class MatchesController < ApplicationController
     end
 
     def match_create_params
-      params.expect(match: [:league_id, :venue_id, :playing_date, :playing_time, :black_team_id, :white_team_id])
+      params.expect(match: [:league_id, :venue_id, :playing_date, :playing_time, :home_team_id, :away_team_id])
     end
 
     def match_update_params
-      params.expect(match: [:venue_id, :playing_date, :playing_time, games_attributes: [[:id, :black_id, :white_id, :result]]])
+      params.expect(match: [:venue_id, :playing_date, :playing_time, games_attributes: [[:id, :home_id, :away_id, :result, :handicap]]])
     end
 end

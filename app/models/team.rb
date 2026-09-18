@@ -3,8 +3,8 @@ class Team < ApplicationRecord
   belongs_to :league
   belongs_to :captain, class_name: "Person", optional: true
 
-  has_many :black_matches, class_name: "Match", foreign_key: :black_team_id, dependent: :destroy, inverse_of: :black_team
-  has_many :white_matches, class_name: "Match", foreign_key: :white_team_id, dependent: :destroy, inverse_of: :white_team
+  has_many :home_matches, class_name: "Match", foreign_key: :home_team_id, dependent: :destroy, inverse_of: :home_team
+  has_many :away_matches, class_name: "Match", foreign_key: :away_team_id, dependent: :destroy, inverse_of: :away_team
   has_many :team_members, -> { by_board }, dependent: :destroy, inverse_of: :team
   has_many :participants, through: :team_members
 
@@ -23,15 +23,15 @@ class Team < ApplicationRecord
   scope :ordered, -> { reorder(:name) }
 
   def matches
-    Match.where(black_team_id: id).or(Match.where(white_team_id: id))
+    Match.where(home_team_id: id).or(Match.where(away_team_id: id))
   end
 
   def score
-    matches.includes(:games).sum { |match| (match.black_team_id == id ? match.black_score : match.white_score).to_f }
+    matches.includes(:games).sum { |match| (match.home_team_id == id ? match.home_score : match.away_score).to_f }
   end
 
   def points
-    matches.includes(:games).sum { |match| (match.black_team_id == id ? match.black_points : match.white_points).to_f }
+    matches.includes(:games).sum { |match| (match.home_team_id == id ? match.home_points : match.away_points).to_f }
   end
 
   def unplayed_matches

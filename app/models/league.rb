@@ -49,10 +49,10 @@ class League < ApplicationRecord
   # their mutual match, or nil when no match has been scheduled.
   def standings
     @standings ||= matches.each_with_object({}) do |match, table|
-      table[match.black_team_id] ||= {}
-      table[match.white_team_id] ||= {}
-      table[match.black_team_id][match.white_team_id] = standing_for(match, :black)
-      table[match.white_team_id][match.black_team_id] = standing_for(match, :white)
+      table[match.home_team_id] ||= {}
+      table[match.away_team_id] ||= {}
+      table[match.home_team_id][match.away_team_id] = standing_for(match, :home)
+      table[match.away_team_id][match.home_team_id] = standing_for(match, :away)
     end
   end
 
@@ -79,7 +79,7 @@ class League < ApplicationRecord
             playing_date = base_date + ((iso_day - base_date.cwday) % 7)
           end
         end
-        matches.create(black_team: home, white_team: away, venue: venue, playing_date: playing_date, playing_time: venue&.playing_time)
+        matches.create(home_team: home, away_team: away, venue: venue, playing_date: playing_date, playing_time: venue&.playing_time)
       end
     end
   end
@@ -114,7 +114,11 @@ class League < ApplicationRecord
   end
 
   def results
-    ResultsExport.new(ordered_participants: ordered_participants, games: games.includes(:black_player, :white_player), group_names: ranked_teams.map(&:name)).lines
+    ResultsExport.new(
+      ordered_participants: ordered_participants,
+      games: games.includes(:home_player, :away_player, match: { league: :season }),
+      group_names: ranked_teams.map(&:name)
+    ).lines
   end
 
   def to_s
@@ -145,15 +149,15 @@ class League < ApplicationRecord
       criteria = team_ids.index_with { [0.0, 0.0] }
 
       matches.includes(:games).each do |match|
-        next unless team_ids.include?(match.black_team_id) && team_ids.include?(match.white_team_id)
+        next unless team_ids.include?(match.home_team_id) && team_ids.include?(match.away_team_id)
 
         games = match.games.select { |game| game.board_number <= boards && game.played? }
         next if games.empty?
 
-        black_points = games.sum { |game| game.black_points.to_f } / 2.0
-        white_points = games.sum { |game| game.white_points.to_f } / 2.0
-        criteria[match.black_team_id] = add_result(criteria[match.black_team_id], black_points, white_points)
-        criteria[match.white_team_id] = add_result(criteria[match.white_team_id], white_points, black_points)
+        home_points = games.sum { |game| game.home_points.to_f } / 2.0
+        away_points = games.sum { |game| game.away_points.to_f } / 2.0
+        criteria[match.home_team_id] = add_result(criteria[match.home_team_id], home_points, away_points)
+        criteria[match.away_team_id] = add_result(criteria[match.away_team_id], away_points, home_points)
       end
 
       criteria
@@ -172,7 +176,7 @@ class League < ApplicationRecord
     def ordered_participants
       team_groups = ranked_teams.map { |team| team.team_members.includes(:participant).by_board.map(&:participant) }
       roster = team_groups.flatten
-      reserves = games.includes(:black_player, :white_player).played.flat_map { |game| [game.black_player, game.white_player] }.compact.uniq - roster
+      reserves = games.includes(:home_player, :away_player).played.flat_map { |game| [game.home_player, game.away_player] }.compact.uniq - roster
       team_groups + (reserves.present? ? [reserves] : [])
     end
 

@@ -1,6 +1,25 @@
 require "test_helper"
 
 class SeasonTest < ActiveSupport::TestCase
+  test "new seasons default to a three stone handicap adjustment" do
+    assert_equal 3, Season.new.handicap_adjustment
+  end
+
+  test "handicap adjustment is optional and limited to valid stone counts" do
+    season = seasons(:current)
+
+    season.handicap_adjustment = nil
+    assert season.valid?
+    assert_not season.handicaps?
+
+    season.handicap_adjustment = 10
+    assert_not season.valid?
+
+    season.handicap_adjustment = 0
+    assert season.valid?
+    assert season.handicaps?
+  end
+
   test "the slug is derived from the name" do
     season = Season.create!(name: "Voorjaar 2027")
 
@@ -27,7 +46,7 @@ class SeasonTest < ActiveSupport::TestCase
     reserves = 2.times.map do |index|
       season.participants.create!(firstname: "Reserve#{index}", lastname: "Speler", rating: 1800, club: clubs(:amsterdam))
     end
-    games(:board_three).update!(black_player: reserves.first, white_player: reserves.second)
+    games(:board_three).update!(home_player: reserves.first, away_player: reserves.second)
 
     lines = season.results
 

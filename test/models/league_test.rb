@@ -61,6 +61,19 @@ class LeagueTest < ActiveSupport::TestCase
     assert_equal teams(:amsterdam), @league.ranked_teams.first
   end
 
+  test "results list the color and handicap of every game" do
+    game = games(:board_one)
+    game.away_player.update!(rating: game.home_rating - 500)
+    game.update!(handicap: 2) # the weaker away player takes black
+
+    lines = @league.results
+
+    assert lines.any? { |line| line.include?("4+/w2") }
+    assert lines.any? { |line| line.include?("1-/b2") }
+    assert lines.any? { |line| line.include?("2+/b0") } # even board, so the away player is black
+    assert lines.any? { |line| line.include?("6+/b0") } # odd board, so the home player is black
+  end
+
   test "tied teams are ranked by the match points of their mutual matches" do
     league = leagues(:first)
     alpha, beta, gamma, delta = create_teams(league, %w[Alpha Beta Gamma Delta])
@@ -133,9 +146,9 @@ class LeagueTest < ActiveSupport::TestCase
     end
 
     # Play a match between two teams, with one result per board, seen from the
-    # first (black) team.
-    def play(league, black_team, white_team, results)
-      match = league.matches.create!(black_team: black_team, white_team: white_team)
+    # first (home) team.
+    def play(league, home_team, away_team, results)
+      match = league.matches.create!(home_team: home_team, away_team: away_team)
       match.games.by_board.each_with_index { |game, index| game.update!(result: results[index]) }
       match
     end

@@ -6,12 +6,12 @@ class ParticipantsController < ApplicationController
   before_action :require_season!, only: %i[new create]
 
   def index
-    @participants = @season ? @season.participants.includes(:club, :black_games, :white_games, team_member: :team).by_rating : Participant.none
+    @participants = @season ? @season.participants.includes(:club, :home_games, :away_games, team_member: :team).by_rating : Participant.none
     @show_club = true
   end
 
   def show
-    @games = @participant.games.includes(:black_player, :white_player, match: %i[black_team white_team])
+    @games = @participant.games.includes(:home_player, :away_player, match: [{ league: :season }, :home_team, :away_team])
   end
 
   def new

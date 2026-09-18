@@ -7,14 +7,14 @@
   </h3>
 
   <div class="flex items-center justify-between border-b border-slate-200 pb-2 font-semibold">
-    <span><%= link_to match.black_team.name, match.black_team, class: "hover:underline" %> &ndash;
-      <%= link_to match.white_team.name, match.white_team, class: "hover:underline" %></span>
+    <span><%= link_to match.home_team.name, match.home_team, class: "hover:underline" %> &ndash;
+      <%= link_to match.away_team.name, match.away_team, class: "hover:underline" %></span>
     <%= link_to format_match_result(match), match, class: "hover:underline" %>
   </div>
 
   <ol class="mt-2 space-y-1">
     <% match.games.sort_by { |game| game.board_number.to_i }.each do |game| %>
-      <li class="flex items-center gap-3 text-sm">
+      <li class="flex items-center gap-3 border-b border-slate-200 py-2 text-sm last:border-0 sm:border-0 sm:py-0">
         <span class="w-4 text-slate-400"><%= game.board_number %></span>
         <%= render game %>
       </li>

@@ -32,7 +32,7 @@
                 <% if standing.nil? %>
                   <td class="px-0 py-1 text-center md:px-1">
                     <% if admin? %>
-                      <%= link_to "+", new_match_path(league_id: league.id, black_team_id: team.id, white_team_id: opponent.id, **season_url_options),
+                      <%= link_to "+", new_match_path(league_id: league.id, home_team_id: team.id, away_team_id: opponent.id, **season_url_options),
                             class: "text-slate-400 hover:text-slate-900", title: "Wedstrijd plannen" %>
                     <% end %>
                   </td>

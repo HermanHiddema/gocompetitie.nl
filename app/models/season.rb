@@ -7,6 +7,7 @@ class Season < ApplicationRecord
 
   validates :name, presence: true
   validates :slug, presence: true, uniqueness: true
+  validates :handicap_adjustment, numericality: { only_integer: true, in: Game::HANDICAPS }, allow_nil: true
 
   before_validation :update_slug
 
@@ -17,12 +18,20 @@ class Season < ApplicationRecord
     self.slug = name.to_s.parameterize
   end
 
+  def handicaps?
+    handicap_adjustment.present?
+  end
+
   def ranked_teams
     leagues.ordered.flat_map(&:ranked_teams)
   end
 
   def results
-    ResultsExport.new(ordered_participants: ordered_participants, games: games.includes(:black_player, :white_player), group_names: ranked_teams.map(&:name)).lines
+    ResultsExport.new(
+      ordered_participants: ordered_participants,
+      games: games.includes(:home_player, :away_player, match: { league: :season }),
+      group_names: ranked_teams.map(&:name)
+    ).lines
   end
 
   def create_leagues(amount = 5)
@@ -72,7 +81,7 @@ class Season < ApplicationRecord
         end
       end
 
-      reserves = participants.includes(:club, :black_games, :white_games).select { |participant| participant.played_games.any? }
+      reserves = participants.includes(:club, :home_games, :away_games).select { |participant| participant.played_games.any? }
         .sort_by { |participant| -participant.rating_change }
 
       team_participants + [reserves - team_participants.flatten]

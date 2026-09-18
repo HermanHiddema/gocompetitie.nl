@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_04_234500) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_17_193000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -26,18 +26,19 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_04_234500) do
   end
 
   create_table "games", force: :cascade do |t|
-    t.bigint "black_id"
-    t.integer "black_points"
+    t.bigint "away_id"
+    t.integer "away_points"
     t.integer "board_number"
     t.datetime "created_at", null: false
+    t.integer "handicap"
+    t.bigint "home_id"
+    t.integer "home_points"
     t.bigint "match_id", null: false
     t.string "reason"
     t.datetime "updated_at", null: false
-    t.bigint "white_id"
-    t.integer "white_points"
-    t.index ["black_id"], name: "index_games_on_black_id"
+    t.index ["away_id"], name: "index_games_on_away_id"
+    t.index ["home_id"], name: "index_games_on_home_id"
     t.index ["match_id"], name: "index_games_on_match_id"
-    t.index ["white_id"], name: "index_games_on_white_id"
   end
 
   create_table "leagues", force: :cascade do |t|
@@ -50,19 +51,19 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_04_234500) do
   end
 
   create_table "matches", force: :cascade do |t|
-    t.bigint "black_team_id", null: false
+    t.bigint "away_team_id", null: false
     t.datetime "created_at", null: false
+    t.bigint "home_team_id", null: false
     t.bigint "league_id", null: false
     t.date "playing_date"
     t.string "playing_time"
     t.datetime "updated_at", null: false
     t.bigint "venue_id"
-    t.bigint "white_team_id", null: false
-    t.index "league_id, LEAST(black_team_id, white_team_id), GREATEST(black_team_id, white_team_id)", name: "index_matches_on_league_and_team_pair", unique: true
-    t.index ["black_team_id"], name: "index_matches_on_black_team_id"
+    t.index "league_id, LEAST(home_team_id, away_team_id), GREATEST(home_team_id, away_team_id)", name: "index_matches_on_league_and_team_pair", unique: true
+    t.index ["away_team_id"], name: "index_matches_on_away_team_id"
+    t.index ["home_team_id"], name: "index_matches_on_home_team_id"
     t.index ["league_id"], name: "index_matches_on_league_id"
     t.index ["venue_id"], name: "index_matches_on_venue_id"
-    t.index ["white_team_id"], name: "index_matches_on_white_team_id"
   end
 
   create_table "participants", force: :cascade do |t|
@@ -98,6 +99,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_04_234500) do
 
   create_table "seasons", force: :cascade do |t|
     t.datetime "created_at", null: false
+    t.integer "handicap_adjustment", default: 3
     t.text "information"
     t.string "name", null: false
     t.string "slug", null: false
@@ -163,12 +165,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_04_234500) do
 
   add_foreign_key "clubs", "people", column: "contact_person_id"
   add_foreign_key "games", "matches"
-  add_foreign_key "games", "participants", column: "black_id"
-  add_foreign_key "games", "participants", column: "white_id"
+  add_foreign_key "games", "participants", column: "away_id"
+  add_foreign_key "games", "participants", column: "home_id"
   add_foreign_key "leagues", "seasons"
   add_foreign_key "matches", "leagues"
-  add_foreign_key "matches", "teams", column: "black_team_id"
-  add_foreign_key "matches", "teams", column: "white_team_id"
+  add_foreign_key "matches", "teams", column: "away_team_id"
+  add_foreign_key "matches", "teams", column: "home_team_id"
   add_foreign_key "matches", "venues"
   add_foreign_key "participants", "clubs"
   add_foreign_key "participants", "people"

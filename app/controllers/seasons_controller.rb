@@ -15,7 +15,7 @@ class SeasonsController < ApplicationController
 
   def show
     respond_to do |format|
-      format.html { @leagues = @season.leagues.ordered.includes(teams: [:club, { team_members: :participant }], matches: :games) }
+      format.html { @leagues = @season.leagues.ordered.includes(teams: [:club, { team_members: :participant }], matches: [:games, { league: :season }]) }
       format.text { render plain: @season.results.join("\n") }
     end
   end
@@ -56,6 +56,6 @@ class SeasonsController < ApplicationController
     end
 
     def season_params
-      params.expect(season: [:name, :information])
+      params.expect(season: [:name, :information, :handicap_adjustment])
     end
 end
