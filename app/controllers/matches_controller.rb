@@ -6,6 +6,7 @@ class MatchesController < ApplicationController
   before_action :set_match, only: %i[show edit update destroy]
   before_action :require_admin!, only: %i[new create destroy]
   before_action :require_season!, only: %i[new create]
+  before_action :require_editable_season!, only: %i[new create edit update destroy]
 
   def index
     @matches = @season ? @season.matches.includes(:venue, :home_team, :away_team, :games, league: :season).scheduled : Match.none
@@ -33,13 +34,15 @@ class MatchesController < ApplicationController
   end
 
   def create
-    @match = Match.new(match_create_params)
+    @league = @season.leagues.find_by(id: match_create_params[:league_id])
+    @match = Match.new(match_create_params.except(:league_id))
+    @match.league = @league
 
-    if @match.save
+    if @match.errors.empty? && @match.save
       redirect_to edit_match_url(@match), notice: "Wedstrijd is toegevoegd."
     else
+      @match.errors.add(:league, :blank) unless @league
       @leagues = @season.leagues.ordered
-      @league = @season.leagues.find_by(id: @match.league_id)
       @teams = @league ? @league.teams.ordered : @season.teams.ordered
       render :new, status: :unprocessable_content
     end

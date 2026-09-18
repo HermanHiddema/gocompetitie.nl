@@ -6,6 +6,10 @@ season = Season.find_or_create_by!(name: "Voorjaar #{Date.today.year}") do |reco
   record.information = "Welkom bij de Nederlandse Go Competitie."
 end
 
+Season.active.where.not(id: season.id).find_each(&:finish!)
+season.phase = :active
+season.save! if season.changed?
+
 CLUBS = {
   "Amsterdam" => { abbrev: "Amst", day: 2, time: "20:00", address: "Da Costakade 158", city: "Amsterdam" },
   "Utrecht" => { abbrev: "Utre", day: 1, time: "19:30", address: "Oudegracht 245", city: "Utrecht" },

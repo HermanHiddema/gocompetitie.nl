@@ -17,10 +17,116 @@ class SeasonsControllerTest < ActionDispatch::IntegrationTest
     assert_select "div.grid > section.min-w-0", count: seasons(:current).leagues.count
   end
 
-  test "the front page redirects to the most recent season" do
+  test "the front page redirects to the active season" do
     get root_url
 
-    assert_redirected_to season_url(Season.recent.first)
+    assert_redirected_to season_url(seasons(:current))
+  end
+
+  test "the front page redirects to the last finished season without an active one" do
+    seasons(:current).update!(phase: :draft)
+
+    get root_url
+
+    assert_redirected_to season_url(seasons(:previous))
+  end
+
+  test "draft seasons are only accessible to admins" do
+    draft = Season.create!(name: "Najaar 2026")
+
+    get season_url(draft)
+    assert_response :not_found
+
+    get seasons_url
+    assert_select "a", text: draft.name, count: 0
+
+    sign_in_as users(:admin)
+    get season_url(draft)
+    assert_response :success
+  end
+
+  test "admins start and finish a season" do
+    sign_in_as users(:admin)
+    draft = Season.create!(name: "Najaar 2026")
+    seasons(:current).update!(phase: :finished)
+
+    post start_season_url(draft)
+
+    assert_redirected_to season_url(draft)
+    assert draft.reload.active?
+  end
+
+  test "starting a season is refused when another season is active" do
+    sign_in_as users(:admin)
+    draft = Season.create!(name: "Najaar 2026")
+
+    post start_season_url(draft)
+
+    assert_redirected_to season_url(draft)
+    assert draft.reload.draft?
+    assert_equal "Fase is al in gebruik door een ander seizoen", flash[:alert]
+  end
+
+  test "finishing a season sets the unplayed games to 0-0" do
+    sign_in_as users(:admin)
+    season = seasons(:current)
+
+    post finish_season_url(season)
+
+    assert_redirected_to season_url(season)
+    assert season.reload.finished?
+    assert_equal "0-0", games(:unplayed).reload.result
+  end
+
+  test "finished seasons cannot be started again" do
+    sign_in_as users(:admin)
+    season = seasons(:current)
+
+    post finish_season_url(season)
+    post start_season_url(season)
+
+    assert_redirected_to season_url(season)
+    assert season.reload.finished?
+    assert_equal "Alleen een seizoen in de fase draft kan worden gestart.", flash[:alert]
+  end
+
+  test "draft seasons cannot be finished" do
+    sign_in_as users(:admin)
+    draft = Season.create!(name: "Najaar 2026")
+
+    post finish_season_url(draft)
+
+    assert_redirected_to season_url(draft)
+    assert draft.reload.draft?
+    assert_equal "Alleen een seizoen in de fase active kan worden afgesloten.", flash[:alert]
+  end
+
+  test "only admins can finish a season" do
+    sign_in_as users(:member)
+
+    post finish_season_url(seasons(:current))
+
+    assert_response :unauthorized
+    assert seasons(:current).reload.active?
+  end
+
+  test "the season page warns about unplayed games before finishing" do
+    sign_in_as users(:admin)
+
+    get season_url(seasons(:current))
+
+    assert_response :success
+    assert_select "form[action=?][data-turbo-confirm*=?]", finish_season_path(seasons(:current)), "1 ongespeelde partij"
+  end
+
+  test "finished seasons no longer show schedule links in the standings" do
+    sign_in_as users(:admin)
+    seasons(:current).update!(phase: :finished)
+
+    get season_url(seasons(:current))
+
+    assert_response :success
+    assert_select "a", text: "+", count: 0
   end
 
   test "show renders the EGD result list as text" do

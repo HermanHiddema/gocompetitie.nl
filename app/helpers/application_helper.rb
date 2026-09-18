@@ -50,6 +50,23 @@ module ApplicationHelper
     [match.home_points, match.away_points].map { |points| format_fraction(points) || "?" }.join("-")
   end
 
+  SEASON_PHASE_NAMES = { "draft" => "concept", "active" => "lopend", "finished" => "afgesloten" }.freeze
+
+  def season_phase_name(season)
+    SEASON_PHASE_NAMES.fetch(season.phase, season.phase)
+  end
+
+  # Finishing a season records the games that were never played as 0-0, so the
+  # confirmation says how many games that are.
+  def season_finish_confirmation(season)
+    unplayed = season.unplayed_games.count
+    return "Weet je het zeker? Het seizoen kan daarna niet meer gewijzigd worden." if unplayed.zero?
+
+    "Er #{unplayed == 1 ? "is" : "zijn"} nog #{unplayed} " \
+      "#{unplayed == 1 ? "ongespeelde partij" : "ongespeelde partijen"}. " \
+      "Deze #{unplayed == 1 ? "wordt" : "worden"} op 0-0 gezet. Weet je het zeker?"
+  end
+
   # Only links out to http(s) urls, so a stored javascript: url can never be
   # turned into a link.
   def external_link_to(url, name = nil, **options)

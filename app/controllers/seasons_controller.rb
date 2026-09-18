@@ -1,16 +1,18 @@
 class SeasonsController < ApplicationController
   allow_unauthenticated_access only: %i[front index show]
 
-  before_action :set_season, only: %i[show edit update destroy]
-  before_action :require_admin!, only: %i[new create edit update destroy]
+  before_action :set_season, only: %i[show edit update destroy start finish]
+  before_action :require_admin!, only: %i[new create edit update destroy start finish]
+  before_action :require_editable_season!, only: %i[edit update destroy]
 
-  # The front page shows the most recent season.
+  # The front page shows the season that is being played, or the season that
+  # was finished most recently.
   def front
-    redirect_to Season.with_slug.recent.first || seasons_url
+    redirect_to Season.current || seasons_url
   end
 
   def index
-    @seasons = Season.recent
+    @seasons = visible_seasons.recent
   end
 
   def show
@@ -45,6 +47,21 @@ class SeasonsController < ApplicationController
     end
   end
 
+  def start
+    if @season.start!
+      redirect_to @season, notice: "Seizoen is gestart."
+    end
+  rescue ActiveRecord::RecordInvalid
+    redirect_to @season, alert: @season.errors.full_messages.to_sentence
+  end
+
+  def finish
+    @season.finish!
+    redirect_to @season, notice: "Seizoen is afgesloten."
+  rescue ActiveRecord::RecordInvalid
+    redirect_to @season, alert: @season.errors.full_messages.to_sentence
+  end
+
   def destroy
     @season.destroy!
     redirect_to seasons_url, notice: "Seizoen is verwijderd.", status: :see_other
@@ -52,7 +69,7 @@ class SeasonsController < ApplicationController
 
   private
     def set_season
-      @season = @current_season = Season.find_by!(slug: params[:slug])
+      @season = @current_season = visible_seasons.find_by!(slug: params[:slug])
     end
 
     def season_params

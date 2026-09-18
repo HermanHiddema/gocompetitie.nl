@@ -8,7 +8,7 @@
   <%= render "matches/match_details", match: @match %>
 </section>
 
-<% if current_user %>
+<% if current_user && @match.season&.editable? %>
   <div class="mt-6 flex gap-3">
     <%= button_link_to "Bewerken", edit_match_path(@match) %>
     <% if admin? %>

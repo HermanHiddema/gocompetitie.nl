@@ -1,6 +1,70 @@
 require "test_helper"
 
 class SeasonTest < ActiveSupport::TestCase
+  test "new seasons start as a draft" do
+    assert Season.new.draft?
+    assert Season.create!(name: "Voorjaar 2029").draft?
+  end
+
+  test "there can be at most one active season" do
+    season = Season.create!(name: "Voorjaar 2029")
+
+    season.phase = :active
+    assert_not season.valid?
+
+    seasons(:current).update!(phase: :finished)
+    assert season.valid?
+  end
+
+  test "the current season is the active one, or the last finished one" do
+    assert_equal seasons(:current), Season.current
+
+    seasons(:current).update!(phase: :draft)
+    assert_equal seasons(:previous), Season.current
+  end
+
+  test "the current season fallback is the most recently finished season" do
+    current = seasons(:current)
+    previous = seasons(:previous)
+    current.update!(phase: :draft)
+    travel 1.second do
+      previous.update!(phase: :draft)
+      previous.start!
+      previous.finish!
+    end
+
+    assert_equal previous, Season.current
+  end
+
+  test "finishing a season sets the unplayed games to 0-0" do
+    season = seasons(:current)
+    game = games(:unplayed)
+
+    assert_equal 1, season.unplayed_games.count
+
+    season.finish!
+
+    assert season.finished?
+    assert_not season.editable?
+    assert_equal "0-0", game.reload.result
+    assert_empty season.unplayed_games
+  end
+
+  test "starting a season requires a draft" do
+    season = seasons(:current)
+
+    assert_raises(ActiveRecord::RecordInvalid) { season.start! }
+
+    season.update!(phase: :finished)
+    assert_raises(ActiveRecord::RecordInvalid) { season.start! }
+  end
+
+  test "finishing a season requires it to be active" do
+    season = Season.create!(name: "Najaar 2028")
+
+    assert_raises(ActiveRecord::RecordInvalid) { season.finish! }
+  end
+
   test "new seasons default to a three stone handicap adjustment" do
     assert_equal 3, Season.new.handicap_adjustment
   end

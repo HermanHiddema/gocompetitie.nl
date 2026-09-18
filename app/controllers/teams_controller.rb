@@ -6,6 +6,7 @@ class TeamsController < ApplicationController
   before_action :set_team, only: %i[show edit update destroy]
   before_action :require_admin!, only: %i[new create edit update destroy]
   before_action :require_season!, only: %i[new create]
+  before_action :require_editable_season!, only: %i[new create edit update destroy]
 
   def index
     @teams = @season ? @season.teams.includes(:league, :club, team_members: :participant).ordered : Team.none
@@ -26,7 +27,9 @@ class TeamsController < ApplicationController
   end
 
   def create
-    @team = Team.new(team_params)
+    @league = @season.leagues.find_by(id: team_create_params[:league_id])
+    @team = Team.new(team_create_params.except(:league_id))
+    @team.league = @league
 
     if @team.save
       redirect_to @team, notice: "Team is toegevoegd."
@@ -37,7 +40,14 @@ class TeamsController < ApplicationController
   end
 
   def update
-    if @team.update(team_params)
+    attributes = team_update_params
+    @league = if attributes.key?(:league_id)
+      @team.season.leagues.find_by(id: attributes[:league_id])
+    else
+      @team.league
+    end
+
+    if @team.update(attributes.except(:league_id).merge(league: @league))
       redirect_to @team, notice: "Team is bijgewerkt."
     else
       build_missing_team_members
@@ -74,7 +84,11 @@ class TeamsController < ApplicationController
       unassigned.or(season.participants.left_joins(:team_member).where(team_members: { team_id: @team.id })).by_rating
     end
 
-    def team_params
+    def team_create_params
+      params.expect(team: [:name, :abbrev, :club_id, :league_id, :captain_id, team_members_attributes: [[:id, :board_number, :participant_id, :_destroy]]])
+    end
+
+    def team_update_params
       params.expect(team: [:name, :abbrev, :club_id, :league_id, :captain_id, team_members_attributes: [[:id, :board_number, :participant_id, :_destroy]]])
     end
 end

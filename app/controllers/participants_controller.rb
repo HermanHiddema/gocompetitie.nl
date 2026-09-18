@@ -4,6 +4,7 @@ class ParticipantsController < ApplicationController
   before_action :set_participant, only: %i[show edit update destroy]
   before_action :require_admin!, only: %i[new create edit update destroy]
   before_action :require_season!, only: %i[new create]
+  before_action :require_editable_season!, only: %i[new create edit update destroy]
 
   def index
     @participants = @season ? @season.participants.includes(:club, :home_games, :away_games, team_member: :team).by_rating : Participant.none

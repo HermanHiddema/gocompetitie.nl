@@ -64,6 +64,7 @@ nl:
       season:
         name: Naam
         information: Informatie
+        phase: Fase
       team:
         name: Naam
         abbrev: Afkorting
