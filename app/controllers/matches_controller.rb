@@ -1,5 +1,6 @@
 class MatchesController < ApplicationController
   allow_unauthenticated_access only: %i[index show]
+  allow_indexing only: :index
 
   BOARDS = 3
 
