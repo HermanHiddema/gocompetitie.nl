@@ -148,7 +148,7 @@ class SeasonTest < ActiveSupport::TestCase
 
     season.finish!
 
-    assert_equal teams(:amsterdam), Season.find(season.id).champion
+    assert_equal teams(:amsterdam), season.champion
     assert_nil seasons(:previous).champion
   end
 
@@ -177,5 +177,15 @@ class SeasonTest < ActiveSupport::TestCase
 
     assert_equal({ leagues: 2, clubs: 3, teams: 3, participants: 7 }, seasons_by_id.fetch(seasons(:current).id).statistics)
     assert_equal({ leagues: 0, clubs: 0, teams: 0, participants: 0 }, seasons_by_id.fetch(seasons(:previous).id).statistics)
+  end
+
+  test "statistics preloading also preloads the champion for finished seasons" do
+    season = seasons(:current)
+    season.finish!
+    seasons = Season.where(id: [season.id]).to_a
+
+    Season.preload_statistics(seasons)
+
+    assert_equal teams(:amsterdam), seasons.first.champion
   end
 end

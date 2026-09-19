@@ -27,15 +27,15 @@ class Team < ApplicationRecord
   end
 
   def score
-    matches.includes(:games).sum { |match| (match.home_team_id == id ? match.home_score : match.away_score).to_f }
+    matches_for_placement.sum { |match| (match.home_team_id == id ? match.home_score : match.away_score).to_f }
   end
 
   def points
-    matches.includes(:games).sum { |match| (match.home_team_id == id ? match.home_points : match.away_points).to_f }
+    matches_for_placement.sum { |match| (match.home_team_id == id ? match.home_points : match.away_points).to_f }
   end
 
   def unplayed_matches
-    matches.reject(&:played?).length
+    matches_for_placement.count { |match| !match.played? }
   end
 
   def placement_criteria
@@ -63,8 +63,16 @@ class Team < ApplicationRecord
       end
     end
 
-    def duplicates?(values)
-      values = values.compact
-      values.length != values.uniq.length
-    end
+  def duplicates?(values)
+    values = values.compact
+    values.length != values.uniq.length
+  end
+
+  def matches_for_placement
+    return matches.includes(:games) unless association(:league).loaded? &&
+      league.association(:matches).loaded? &&
+      league.matches.all? { |match| match.association(:games).loaded? }
+
+    league.matches.select { |match| [match.home_team_id, match.away_team_id].include?(id) }
+  end
 end
