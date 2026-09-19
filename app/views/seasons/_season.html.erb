@@ -4,7 +4,7 @@
     <%= link_to season.name, season, class: "font-medium hover:underline" %>
     <%= season_phase_badge(season, class: "ml-1 text-xs") %>
   </div>
-  <div class="font-medium text-slate-600 md:col-span-2"><%= season.champion&.name %></div>
+  <div class="font-medium text-slate-600 md:col-span-2"><% if season.champion %><%= season.champion.name %> <span class="md:hidden" role="img" aria-label="kampioen">🥇</span><% end %></div>
   <div class="text-slate-600"><%= pluralize(statistics[:leagues], "poule", "poules") %></div>
   <div class="text-slate-600"><%= pluralize(statistics[:clubs], "club", "clubs") %></div>
   <div class="text-slate-600"><%= pluralize(statistics[:teams], "team", "teams") %></div>
