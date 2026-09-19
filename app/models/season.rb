@@ -109,6 +109,14 @@ class Season < ApplicationRecord
     }
   end
 
+  # The team that won the highest league. A season only has a champion once it
+  # has been finished, before that the standings can still change.
+  def champion
+    return @champion if instance_variable_defined?(:@champion)
+
+    @champion = finished? ? leagues.ordered.first&.ranked_teams&.first : nil
+  end
+
   def ranked_teams
     leagues.ordered.flat_map(&:ranked_teams)
   end

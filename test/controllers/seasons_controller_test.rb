@@ -18,6 +18,18 @@ class SeasonsControllerTest < ActionDispatch::IntegrationTest
     assert_select "section div", text: "7 spelers", count: 1
   end
 
+  test "index shows the champion of each finished season" do
+    get seasons_url
+    assert_select "section div", text: "Amsterdam 1", count: 0
+
+    seasons(:current).finish!
+
+    get seasons_url
+
+    assert_response :success
+    assert_select "section div", text: "Amsterdam 1", count: 1
+  end
+
   test "index pluralizes singular season statistics" do
     season = Season.create!(name: "Najaar 2026", phase: :finished)
     league = season.leagues.create!(name: "Hoofdklasse", position: 0)

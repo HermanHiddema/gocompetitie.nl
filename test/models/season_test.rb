@@ -140,6 +140,18 @@ class SeasonTest < ActiveSupport::TestCase
     file&.unlink
   end
 
+  test "the champion is the winner of the highest league of a finished season" do
+    season = seasons(:current)
+
+    # While the season is being played the standings can still change.
+    assert_nil season.champion
+
+    season.finish!
+
+    assert_equal teams(:amsterdam), Season.find(season.id).champion
+    assert_nil seasons(:previous).champion
+  end
+
   test "statistics count what takes part in the season" do
     season = seasons(:current)
 
