@@ -20,7 +20,7 @@ class SeasonsControllerTest < ActionDispatch::IntegrationTest
 
   test "index shows the champion of each finished season" do
     get seasons_url
-    assert_select "section div", text: "Amsterdam 1 🥇", count: 0
+    assert_select "section div", text: "Amsterdam 1", count: 0
 
     seasons(:current).finish!
 
@@ -28,7 +28,7 @@ class SeasonsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_select "section div", text: "Amsterdam 1 🥇", count: 1
-    assert_select "section div span.md\\:hidden", text: "🥇", count: 1
+    assert_select "section div span.md\\:hidden[role=img][aria-label=?]", "kampioen", text: "🥇", count: 1
   end
 
   test "index pluralizes singular season statistics" do
