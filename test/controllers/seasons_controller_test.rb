@@ -64,6 +64,18 @@ class SeasonsControllerTest < ActionDispatch::IntegrationTest
     assert_select "div.grid > section.min-w-0", count: seasons(:current).leagues.count
   end
 
+  test "show hides the phase badge of an active season" do
+    get season_url(seasons(:current))
+
+    assert_response :success
+    assert_select "h1 ~ span[role=img]", count: 0
+
+    get season_url(seasons(:previous))
+
+    assert_response :success
+    assert_select "h1 ~ span[role=img][aria-label=?]", "afgesloten", count: 1
+  end
+
   test "the front page redirects to the active season" do
     get root_url
 
