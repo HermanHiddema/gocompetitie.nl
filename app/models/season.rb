@@ -25,9 +25,25 @@ class Season < ApplicationRecord
   def self.preload_statistics(seasons)
     statistics = statistics_for(seasons)
     empty_statistics = { leagues: 0, clubs: 0, teams: 0, participants: 0 }
+    champions = champions_for(seasons.select(&:finished?))
 
     seasons.each do |season|
       season.instance_variable_set(:@statistics, statistics.fetch(season.id, empty_statistics))
+      season.instance_variable_set(:@champion, champions.fetch(season.id, nil)) if season.finished?
+    end
+  end
+
+  def self.champions_for(seasons)
+    season_ids = seasons.map(&:id)
+    return {} if season_ids.empty?
+
+    first_league_ids = League.where(season_id: season_ids).order(:season_id, :position, :id).pluck(:season_id, :id)
+      .each_with_object({}) do |(season_id, league_id), first_ids|
+        first_ids[season_id] ||= league_id
+      end
+
+    League.where(id: first_league_ids.values).includes(matches: :games, teams: :league).index_by(&:season_id).transform_values do |league|
+      league.ranked_teams.first
     end
   end
 
@@ -107,6 +123,15 @@ class Season < ApplicationRecord
       participants: participants.where(id: games.select(:home_id))
         .or(participants.where(id: games.select(:away_id))).count
     }
+  end
+
+  # The team that won the highest league. A season only has a champion once it
+  # has been finished, before that the standings can still change.
+  def champion
+    return unless finished?
+    return @champion if instance_variable_defined?(:@champion)
+
+    @champion = leagues.ordered.first&.ranked_teams&.first
   end
 
   def ranked_teams

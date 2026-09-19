@@ -140,6 +140,18 @@ class SeasonTest < ActiveSupport::TestCase
     file&.unlink
   end
 
+  test "the champion is the winner of the highest league of a finished season" do
+    season = seasons(:current)
+
+    # While the season is being played the standings can still change.
+    assert_nil season.champion
+
+    season.finish!
+
+    assert_equal teams(:amsterdam), season.champion
+    assert_nil seasons(:previous).champion
+  end
+
   test "statistics count what takes part in the season" do
     season = seasons(:current)
 
@@ -165,5 +177,15 @@ class SeasonTest < ActiveSupport::TestCase
 
     assert_equal({ leagues: 2, clubs: 3, teams: 3, participants: 7 }, seasons_by_id.fetch(seasons(:current).id).statistics)
     assert_equal({ leagues: 0, clubs: 0, teams: 0, participants: 0 }, seasons_by_id.fetch(seasons(:previous).id).statistics)
+  end
+
+  test "statistics preloading also preloads the champion for finished seasons" do
+    season = seasons(:current)
+    season.finish!
+    seasons = Season.where(id: [season.id]).to_a
+
+    Season.preload_statistics(seasons)
+
+    assert_equal teams(:amsterdam), seasons.first.champion
   end
 end
