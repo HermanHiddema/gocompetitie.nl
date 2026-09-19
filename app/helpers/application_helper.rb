@@ -56,7 +56,7 @@ module ApplicationHelper
     SEASON_PHASE_NAMES.fetch(season.phase, season.phase)
   end
 
-  SEASON_PHASE_ICONS = { "draft" => "📄", "active" => "🔄", "finished" => "✅" }.freeze
+  SEASON_PHASE_ICONS = { "draft" => "📄", "active" => "➡️", "finished" => "✅" }.freeze
 
   # Shows the phase of a season as an icon, with its name for screen readers
   # and as a tooltip.
