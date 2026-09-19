@@ -1,5 +1,6 @@
 class SeasonsController < ApplicationController
   allow_unauthenticated_access only: %i[front index show]
+  allow_indexing only: %i[index show]
 
   before_action :set_season, only: %i[show edit update destroy start finish]
   before_action :require_admin!, only: %i[new create edit update destroy start finish]

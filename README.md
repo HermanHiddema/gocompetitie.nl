@@ -39,6 +39,11 @@ application on Rails 8, with the same business logic and a new Tailwind CSS fron
 League and season results can be exported in the tab separated format used by the
 European Go Database by requesting the text format, e.g. `/leagues/1.text`.
 
+Pages with personal details, such as player names or the addresses of clubs and
+venues, are kept out of search indexes. Indexing is opt in: a controller allows
+it with `allow_indexing`, every other response gets a `noindex, nofollow` robots
+meta tag and `X-Robots-Tag` header, which also covers the text exports.
+
 ## Development
 
 Requirements: Ruby (see `.ruby-version`), PostgreSQL and Node-free asset tooling

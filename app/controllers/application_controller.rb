@@ -8,8 +8,16 @@ class ApplicationController < ActionController::Base
   stale_when_importmap_changes
 
   before_action :set_current_season
+  after_action :discourage_indexing
 
-  helper_method :current_user, :current_season, :admin?
+  helper_method :current_user, :current_season, :admin?, :indexable?
+
+  # Pages with personal details, like player names, club addresses and phone
+  # numbers, are kept out of search indexes. Indexing is therefore opt in: an
+  # action is only indexed when its controller allows it here.
+  def self.allow_indexing(only:)
+    before_action(only:) { @indexable = true }
+  end
 
   private
     attr_reader :current_season, :season
@@ -24,6 +32,18 @@ class ApplicationController < ActionController::Base
     # editing matches.
     def admin?
       current_user&.admin? || false
+    end
+
+    # Only the pages that were allowed with `allow_indexing` may appear in a
+    # search index. The text exports list players, so they are never indexed.
+    def indexable?
+      @indexable.present? && request.format.html?
+    end
+
+    # Responses that may not be indexed say so in a header as well as in the
+    # layout, because the text exports have no markup to carry a meta tag.
+    def discourage_indexing
+      response.headers["X-Robots-Tag"] = "noindex, nofollow" unless indexable?
     end
 
     # Season pages carry the season slug in their path, e.g.
