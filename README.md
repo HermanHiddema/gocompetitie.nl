@@ -41,8 +41,8 @@ European Go Database by requesting the text format, e.g. `/leagues/1.text`.
 
 Pages with personal details, such as player names or the addresses of clubs and
 venues, are kept out of search indexes. Indexing is opt in: a controller allows
-it with `allow_indexing`, every other page gets a `noindex` robots tag and is
-disallowed in `public/robots.txt`.
+it with `allow_indexing`, every other response gets a `noindex, nofollow` robots
+meta tag and `X-Robots-Tag` header, which also covers the text exports.
 
 ## Development
 

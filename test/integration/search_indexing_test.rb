@@ -7,6 +7,7 @@ class SearchIndexingTest < ActionDispatch::IntegrationTest
 
       assert_response :success
       assert_select "meta[name=robots]", count: 0
+      assert_nil response.headers["X-Robots-Tag"]
     end
   end
 
@@ -17,6 +18,7 @@ class SearchIndexingTest < ActionDispatch::IntegrationTest
 
       assert_response :success
       assert_select "meta[name=robots][content=?]", "noindex, nofollow"
+      assert_equal "noindex, nofollow", response.headers["X-Robots-Tag"]
     end
   end
 
@@ -24,6 +26,6 @@ class SearchIndexingTest < ActionDispatch::IntegrationTest
     get league_url(leagues(:top), format: :text)
 
     assert_response :success
-    assert_no_match "robots", response.body
+    assert_equal "noindex, nofollow", response.headers["X-Robots-Tag"]
   end
 end
