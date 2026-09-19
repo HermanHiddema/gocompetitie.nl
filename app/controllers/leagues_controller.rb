@@ -1,6 +1,5 @@
 class LeaguesController < ApplicationController
   allow_unauthenticated_access only: :show
-  allow_indexing only: :show
 
   before_action :set_league, only: %i[show edit update destroy]
   before_action :require_admin!, only: %i[new create edit update destroy]
