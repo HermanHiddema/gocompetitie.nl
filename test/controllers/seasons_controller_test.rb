@@ -27,7 +27,8 @@ class SeasonsControllerTest < ActionDispatch::IntegrationTest
     get seasons_url
 
     assert_response :success
-    assert_select "section div", text: "Amsterdam 1", count: 1
+    assert_select "section div", text: "Amsterdam 1 🥇", count: 1
+    assert_select "section div span.md\\:hidden[role=img][aria-label=?]", "kampioen", text: "🥇", count: 1
   end
 
   test "index pluralizes singular season statistics" do
