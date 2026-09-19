@@ -37,8 +37,13 @@ class Season < ApplicationRecord
     season_ids = seasons.map(&:id)
     return {} if season_ids.empty?
 
-    League.where(season_id: season_ids).ordered.includes(matches: :games, teams: :league).group_by(&:season_id).transform_values do |leagues|
-      leagues.first&.ranked_teams&.first
+    first_league_ids = League.where(season_id: season_ids).order(:season_id, :position, :id).pluck(:season_id, :id)
+      .each_with_object({}) do |(season_id, league_id), first_ids|
+        first_ids[season_id] ||= league_id
+      end
+
+    League.where(id: first_league_ids.values).includes(matches: :games, teams: :league).index_by(&:season_id).transform_values do |league|
+      league.ranked_teams.first
     end
   end
 
