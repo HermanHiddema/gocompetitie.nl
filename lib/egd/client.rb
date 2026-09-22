@@ -17,6 +17,15 @@ module Egd
       }
     GRAPHQL
 
+    PLAYERS_SEARCH_QUERY = <<~GRAPHQL.freeze
+      query PlayersSearch($search: String!, $pagination: PaginationInput!) {
+        playersSearch(search: $search, order: { field: rating, direction: DESC }, pagination: $pagination) {
+          data { pin firstName lastName countryCode club grade rating }
+          hasMorePages
+        }
+      }
+    GRAPHQL
+
     def initialize(token: ENV["EGD_API_TOKEN"], endpoint: ENDPOINT)
       raise Error, "EGD_API_TOKEN is niet ingesteld" if token.blank?
 
@@ -34,6 +43,24 @@ module Egd
       loop do
         pagination = { page: page, limit: limit.clamp(1, MAX_PAGE_SIZE) }
         result = query(PLAYERS_QUERY, filter: filter.presence, pagination: pagination).fetch("players")
+        result["data"].each { |player| yield player }
+
+        break unless result["hasMorePages"]
+
+        page += 1
+      end
+    end
+
+    # Yields every player matching a free-text search, paging through the results.
+    def search_players(search, limit: MAX_PAGE_SIZE)
+      unless block_given?
+        return Enumerator.new { |yielder| search_players(search, limit: limit) { |player| yielder << player } }
+      end
+
+      page = 1
+      loop do
+        pagination = { page: page, limit: limit.clamp(1, MAX_PAGE_SIZE) }
+        result = query(PLAYERS_SEARCH_QUERY, search: search, pagination: pagination).fetch("playersSearch")
         result["data"].each { |player| yield player }
 
         break unless result["hasMorePages"]

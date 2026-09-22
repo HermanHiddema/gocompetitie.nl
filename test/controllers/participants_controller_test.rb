@@ -1,6 +1,20 @@
 require "test_helper"
 
 class ParticipantsControllerTest < ActionDispatch::IntegrationTest
+  class FakeEgdClient
+    attr_reader :searches
+
+    def initialize(players)
+      @players = players
+      @searches = []
+    end
+
+    def search_players(search, limit:)
+      @searches << { search: search, limit: limit }
+      @players
+    end
+  end
+
   test "index lists the participants of the season" do
     get participants_url
 
@@ -27,6 +41,40 @@ class ParticipantsControllerTest < ActionDispatch::IntegrationTest
     assert_equal seasons(:current), participant.season
   end
 
+  test "signed in users can search EGD players while adding a participant to an editable season" do
+    sign_in_as users(:admin)
+    client = FakeEgdClient.new([
+      { "pin" => 12345678, "firstName" => "Jan", "lastName" => "Jansen", "club" => "Tstv", "grade" => "2k",
+        "rating" => 1850 }
+    ])
+
+    with_egd_client(client) do
+      get new_participant_url(season_slug: seasons(:current).slug, egd_search: "Jan")
+    end
+
+    assert_response :success
+    assert_equal [{ search: "Jan", limit: 20 }], client.searches
+    assert_select "h2", text: "Zoeken in de EGD"
+    assert_select "div", text: /Jan Jansen/
+    assert_select "form[action=?]", import_egd_participants_path(season_slug: seasons(:current).slug)
+  end
+
+  test "signed in users can import one EGD player into an active season" do
+    sign_in_as users(:admin)
+
+    assert_difference -> { seasons(:current).participants.count }, 1 do
+      post import_egd_participants_url(season_slug: seasons(:current).slug),
+        params: { egd_player: { pin: 12345678, firstName: "Jan", lastName: "Jansen", club: "Tstv", grade: "2k", rating: 1850 } }
+    end
+
+    participant = Participant.last
+    assert_redirected_to participant_url(participant)
+    assert_equal seasons(:current), participant.season
+    assert_equal "12345678", participant.egd_pin
+    assert_equal "2k", participant.rank
+    assert_equal "Tstv", participant.club.abbrev
+  end
+
   test "historical season participant links and forms keep the selected season" do
     sign_in_as users(:admin)
     previous = seasons(:previous)
@@ -39,6 +87,15 @@ class ParticipantsControllerTest < ActionDispatch::IntegrationTest
     get new_participant_url(season_slug: previous.slug)
     assert_select "form[action=?]", participants_path(season_slug: previous.slug)
     assert_select "footer", /Najaar 2025/
+
+    client = FakeEgdClient.new([
+      { "pin" => 12345678, "firstName" => "Jan", "lastName" => "Jansen", "club" => "Tstv", "grade" => "2k",
+        "rating" => 1850 }
+    ])
+    with_egd_client(client) do
+      get new_participant_url(season_slug: previous.slug, egd_search: "Jan")
+    end
+    assert_select "form[action=?]", import_egd_participants_path(season_slug: previous.slug)
 
     assert_difference -> { previous.participants.count }, 1 do
       post participants_url(season_slug: previous.slug), params: { participant: { firstname: "Nieuwe", lastname: "Speler",
@@ -67,11 +124,22 @@ class ParticipantsControllerTest < ActionDispatch::IntegrationTest
     participant = participants(:amsterdam_1)
     participant.season.update!(phase: :finished)
 
+    get new_participant_url(season_slug: participant.season.slug)
+
+    assert_redirected_to season_url(participant.season)
+
     patch participant_url(participant), params: { participant: { firstname: "Gewijzigd", lastname: participant.lastname,
       rating: participant.rating, egd_pin: participant.egd_pin, club_id: participant.club_id, rank: participant.rank } }
 
     assert_redirected_to season_url(participant.season)
     assert_equal "Speler1", participant.reload.firstname
+
+    assert_no_difference -> { participant.season.participants.count } do
+      post import_egd_participants_url(season_slug: participant.season.slug),
+        params: { egd_player: { pin: 12345678, firstName: "Jan", lastName: "Jansen", club: "Tstv", grade: "2k", rating: 1850 } }
+    end
+
+    assert_redirected_to season_url(participant.season)
 
     assert_no_difference -> { Participant.count } do
       delete participant_url(participant)
@@ -79,4 +147,14 @@ class ParticipantsControllerTest < ActionDispatch::IntegrationTest
 
     assert_redirected_to season_url(participant.season)
   end
+
+  private
+    def with_egd_client(client)
+      singleton_class = Egd::Client.singleton_class
+      original_new = Egd::Client.method(:new)
+      singleton_class.send(:define_method, :new, ->(*, **) { client })
+      yield
+    ensure
+      singleton_class.send(:define_method, :new, original_new)
+    end
 end

@@ -21,7 +21,11 @@ Rails.application.routes.draw do
     resources :venues
     resources :games, only: :index
     resources :matches, only: %i[index new create]
-    resources :participants, only: %i[index new create]
+    resources :participants, only: %i[index new create] do
+      collection do
+        post :import_egd
+      end
+    end
     resources :teams, only: %i[index new create]
   end
 

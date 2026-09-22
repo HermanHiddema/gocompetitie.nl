@@ -95,6 +95,10 @@ the database. The import needs a personal access token of the EGD, created under
 EGD_API_TOKEN=... bin/rails egd:import_players
 ```
 
+Admins can also add individual players from the EGD on the “Nieuwe speler” page
+of a draft or running season; that search is not limited by country or recent
+activity.
+
 The API itself is described in [docs/egd-graphql-api.md](docs/egd-graphql-api.md).
 
 ## Testing and linting

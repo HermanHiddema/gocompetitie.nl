@@ -1,5 +1,46 @@
 <% content_for :title, "Nieuwe speler" %>
 <h1 class="mb-6 text-2xl font-bold">Nieuwe speler</h1>
+<section class="mb-6 rounded-lg bg-white p-5 shadow-sm ring-1 ring-slate-200">
+  <h2 class="mb-3 text-lg font-semibold">Zoeken in de EGD</h2>
+  <%= form_with url: new_participant_path(**season_url_options), method: :get, class: "space-y-4" do |form| %>
+    <div class="grid gap-4 sm:grid-cols-[1fr_auto] sm:items-end">
+      <div>
+        <%= form.label :egd_search, "Zoekterm", class: label_classes %>
+        <%= form.text_field :egd_search, value: @egd_search, class: field_classes %>
+        <p class="mt-1 text-xs text-slate-500">Zoekt in de hele EGD op naam, club of PIN.</p>
+      </div>
+      <%= form.submit "Zoeken", class: button_classes(:secondary) %>
+    </div>
+  <% end %>
+
+  <% if @egd_search.present? %>
+    <div class="mt-4 space-y-3">
+      <% if @egd_players.any? %>
+        <% @egd_players.each do |player| %>
+          <div class="flex flex-col gap-3 rounded-md border border-slate-200 p-3 sm:flex-row sm:items-center sm:justify-between">
+            <div class="text-sm">
+              <div class="font-semibold"><%= [player["firstName"], player["lastName"]].join(" ") %></div>
+              <div class="text-slate-600">
+                PIN <%= player["pin"] %>
+                <% if player["rating"].present? %>· <%= player["rating"] %><% end %>
+                <% if player["grade"].present? %>· <%= player["grade"] %><% end %>
+                <% if player["club"].present? %>· <%= player["club"] %><% end %>
+              </div>
+            </div>
+            <%= form_with url: import_egd_participants_path(**season_url_options), class: "shrink-0" do %>
+              <% %w[pin firstName lastName club grade rating].each do |key| %>
+                <%= hidden_field_tag "egd_player[#{key}]", player[key] %>
+              <% end %>
+              <%= submit_tag "Toevoegen uit EGD", class: button_classes %>
+            <% end %>
+          </div>
+        <% end %>
+      <% else %>
+        <p class="text-sm text-slate-600">Geen spelers gevonden.</p>
+      <% end %>
+    </div>
+  <% end %>
+</section>
 <section class="rounded-lg bg-white p-5 shadow-sm ring-1 ring-slate-200">
   <%= render "form", participant: @participant %>
 </section>

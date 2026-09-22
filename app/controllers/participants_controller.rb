@@ -5,6 +5,7 @@ class ParticipantsController < ApplicationController
   before_action :require_admin!, only: %i[new create edit update destroy]
   before_action :require_season!, only: %i[new create]
   before_action :require_editable_season!, only: %i[new create edit update destroy]
+  before_action :require_admin!, :require_season!, :require_editable_season!, only: :import_egd
 
   def index
     @participants = @season ? @season.participants.includes(:club, :home_games, :away_games, team_member: :team).by_rating : Participant.none
@@ -17,6 +18,8 @@ class ParticipantsController < ApplicationController
 
   def new
     @participant = Participant.new(season: @season)
+    @egd_search = params[:egd_search].to_s.strip
+    @egd_players = search_egd_players
   end
 
   def edit
@@ -31,6 +34,11 @@ class ParticipantsController < ApplicationController
     else
       render :new, status: :unprocessable_content
     end
+  end
+
+  def import_egd
+    participant = @season.upsert_egd_player(egd_player_params)
+    redirect_to participant, notice: "Speler is uit de EGD overgenomen."
   end
 
   def update
@@ -54,5 +62,22 @@ class ParticipantsController < ApplicationController
 
     def participant_params
       params.expect(participant: [:firstname, :lastname, :rating, :egd_pin, :club_id, :rank])
+    end
+
+    def egd_player_params
+      params.expect(egd_player: %i[pin firstName lastName club grade rating]).to_h.stringify_keys
+    end
+
+    def search_egd_players
+      return [] if @egd_search.blank?
+
+      egd_client.search_players(@egd_search, limit: 20).to_a
+    rescue Egd::Error => error
+      flash.now[:alert] = error.message
+      []
+    end
+
+    def egd_client
+      Egd::Client.new
     end
 end
