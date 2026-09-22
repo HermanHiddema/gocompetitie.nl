@@ -4,7 +4,7 @@ namespace :egd do
     season = if ENV["SEASON"].present?
       Season.find_by!(slug: ENV["SEASON"])
     else
-      Season.current or abort "Geen seizoen gevonden, geef er een op met SEASON=slug."
+      Season.with_slug.draft.recent.first or abort "Geen draftseizoen gevonden, geef er een op met SEASON=slug."
     end
 
     country_code = ENV["COUNTRY"].presence || Season::EGD_COUNTRY_CODE
@@ -14,5 +14,7 @@ namespace :egd do
     puts "#{imported} spelers uit #{country_code} geïmporteerd in #{season.name}."
   rescue Egd::Error => error
     abort error.message
+  rescue ActiveRecord::RecordInvalid => error
+    abort error.record.errors.full_messages.to_sentence
   end
 end

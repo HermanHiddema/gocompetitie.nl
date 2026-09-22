@@ -80,15 +80,16 @@ in the development environment.
 A season can be filled with players from the [European Go Database](https://europeangodatabase.eu):
 
 ```bash
-bin/rails egd:import_players                                  # the current season
+bin/rails egd:import_players                                  # the most recent draft season
 bin/rails egd:import_players SEASON=voorjaar-2026 COUNTRY=NL YEARS=4
 ```
 
 By default the Dutch players that appeared in a tournament in the past four years
-are imported, and `YEARS` must be a positive number. Every player becomes a
-person, matched on their EGD pin, and a participant of the season, with the club,
-rating and rank from the database. The import needs a personal access token of
-the EGD, created under *Developer → New Token*, in `EGD_API_TOKEN`:
+are imported, and `YEARS` must be a positive number. Bulk imports only work for
+seasons that are still a draft. Every player becomes a person, matched on their
+EGD pin, and a participant of the season, with the club, rating and rank from
+the database. The import needs a personal access token of the EGD, created under
+*Developer → New Token*, in `EGD_API_TOKEN`:
 
 ```bash
 EGD_API_TOKEN=... bin/rails egd:import_players

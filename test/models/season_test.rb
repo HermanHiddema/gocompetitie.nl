@@ -246,6 +246,20 @@ class SeasonTest < ActiveSupport::TestCase
     assert_equal "Tstv", participant.club.abbrev
   end
 
+  test "importing players from the EGD requires a draft season" do
+    client = RejectingEgdClient.new
+
+    [seasons(:current), Season.create!(name: "Najaar 2028", phase: :finished),
+      Season.create!(name: "Voorjaar 2028", phase: :cancelled)].each do |season|
+      error = assert_raises(ActiveRecord::RecordInvalid) do
+        season.import_egd_players(client: client)
+      end
+
+      assert_equal ["Alleen een seizoen in de fase draft kan worden gevuld met spelers uit de EGD."],
+        error.record.errors.full_messages
+    end
+  end
+
   test "importing players from the EGD twice updates them instead of adding them again" do
     season = Season.create!(name: "Najaar 2029")
     player = egd_player(pin: 12345678, first_name: "Jan", last_name: "Jansen", club: "Tstv", grade: "2k",
