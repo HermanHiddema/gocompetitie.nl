@@ -50,13 +50,13 @@ module ApplicationHelper
     [match.home_points, match.away_points].map { |points| format_fraction(points) || "?" }.join("-")
   end
 
-  SEASON_PHASE_NAMES = { "draft" => "concept", "active" => "lopend", "finished" => "afgesloten" }.freeze
+  SEASON_PHASE_NAMES = { "draft" => "concept", "active" => "lopend", "finished" => "afgesloten", "cancelled" => "geannuleerd" }.freeze
 
   def season_phase_name(season)
     SEASON_PHASE_NAMES.fetch(season.phase, season.phase)
   end
 
-  SEASON_PHASE_ICONS = { "draft" => "📄", "active" => "➡️", "finished" => "✅" }.freeze
+  SEASON_PHASE_ICONS = { "draft" => "⏸️", "active" => "➡️", "finished" => "✅", "cancelled" => "🛑" }.freeze
 
   # Shows the phase of a season as an icon, with its name for screen readers
   # and as a tooltip.
@@ -77,6 +77,14 @@ module ApplicationHelper
     "Er #{unplayed == 1 ? "is" : "zijn"} nog #{unplayed} " \
       "#{unplayed == 1 ? "ongespeelde partij" : "ongespeelde partijen"}. " \
       "Deze #{unplayed == 1 ? "wordt" : "worden"} op 0-0 gezet. Weet je het zeker?"
+  end
+
+  # Cancelling a season leaves its games unplayed and leaves it without a
+  # winner, so the confirmation says so.
+  def season_cancel_confirmation
+    "Het seizoen wordt geannuleerd en heeft geen winnaar. " \
+      "De ongespeelde partijen blijven ongespeeld en het seizoen kan daarna niet meer gewijzigd worden. " \
+      "Weet je het zeker?"
   end
 
   # Only links out to http(s) urls, so a stored javascript: url can never be

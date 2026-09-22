@@ -68,12 +68,54 @@ class SeasonTest < ActiveSupport::TestCase
     assert Participant.exists?(team_member.id)
   end
 
+  test "cancelling a season leaves the unplayed games unplayed and has no champion" do
+    season = seasons(:current)
+    game = games(:unplayed)
+
+    season.cancel!
+
+    assert season.cancelled?
+    assert_not season.editable?
+    assert_nil season.champion
+    assert_nil game.reload.home_points
+    assert_equal 1, season.unplayed_games.count
+  end
+
+  test "cancelling a season deletes the participants without games, except team members" do
+    season = seasons(:current)
+    playing = season.participants.create!(firstname: "Speler", lastname: "Met_partij")
+    team_member = participants(:rotterdam_3)
+    gameless = season.participants.create!(firstname: "Speler", lastname: "Zonder")
+    games(:board_one).update!(home_player: playing)
+
+    season.cancel!
+
+    assert_not Participant.exists?(gameless.id)
+    assert Participant.exists?(playing.id)
+    assert Participant.exists?(team_member.id)
+  end
+
+  test "cancelling a season requires it to be active" do
+    season = Season.create!(name: "Najaar 2028")
+
+    assert_raises(ActiveRecord::RecordInvalid) { season.cancel! }
+  end
+
+  test "the current season fallback also considers cancelled seasons" do
+    seasons(:current).cancel!
+
+    assert_equal seasons(:current), Season.current
+  end
+
   test "starting a season requires a draft" do
     season = seasons(:current)
 
     assert_raises(ActiveRecord::RecordInvalid) { season.start! }
 
     season.update!(phase: :finished)
+    assert_raises(ActiveRecord::RecordInvalid) { season.start! }
+
+    season.update!(phase: :cancelled)
     assert_raises(ActiveRecord::RecordInvalid) { season.start! }
   end
 

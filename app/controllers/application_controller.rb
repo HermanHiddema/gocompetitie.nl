@@ -79,9 +79,11 @@ class ApplicationController < ActionController::Base
       head :unauthorized unless admin?
     end
 
-    # A finished season keeps its results, so they can no longer be edited.
+    # A season that has ended keeps its results, so they can no longer be edited.
     def require_editable_season!
-      redirect_to(season_url(@season), alert: "Dit seizoen is afgesloten.", status: :see_other) unless @season.nil? || @season.editable?
+      return if @season.nil? || @season.editable?
+
+      redirect_to(season_url(@season), alert: "Dit seizoen is #{helpers.season_phase_name(@season)}.", status: :see_other)
     end
 
     # A season is played with the leagues and teams it was prepared with, so

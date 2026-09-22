@@ -29,12 +29,15 @@ class ApplicationHelperTest < ActionView::TestCase
     season = seasons(:current)
 
     season.phase = :draft
-    assert_dom_equal %(<span role="img" aria-label="concept" title="concept">📄</span>), season_phase_badge(season)
+    assert_dom_equal %(<span role="img" aria-label="concept" title="concept">⏸️</span>), season_phase_badge(season)
 
     season.phase = :active
     assert_dom_equal %(<span role="img" aria-label="lopend" title="lopend">➡️</span>), season_phase_badge(season)
 
     season.phase = :finished
     assert_dom_equal %(<span role="img" aria-label="afgesloten" title="afgesloten">✅</span>), season_phase_badge(season)
+
+    season.phase = :cancelled
+    assert_dom_equal %(<span role="img" aria-label="geannuleerd" title="geannuleerd">🛑</span>), season_phase_badge(season)
   end
 end

@@ -182,13 +182,55 @@ class SeasonsControllerTest < ActionDispatch::IntegrationTest
     assert seasons(:current).reload.active?
   end
 
-  test "the season page warns about unplayed games before finishing" do
+  test "admins cancel a season" do
+    sign_in_as users(:admin)
+    season = seasons(:current)
+
+    post cancel_season_url(season)
+
+    assert_redirected_to season_url(season)
+    assert season.reload.cancelled?
+    assert_nil games(:unplayed).reload.home_points
+  end
+
+  test "draft seasons cannot be cancelled" do
+    sign_in_as users(:admin)
+    draft = Season.create!(name: "Najaar 2026")
+
+    post cancel_season_url(draft)
+
+    assert_redirected_to season_url(draft)
+    assert draft.reload.draft?
+    assert_equal "Alleen een seizoen in de fase active kan worden geannuleerd.", flash[:alert]
+  end
+
+  test "only admins can cancel a season" do
+    sign_in_as users(:member)
+
+    post cancel_season_url(seasons(:current))
+
+    assert_response :unauthorized
+    assert seasons(:current).reload.active?
+  end
+
+  test "cancelled seasons can no longer be edited" do
+    sign_in_as users(:admin)
+    seasons(:current).update!(phase: :cancelled)
+
+    get edit_season_url(seasons(:current))
+
+    assert_redirected_to season_url(seasons(:current))
+    assert_equal "Dit seizoen is geannuleerd.", flash[:alert]
+  end
+
+  test "the season edit page finishes and cancels the season" do
     sign_in_as users(:admin)
 
-    get season_url(seasons(:current))
+    get edit_season_url(seasons(:current))
 
     assert_response :success
     assert_select "form[action=?][data-turbo-confirm*=?]", finish_season_path(seasons(:current)), "1 ongespeelde partij"
+    assert_select "form[action=?][data-turbo-confirm*=?]", cancel_season_path(seasons(:current)), "geen winnaar"
   end
 
   test "finished seasons no longer show schedule links in the standings" do

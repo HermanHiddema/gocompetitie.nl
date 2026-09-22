@@ -1,7 +1,8 @@
 class Season < ApplicationRecord
-  # Seasons are drafted, then played and finally closed. A finished season is
-  # read only and only admins see the seasons that are still a draft.
-  PHASES = %w[draft active finished].freeze
+  # Seasons are drafted, then played and finally closed, or cancelled when they
+  # cannot be played out. A finished or cancelled season is read only and only
+  # admins see the seasons that are still a draft.
+  PHASES = %w[draft active finished cancelled].freeze
 
   enum :phase, PHASES.index_by(&:itself), default: :draft, validate: true
 
@@ -21,6 +22,7 @@ class Season < ApplicationRecord
   scope :with_slug, -> { where.not(slug: [nil, ""]) }
   scope :recent, -> { order(created_at: :desc) }
   scope :published, -> { where.not(phase: :draft) }
+  scope :ended, -> { where(phase: %i[finished cancelled]) }
 
   def self.preload_statistics(seasons)
     statistics = statistics_for(seasons)
@@ -73,13 +75,13 @@ class Season < ApplicationRecord
   end
 
   # The season the site shows by default: the season that is being played, or
-  # the season that was finished most recently.
+  # the season that ended most recently.
   def self.current
-    with_slug.active.recent.first || with_slug.finished.order(updated_at: :desc, created_at: :desc).first
+    with_slug.active.recent.first || with_slug.ended.order(updated_at: :desc, created_at: :desc).first
   end
 
   def start!
-    transition_to!(:active, from: :draft)
+    transition_to!(:active, from: :draft, action: "gestart")
   end
 
   # Games without a result in both columns, which are set to 0-0 when the
@@ -89,7 +91,7 @@ class Season < ApplicationRecord
   end
 
   # Participants that never appeared on a board and play in no team, which are
-  # removed when the season is finished.
+  # removed when the season ends.
   def gameless_participants
     participants.where.missing(:team_member)
       .where.not(id: games.where.not(home_id: nil).select(:home_id))
@@ -108,9 +110,26 @@ class Season < ApplicationRecord
     end
   end
 
+  # Cancelling a season ends it without a winner: the games that were never
+  # played stay unplayed, only the participants without any game or team are
+  # deleted.
+  def cancel!
+    transaction do
+      ensure_transition_from!(:active, action: "geannuleerd")
+      gameless_participants.destroy_all
+      update!(phase: :cancelled)
+    end
+  end
+
+  # A season that has ended keeps its results, whether it was finished or
+  # cancelled.
+  def ended?
+    finished? || cancelled?
+  end
+
   # Results may only be changed while the season is being played or prepared.
   def editable?
-    !finished?
+    !ended?
   end
 
   def update_slug
@@ -196,8 +215,8 @@ class Season < ApplicationRecord
   end
 
   private
-    def transition_to!(phase, from:)
-      ensure_transition_from!(from, action: phase == :active ? "gestart" : "afgesloten")
+    def transition_to!(phase, from:, action:)
+      ensure_transition_from!(from, action: action)
       update!(phase: phase)
     rescue ActiveRecord::RecordNotUnique
       errors.add(:phase, "is al in gebruik door een ander seizoen")

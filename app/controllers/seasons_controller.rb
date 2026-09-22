@@ -2,8 +2,8 @@ class SeasonsController < ApplicationController
   allow_unauthenticated_access only: %i[front index show]
   allow_indexing only: %i[index show]
 
-  before_action :set_season, only: %i[show edit update destroy start finish]
-  before_action :require_admin!, only: %i[new create edit update destroy start finish]
+  before_action :set_season, only: %i[show edit update destroy start finish cancel]
+  before_action :require_admin!, only: %i[new create edit update destroy start finish cancel]
   before_action :require_editable_season!, only: %i[edit update destroy]
 
   # The front page shows the season that is being played, or the season that
@@ -60,6 +60,13 @@ class SeasonsController < ApplicationController
   def finish
     @season.finish!
     redirect_to @season, notice: "Seizoen is afgesloten."
+  rescue ActiveRecord::RecordInvalid
+    redirect_to @season, alert: @season.errors.full_messages.to_sentence
+  end
+
+  def cancel
+    @season.cancel!
+    redirect_to @season, notice: "Seizoen is geannuleerd."
   rescue ActiveRecord::RecordInvalid
     redirect_to @season, alert: @season.errors.full_messages.to_sentence
   end
