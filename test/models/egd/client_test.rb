@@ -83,7 +83,7 @@ class Egd::ClientTest < ActiveSupport::TestCase
 
   test "socket errors are reported" do
     error = assert_raises(Egd::Error) do
-      Net::HTTP.stub(:start, ->(*) { raise SocketError, "getaddrinfo: Name or service not known" }) do
+      with_http_start(->(*, **, &) { raise SocketError, "getaddrinfo: Name or service not known" }) do
         Egd::Client.new(token: "secret").players.to_a
       end
     end
@@ -93,7 +93,16 @@ class Egd::ClientTest < ActiveSupport::TestCase
 
   private
     def with_http(http, &block)
-      Net::HTTP.stub(:start, ->(*, **, &connection) { connection.call(http) }, &block)
+      with_http_start(->(*, **, &connection) { connection.call(http) }, &block)
+    end
+
+    def with_http_start(start, &block)
+      singleton_class = Net::HTTP.singleton_class
+      original_start = Net::HTTP.method(:start)
+      singleton_class.send(:define_method, :start, start)
+      block.call
+    ensure
+      singleton_class.send(:define_method, :start, original_start)
     end
 
     def success(players:, has_more_pages:)
