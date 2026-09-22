@@ -211,7 +211,7 @@ class Season < ApplicationRecord
   # Dutch players that appeared in a tournament in the past four years. See
   # docs/egd-graphql-api.md for the API this reads from.
   def import_egd_players(country_code: EGD_COUNTRY_CODE, years: EGD_ACTIVE_YEARS, client: Egd::Client.new)
-    active_since = years.to_i.positive? ? years.to_i.years.ago.to_date : nil
+    active_since = egd_active_since(years)
     players = client.players(filter: { countryCode: country_code })
       .select { |player| importable_egd_player?(player, active_since) }
 
@@ -272,6 +272,17 @@ class Season < ApplicationRecord
   end
 
   private
+    def egd_active_since(years)
+      return if years.nil?
+
+      years = Integer(years)
+      raise Egd::Error, "YEARS moet een positief aantal jaren zijn" unless years.positive?
+
+      years.years.ago.to_date
+    rescue ArgumentError, TypeError
+      raise Egd::Error, "YEARS moet een positief aantal jaren zijn"
+    end
+
     # Players without a name or a PIN cannot be stored, and unless every player
     # is wanted only those that appeared in a tournament since the given date
     # are imported. The API documents no format for its dates, so a date that

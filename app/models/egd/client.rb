@@ -69,7 +69,7 @@ module Egd
           open_timeout: OPEN_TIMEOUT, read_timeout: READ_TIMEOUT) do |http|
           http.request(request)
         end
-      rescue SystemCallError, Timeout::Error, IOError, OpenSSL::SSL::SSLError => error
+      rescue SocketError, SystemCallError, Timeout::Error, IOError, OpenSSL::SSL::SSLError => error
         raise Error, "EGD is niet bereikbaar: #{error.message}"
       end
 

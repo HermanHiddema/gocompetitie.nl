@@ -81,6 +81,16 @@ class Egd::ClientTest < ActiveSupport::TestCase
     assert_includes error.message, "503"
   end
 
+  test "socket errors are reported" do
+    error = assert_raises(Egd::Error) do
+      Net::HTTP.stub(:start, ->(*) { raise SocketError, "getaddrinfo: Name or service not known" }) do
+        Egd::Client.new(token: "secret").players.to_a
+      end
+    end
+
+    assert_includes error.message, "niet bereikbaar"
+  end
+
   private
     def with_http(http, &block)
       Net::HTTP.stub(:start, ->(*, **, &connection) { connection.call(http) }, &block)

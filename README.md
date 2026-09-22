@@ -85,10 +85,10 @@ bin/rails egd:import_players SEASON=voorjaar-2026 COUNTRY=NL YEARS=4
 ```
 
 By default the Dutch players that appeared in a tournament in the past four years
-are imported; `YEARS=0` imports everyone of the country. Every player becomes a
+are imported, and `YEARS` must be a positive number. Every player becomes a
 person, matched on their EGD pin, and a participant of the season, with the club,
-rating and rank from the database. The import needs a personal access token of the
-EGD, created under *Developer → New Token*, in `EGD_API_TOKEN`:
+rating and rank from the database. The import needs a personal access token of
+the EGD, created under *Developer → New Token*, in `EGD_API_TOKEN`:
 
 ```bash
 EGD_API_TOKEN=... bin/rails egd:import_players

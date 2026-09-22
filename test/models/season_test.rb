@@ -275,6 +275,19 @@ class SeasonTest < ActiveSupport::TestCase
     assert_equal({ countryCode: "DE" }, client.filter)
   end
 
+  test "invalid activity cutoffs are rejected before importing" do
+    season = Season.create!(name: "Najaar 2029")
+    client = RejectingEgdClient.new
+
+    ["four", -1, 0].each do |years|
+      error = assert_raises(Egd::Error) do
+        season.import_egd_players(years: years, client: client)
+      end
+
+      assert_equal "YEARS moet een positief aantal jaren zijn", error.message
+    end
+  end
+
   test "the champion is the winner of the highest league of a finished season" do
     season = seasons(:current)
 
@@ -336,6 +349,12 @@ class SeasonTest < ActiveSupport::TestCase
       def players(filter: {})
         @filter = filter
         @players
+      end
+    end
+
+    class RejectingEgdClient
+      def players(**)
+        raise "players should not be fetched for invalid YEARS"
       end
     end
 
