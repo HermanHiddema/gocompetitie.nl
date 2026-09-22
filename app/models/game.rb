@@ -1,3 +1,31 @@
+# == Schema Information
+#
+# Table name: games
+#
+#  id           :bigint           not null, primary key
+#  away_points  :integer
+#  board_number :integer
+#  handicap     :integer
+#  home_points  :integer
+#  reason       :string
+#  created_at   :datetime         not null
+#  updated_at   :datetime         not null
+#  away_id      :bigint
+#  home_id      :bigint
+#  match_id     :bigint           not null
+#
+# Indexes
+#
+#  index_games_on_away_id   (away_id)
+#  index_games_on_home_id   (home_id)
+#  index_games_on_match_id  (match_id)
+#
+# Foreign Keys
+#
+#  fk_rails_...  (away_id => participants.id)
+#  fk_rails_...  (home_id => participants.id)
+#  fk_rails_...  (match_id => matches.id)
+#
 class Game < ApplicationRecord
   RESULTS = ["?-?", "1-0", "0-1", "½-½", "1-0!", "0-1!", "0-0"].freeze
 

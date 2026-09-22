@@ -1,5 +1,30 @@
 require "test_helper"
 
+# == Schema Information
+#
+# Table name: teams
+#
+#  id         :bigint           not null, primary key
+#  abbrev     :string           not null
+#  name       :string           not null
+#  created_at :datetime         not null
+#  updated_at :datetime         not null
+#  captain_id :bigint
+#  club_id    :bigint           not null
+#  league_id  :bigint           not null
+#
+# Indexes
+#
+#  index_teams_on_captain_id  (captain_id)
+#  index_teams_on_club_id     (club_id)
+#  index_teams_on_league_id   (league_id)
+#
+# Foreign Keys
+#
+#  fk_rails_...  (captain_id => people.id)
+#  fk_rails_...  (club_id => clubs.id)
+#  fk_rails_...  (league_id => leagues.id)
+#
 class TeamTest < ActiveSupport::TestCase
   test "score and points are summed over both colors" do
     assert_equal 1, teams(:amsterdam).score

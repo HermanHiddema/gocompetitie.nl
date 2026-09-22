@@ -1,3 +1,24 @@
+# == Schema Information
+#
+# Table name: clubs
+#
+#  id                :bigint           not null, primary key
+#  abbrev            :string
+#  info              :text
+#  name              :string           not null
+#  website           :string
+#  created_at        :datetime         not null
+#  updated_at        :datetime         not null
+#  contact_person_id :bigint
+#
+# Indexes
+#
+#  index_clubs_on_contact_person_id  (contact_person_id)
+#
+# Foreign Keys
+#
+#  fk_rails_...  (contact_person_id => people.id)
+#
 class Club < ApplicationRecord
   belongs_to :contact_person, class_name: "Person", optional: true, inverse_of: :contacted_clubs
 
