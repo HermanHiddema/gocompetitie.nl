@@ -1,8 +1,6 @@
 # Minimal GraphQL client for the European Go Database, see
 # docs/egd-graphql-api.md for the API reference.
 module Egd
-  class Error < StandardError; end
-
   class Client
     ENDPOINT = "https://europeangodatabase.eu/api/v2026.02/graphql".freeze
     # The API caps the page size of the top level list queries at 100.
