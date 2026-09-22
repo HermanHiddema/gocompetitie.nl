@@ -36,5 +36,8 @@ class ApplicationHelperTest < ActionView::TestCase
 
     season.phase = :finished
     assert_dom_equal %(<span role="img" aria-label="afgesloten" title="afgesloten">✅</span>), season_phase_badge(season)
+
+    season.phase = :cancelled
+    assert_dom_equal %(<span role="img" aria-label="geannuleerd" title="geannuleerd">🛑</span>), season_phase_badge(season)
   end
 end

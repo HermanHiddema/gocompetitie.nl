@@ -10,12 +10,14 @@ application on Rails 8, with the same business logic and a new Tailwind CSS fron
   path, `/season/voorjaar-2026`, which also prefixes the pages of that season, e.g.
   `/season/voorjaar-2026/teams`. Without a season in the path the most recent season
   is shown. A season is a *draft* while it is being prepared, *active* while it is
-  played and *finished* once it is closed. There is at most one active season and the
-  front page redirects to it, or to the season that was finished most recently.
-  Drafts are only visible to admins, and the results of a finished season can no
-  longer be changed: finishing a season records its unplayed games as 0-0. Leagues
-  and teams are set up while the season is a draft; once it has started no more of
-  them can be added.
+  played and *finished* once it is closed, or *cancelled* when it cannot be played
+  out. There is at most one active season and the front page redirects to it, or to
+  the season that ended most recently. Drafts are only visible to admins, and the
+  results of a season that has ended can no longer be changed: finishing a season
+  records its unplayed games as 0-0, cancelling one leaves them unplayed and leaves
+  the season without a champion. Both delete the participants that played no game
+  and are in no team. Leagues and teams are set up while the season is a draft; once
+  it has started no more of them can be added.
 * **League** (*poule*) – a group of teams within a season that play a round robin.
 * **Club**, **Venue** (*speellocatie*) and **Person** – the organisations, playing
   locations and contact persons. Clubs and venues outlive a season, so their pages

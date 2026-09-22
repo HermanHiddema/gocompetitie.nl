@@ -3,3 +3,12 @@
 <section class="rounded-lg bg-white p-5 shadow-sm ring-1 ring-slate-200">
   <%= render "form", season: @season %>
 </section>
+
+<% if @season.active? %>
+  <section class="mt-8 flex flex-wrap gap-3">
+    <%= button_to "Seizoen afsluiten", finish_season_path(@season), class: button_classes(:danger),
+          form: { data: { turbo_confirm: season_finish_confirmation(@season) } } %>
+    <%= button_to "Seizoen annuleren", cancel_season_path(@season), class: button_classes(:danger),
+          form: { data: { turbo_confirm: season_cancel_confirmation } } %>
+  </section>
+<% end %>

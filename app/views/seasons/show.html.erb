@@ -36,9 +36,6 @@
     <% if @season.draft? %>
       <%= button_link_to "Poule toevoegen", new_league_path(season_id: @season.id) %>
       <%= button_to "Seizoen starten", start_season_path(@season), class: button_classes %>
-    <% elsif @season.active? %>
-      <%= button_to "Seizoen afsluiten", finish_season_path(@season), class: button_classes(:danger),
-            form: { data: { turbo_confirm: season_finish_confirmation(@season) } } %>
     <% end %>
   </div>
 <% end %>
