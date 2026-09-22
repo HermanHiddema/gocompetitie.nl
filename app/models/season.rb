@@ -1,3 +1,22 @@
+# == Schema Information
+#
+# Table name: seasons
+#
+#  id                  :bigint           not null, primary key
+#  handicap_adjustment :integer          default(3)
+#  information         :text
+#  name                :string           not null
+#  phase               :string           default("draft"), not null
+#  slug                :string           not null
+#  created_at          :datetime         not null
+#  updated_at          :datetime         not null
+#
+# Indexes
+#
+#  index_seasons_on_active_phase  (phase) UNIQUE WHERE ((phase)::text = 'active'::text)
+#  index_seasons_on_phase         (phase)
+#  index_seasons_on_slug          (slug) UNIQUE
+#
 class Season < ApplicationRecord
   # Seasons are drafted, then played and finally closed, or cancelled when they
   # cannot be played out. A finished or cancelled season is read only and only

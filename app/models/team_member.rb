@@ -1,3 +1,29 @@
+# == Schema Information
+#
+# Table name: team_members
+#
+#  id             :bigint           not null, primary key
+#  board_number   :integer          not null
+#  created_at     :datetime         not null
+#  updated_at     :datetime         not null
+#  participant_id :bigint           not null
+#  team_id        :bigint           not null
+#
+# Indexes
+#
+#  index_team_members_on_participant_id  (participant_id)
+#  index_team_members_on_team_id         (team_id)
+#
+# Foreign Keys
+#
+#  fk_rails_...  (participant_id => participants.id)
+#  fk_rails_...  (team_id => teams.id)
+#
+# Unique Constraints
+#
+#  uniq_rails_3abd076eb9  (participant_id) DEFERRABLE INITIALLY DEFERRED
+#  uniq_rails_e379ab73b9  (team_id, board_number) DEFERRABLE INITIALLY DEFERRED
+#
 class TeamMember < ApplicationRecord
   belongs_to :team
   belongs_to :participant

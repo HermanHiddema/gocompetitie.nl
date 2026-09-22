@@ -1,3 +1,31 @@
+# == Schema Information
+#
+# Table name: participants
+#
+#  id         :bigint           not null, primary key
+#  egd_pin    :string
+#  firstname  :string           not null
+#  lastname   :string           not null
+#  rank       :integer
+#  rating     :integer
+#  created_at :datetime         not null
+#  updated_at :datetime         not null
+#  club_id    :bigint
+#  person_id  :bigint
+#  season_id  :bigint           not null
+#
+# Indexes
+#
+#  index_participants_on_club_id    (club_id)
+#  index_participants_on_person_id  (person_id)
+#  index_participants_on_season_id  (season_id)
+#
+# Foreign Keys
+#
+#  fk_rails_...  (club_id => clubs.id)
+#  fk_rails_...  (person_id => people.id)
+#  fk_rails_...  (season_id => seasons.id)
+#
 class Participant < ApplicationRecord
   PERSON_ATTRIBUTES = %w[club_id firstname lastname rating egd_pin].freeze
 

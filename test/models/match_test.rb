@@ -1,5 +1,34 @@
 require "test_helper"
 
+# == Schema Information
+#
+# Table name: matches
+#
+#  id           :bigint           not null, primary key
+#  playing_date :date
+#  playing_time :string
+#  created_at   :datetime         not null
+#  updated_at   :datetime         not null
+#  away_team_id :bigint           not null
+#  home_team_id :bigint           not null
+#  league_id    :bigint           not null
+#  venue_id     :bigint
+#
+# Indexes
+#
+#  index_matches_on_away_team_id          (away_team_id)
+#  index_matches_on_home_team_id          (home_team_id)
+#  index_matches_on_league_and_team_pair  (league_id, LEAST(home_team_id, away_team_id), GREATEST(home_team_id, away_team_id)) UNIQUE
+#  index_matches_on_league_id             (league_id)
+#  index_matches_on_venue_id              (venue_id)
+#
+# Foreign Keys
+#
+#  fk_rails_...  (away_team_id => teams.id)
+#  fk_rails_...  (home_team_id => teams.id)
+#  fk_rails_...  (league_id => leagues.id)
+#  fk_rails_...  (venue_id => venues.id)
+#
 class MatchTest < ActiveSupport::TestCase
   setup do
     @match = matches(:amsterdam_utrecht)

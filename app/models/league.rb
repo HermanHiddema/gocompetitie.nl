@@ -1,3 +1,22 @@
+# == Schema Information
+#
+# Table name: leagues
+#
+#  id         :bigint           not null, primary key
+#  name       :string           not null
+#  position   :integer
+#  created_at :datetime         not null
+#  updated_at :datetime         not null
+#  season_id  :bigint           not null
+#
+# Indexes
+#
+#  index_leagues_on_season_id  (season_id)
+#
+# Foreign Keys
+#
+#  fk_rails_...  (season_id => seasons.id)
+#
 class League < ApplicationRecord
   NAMES = [
     "Hoofdklasse",

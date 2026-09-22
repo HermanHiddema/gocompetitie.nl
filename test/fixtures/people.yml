@@ -1,3 +1,28 @@
+# == Schema Information
+#
+# Table name: people
+#
+#  id         :bigint           not null, primary key
+#  egd_pin    :string
+#  email      :string
+#  email2     :string
+#  firstname  :string           not null
+#  lastname   :string           not null
+#  phone      :string
+#  phone2     :string
+#  rating     :integer
+#  created_at :datetime         not null
+#  updated_at :datetime         not null
+#  club_id    :bigint
+#
+# Indexes
+#
+#  index_people_on_club_id  (club_id)
+#
+# Foreign Keys
+#
+#  fk_rails_...  (club_id => clubs.id)
+#
 anna:
   firstname: Anna
   lastname: Amsterdam
