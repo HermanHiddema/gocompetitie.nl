@@ -562,7 +562,7 @@ When behavior depends on one of these points, probe safely against the API or ob
 
 ## How this application uses the API
 
-`Egd::Client` (`app/models/egd/client.rb`) is a small `Net::HTTP` GraphQL client for
+`Egd::Client` (`lib/egd/client.rb`) is a small `Net::HTTP` GraphQL client for
 the endpoint above. `Season#import_egd_players` uses it to seed a season with
 participants: it pages through `players`, filtered on `countryCode`, and keeps the
 players whose `lastAppearance` falls within the configured number of years. Run it
