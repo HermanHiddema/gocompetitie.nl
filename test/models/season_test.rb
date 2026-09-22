@@ -219,6 +219,62 @@ class SeasonTest < ActiveSupport::TestCase
     file&.unlink
   end
 
+  test "players are imported from the EGD, by default the recently active Dutch ones" do
+    season = Season.create!(name: "Najaar 2029")
+    client = FakeEgdClient.new([
+      egd_player(pin: 12345678, first_name: "Jan", last_name: "Jansen", club: "Tstv", grade: "2k",
+        rating: 1850, last_appearance: 1.year.ago.to_date.to_s),
+      egd_player(pin: 22222222, first_name: "Piet", last_name: "Pietersen", club: "Tstv", grade: "5k",
+        rating: 1400, last_appearance: 6.years.ago.to_date.to_s),
+      egd_player(pin: 33333333, first_name: "Klaas", last_name: "Klaassen", club: "Tstv", grade: "1d",
+        rating: 2100, last_appearance: nil)
+    ])
+
+    imported = nil
+    assert_difference -> { season.participants.count }, 1 do
+      imported = season.import_egd_players(client: client)
+    end
+
+    assert_equal 1, imported
+    assert_equal({ countryCode: "NL" }, client.filter)
+
+    participant = season.participants.sole
+    assert_equal "Jan Jansen", participant.fullname
+    assert_equal 1850, participant.rating
+    assert_equal "2k", participant.rank
+    assert_equal "12345678", participant.egd_pin
+    assert_equal "Tstv", participant.club.abbrev
+  end
+
+  test "importing players from the EGD twice updates them instead of adding them again" do
+    season = Season.create!(name: "Najaar 2029")
+    player = egd_player(pin: 12345678, first_name: "Jan", last_name: "Jansen", club: "Tstv", grade: "2k",
+      rating: 1850, last_appearance: 1.year.ago.to_date.to_s)
+    season.import_egd_players(client: FakeEgdClient.new([player]))
+
+    assert_no_difference -> { season.participants.count } do
+      season.import_egd_players(client: FakeEgdClient.new([player.merge("rating" => 1900, "grade" => "1k")]))
+    end
+
+    participant = season.participants.sole
+    assert_equal 1900, participant.rating
+    assert_equal "1k", participant.rank
+  end
+
+  test "all players of a country are imported when no period is given" do
+    season = Season.create!(name: "Najaar 2029")
+    client = FakeEgdClient.new([
+      egd_player(pin: 12345678, first_name: "Jan", last_name: "Jansen", club: "Tstv", grade: "2k",
+        rating: 1850, last_appearance: 20.years.ago.to_date.to_s)
+    ])
+
+    assert_difference -> { season.participants.count }, 1 do
+      season.import_egd_players(country_code: "DE", years: nil, client: client)
+    end
+
+    assert_equal({ countryCode: "DE" }, client.filter)
+  end
+
   test "the champion is the winner of the highest league of a finished season" do
     season = seasons(:current)
 
@@ -267,4 +323,24 @@ class SeasonTest < ActiveSupport::TestCase
 
     assert_equal teams(:amsterdam), seasons.first.champion
   end
+
+  private
+    # Stands in for Egd::Client so the tests do not reach the European Go Database.
+    class FakeEgdClient
+      attr_reader :filter
+
+      def initialize(players)
+        @players = players
+      end
+
+      def players(filter: {})
+        @filter = filter
+        @players
+      end
+    end
+
+    def egd_player(pin:, first_name:, last_name:, club:, grade:, rating:, last_appearance:)
+      { "pin" => pin, "firstName" => first_name, "lastName" => last_name, "countryCode" => "NL",
+        "club" => club, "grade" => grade, "rating" => rating, "lastAppearance" => last_appearance }
+    end
 end

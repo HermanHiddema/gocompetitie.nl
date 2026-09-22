@@ -1,0 +1,88 @@
+# Minimal GraphQL client for the European Go Database, see
+# docs/egd-graphql-api.md for the API reference.
+module Egd
+  class Error < StandardError; end
+
+  class Client
+    ENDPOINT = "https://europeangodatabase.eu/api/v2026.02/graphql".freeze
+    # The API caps the page size of the top level list queries at 100.
+    MAX_PAGE_SIZE = 100
+    OPEN_TIMEOUT = 10
+    READ_TIMEOUT = 30
+
+    PLAYERS_QUERY = <<~GRAPHQL.freeze
+      query Players($filter: PlayerFilterInput, $pagination: PaginationInput!) {
+        players(filter: $filter, order: { field: pin, direction: ASC }, pagination: $pagination) {
+          data { pin firstName lastName countryCode club grade rating lastAppearance }
+          hasMorePages
+        }
+      }
+    GRAPHQL
+
+    def initialize(token: ENV["EGD_API_TOKEN"], endpoint: ENDPOINT)
+      raise Error, "EGD_API_TOKEN is niet ingesteld" if token.blank?
+
+      @token = token
+      @uri = URI.parse(endpoint)
+    end
+
+    # Yields every player matching the filter, paging through the results.
+    def players(filter: {}, limit: MAX_PAGE_SIZE)
+      unless block_given?
+        return Enumerator.new { |yielder| players(filter: filter, limit: limit) { |player| yielder << player } }
+      end
+
+      page = 1
+      loop do
+        pagination = { page: page, limit: limit.clamp(1, MAX_PAGE_SIZE) }
+        result = query(PLAYERS_QUERY, filter: filter.presence, pagination: pagination).fetch("players")
+        result["data"].each { |player| yield player }
+
+        break unless result["hasMorePages"]
+
+        page += 1
+      end
+    end
+
+    # Posts a GraphQL document and returns its `data`, raising Egd::Error for
+    # transport, HTTP, JSON and GraphQL errors alike.
+    def query(document, variables = {})
+      response = post(query: document, variables: variables)
+
+      case response
+      when Net::HTTPUnauthorized
+        raise Error, "EGD weigert het API token (401 Unauthorized)"
+      when Net::HTTPSuccess
+        parse(response.body)
+      else
+        raise Error, "EGD antwoordde met #{response.code} #{response.message}"
+      end
+    end
+
+    private
+      def post(payload)
+        request = Net::HTTP::Post.new(@uri)
+        request["Authorization"] = "Bearer #{@token}"
+        request["Content-Type"] = "application/json"
+        request["Accept"] = "application/json"
+        request.body = payload.to_json
+
+        Net::HTTP.start(@uri.hostname, @uri.port, use_ssl: @uri.scheme == "https",
+          open_timeout: OPEN_TIMEOUT, read_timeout: READ_TIMEOUT) do |http|
+          http.request(request)
+        end
+      rescue SystemCallError, Timeout::Error, IOError, OpenSSL::SSL::SSLError => error
+        raise Error, "EGD is niet bereikbaar: #{error.message}"
+      end
+
+      def parse(body)
+        json = JSON.parse(body.to_s)
+        errors = json["errors"]
+        raise Error, "EGD meldt: #{errors.filter_map { |error| error["message"] }.join(", ")}" if errors.present?
+
+        json["data"] or raise Error, "EGD stuurde een antwoord zonder gegevens"
+      rescue JSON::ParserError
+        raise Error, "EGD stuurde een antwoord dat geen JSON is"
+      end
+  end
+end

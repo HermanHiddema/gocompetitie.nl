@@ -75,6 +75,27 @@ bin/rails credentials:edit
 The seeds create an administrator, `admin@example.com` with password `secret123456`,
 in the development environment.
 
+## Seeding a season from the European Go Database
+
+A season can be filled with players from the [European Go Database](https://europeangodatabase.eu):
+
+```bash
+bin/rails egd:import_players                                  # the current season
+bin/rails egd:import_players SEASON=voorjaar-2026 COUNTRY=NL YEARS=4
+```
+
+By default the Dutch players that appeared in a tournament in the past four years
+are imported; `YEARS=0` imports everyone of the country. Every player becomes a
+person, matched on their EGD pin, and a participant of the season, with the club,
+rating and rank from the database. The import needs a personal access token of the
+EGD, created under *Developer → New Token*, in `EGD_API_TOKEN`:
+
+```bash
+EGD_API_TOKEN=... bin/rails egd:import_players
+```
+
+The API itself is described in [docs/egd-graphql-api.md](docs/egd-graphql-api.md).
+
 ## Testing and linting
 
 ```bash

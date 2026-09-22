@@ -23,6 +23,11 @@ class Season < ApplicationRecord
   # admins see the seasons that are still a draft.
   PHASES = %w[draft active finished cancelled].freeze
 
+  # Defaults of the import from the European Go Database: the Dutch players
+  # that played a rated game in the past four years.
+  EGD_COUNTRY_CODE = "NL".freeze
+  EGD_ACTIVE_YEARS = 4
+
   enum :phase, PHASES.index_by(&:itself), default: :draft, validate: true
 
   has_many :leagues, -> { ordered }, dependent: :destroy, inverse_of: :season
@@ -202,6 +207,39 @@ class Season < ApplicationRecord
     leagues.create(name: League.name_for_position(position), position: position)
   end
 
+  # Seeds the season with players from the European Go Database: by default the
+  # Dutch players that appeared in a tournament in the past four years. See
+  # docs/egd-graphql-api.md for the API this reads from.
+  def import_egd_players(country_code: EGD_COUNTRY_CODE, years: EGD_ACTIVE_YEARS, client: Egd::Client.new)
+    active_since = years.to_i.positive? ? years.to_i.years.ago.to_date : nil
+    players = client.players(filter: { countryCode: country_code })
+      .select { |player| importable_egd_player?(player, active_since) }
+
+    transaction do
+      players.each { |player| upsert_egd_player(player) }
+    end
+
+    players.size
+  end
+
+  # Stores one player of the European Go Database as a person of this season,
+  # reusing the person and the club that were imported earlier.
+  def upsert_egd_player(player)
+    person = Person.find_or_initialize_by(egd_pin: player["pin"].to_s)
+    person.update!(
+      firstname: player["firstName"],
+      lastname: player["lastName"],
+      rating: player["rating"],
+      club: egd_club(player["club"]) || person.club
+    )
+
+    participant = participants.find_or_initialize_by(person: person)
+    participant.copy_person_attributes
+    participant.rank = player["grade"]
+    participant.save!
+    participant
+  end
+
   # Imports players from an European Go Database tournament export.
   def upsert_players(json_file)
     egd_data = JSON.parse(File.read(json_file))
@@ -234,6 +272,30 @@ class Season < ApplicationRecord
   end
 
   private
+    # Players without a name or a PIN cannot be stored, and unless every player
+    # is wanted only those that appeared in a tournament since the given date
+    # are imported. The API documents no format for its dates, so a date that
+    # cannot be read counts as no appearance at all.
+    def importable_egd_player?(player, active_since)
+      return false if player["pin"].blank? || player["firstName"].blank? || player["lastName"].blank?
+      return true if active_since.nil?
+
+      last_appearance = egd_date(player["lastAppearance"])
+      last_appearance.present? && last_appearance >= active_since
+    end
+
+    def egd_date(value)
+      Date.parse(value.to_s)
+    rescue ArgumentError, TypeError
+      nil
+    end
+
+    def egd_club(abbrev)
+      return if abbrev.blank?
+
+      Club.find_by(abbrev: abbrev) || Club.create!(name: abbrev, abbrev: abbrev)
+    end
+
     def transition_to!(phase, from:, action:)
       ensure_transition_from!(from, action: action)
       update!(phase: phase)
