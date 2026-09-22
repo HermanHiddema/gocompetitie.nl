@@ -79,8 +79,7 @@ class ApplicationController < ActionController::Base
       head :unauthorized unless admin?
     end
 
-    # A season that has ended keeps its results, so they can no longer be
-    # edited.
+    # A season that has ended keeps its results, so they can no longer be edited.
     def require_editable_season!
       return if @season.nil? || @season.editable?
 
