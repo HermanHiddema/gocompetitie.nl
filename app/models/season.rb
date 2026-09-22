@@ -230,7 +230,7 @@ class Season < ApplicationRecord
       firstname: player["firstName"],
       lastname: player["lastName"],
       rating: player["rating"],
-      club: egd_club(player["club"]) || person.club
+      club: egd_club(player["club"])
     )
 
     participant = participants.find_or_initialize_by(person: person)

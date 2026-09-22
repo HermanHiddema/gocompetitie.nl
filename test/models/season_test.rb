@@ -261,6 +261,19 @@ class SeasonTest < ActiveSupport::TestCase
     assert_equal "1k", participant.rank
   end
 
+  test "refreshing EGD players clears a removed club" do
+    season = Season.create!(name: "Najaar 2029")
+    player = egd_player(pin: 12345678, first_name: "Jan", last_name: "Jansen", club: "Tstv", grade: "2k",
+      rating: 1850, last_appearance: 1.year.ago.to_date.to_s)
+    season.import_egd_players(client: FakeEgdClient.new([player]))
+
+    season.import_egd_players(client: FakeEgdClient.new([player.merge("club" => nil)]))
+
+    participant = season.participants.sole
+    assert_nil participant.reload.club
+    assert_nil participant.person.reload.club
+  end
+
   test "all players of a country are imported when no period is given" do
     season = Season.create!(name: "Najaar 2029")
     client = FakeEgdClient.new([
