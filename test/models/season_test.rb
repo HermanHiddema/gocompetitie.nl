@@ -52,9 +52,10 @@ class SeasonTest < ActiveSupport::TestCase
 
   test "finishing a season deletes the participants without games, except team members" do
     season = seasons(:current)
-    playing = participants(:amsterdam_1)
+    playing = season.participants.create!(firstname: "Speler", lastname: "Met_partij")
     team_member = participants(:rotterdam_3)
     gameless = season.participants.create!(firstname: "Speler", lastname: "Zonder")
+    games(:board_one).update!(home_player: playing)
 
     assert_includes season.gameless_participants, gameless
     assert_not_includes season.gameless_participants, playing
