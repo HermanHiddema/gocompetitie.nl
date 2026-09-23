@@ -1,22 +1,26 @@
 <% content_for :title, "Nieuwe speler" %>
 <h1 class="mb-6 text-2xl font-bold">Nieuwe speler</h1>
 <section class="mb-6 rounded-lg bg-white p-5 shadow-sm ring-1 ring-slate-200">
-  <%= turbo_frame_tag "egd_search" do %>
-    <h2 class="mb-3 text-lg font-semibold">Zoeken in de EGD</h2>
-    <%= form_with url: new_participant_path(**season_url_options), method: :get, class: "space-y-4",
-      data: { controller: "autosubmit", turbo_frame: "egd_search", autosubmit_delay_value: 300 } do |form| %>
-      <div class="grid gap-4 sm:grid-cols-[1fr_auto] sm:items-end">
-        <div>
-          <%= form.label :egd_search, "Zoekterm", class: label_classes %>
-          <%= form.search_field :egd_search, value: @egd_search, class: field_classes,
-            data: { action: "input->autosubmit#queue search->autosubmit#queue" } %>
-          <p class="mt-1 text-xs text-slate-500">Zoekt in de hele EGD op naam, club of PIN.</p>
-        </div>
-        <%= form.submit "Zoeken", class: button_classes(:secondary) %>
+  <h2 class="mb-3 text-lg font-semibold">Zoeken in de EGD</h2>
+  <%= form_with url: new_participant_path(**season_url_options), method: :get, class: "space-y-4",
+    data: { controller: "autosubmit", turbo_frame: "egd_search_results", autosubmit_delay_value: 300 } do |form| %>
+    <div class="grid gap-4 sm:grid-cols-[1fr_auto] sm:items-end">
+      <div>
+        <%= form.label :egd_search, "Zoekterm", class: label_classes %>
+        <%= form.search_field :egd_search, value: @egd_search, class: field_classes,
+          data: { action: "input->autosubmit#queue search->autosubmit#queue" } %>
+        <p class="mt-1 text-xs text-slate-500">Zoekt in de hele EGD op naam, club of PIN.</p>
       </div>
-    <% end %>
+      <%= form.submit "Zoeken", class: button_classes(:secondary) %>
+    </div>
+  <% end %>
 
-    <% if @egd_search.present? %>
+  <%= turbo_frame_tag "egd_search_results" do %>
+    <% if @egd_search_error.present? %>
+      <div class="mt-4 rounded-md border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800" role="alert">
+        <%= @egd_search_error %>
+      </div>
+    <% elsif @egd_search.present? %>
       <div class="mt-4 space-y-3">
         <% if @egd_players.any? %>
           <% @egd_players.each do |player| %>

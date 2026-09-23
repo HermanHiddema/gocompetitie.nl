@@ -4,13 +4,15 @@ class ParticipantsControllerTest < ActionDispatch::IntegrationTest
   class FakeEgdClient
     attr_reader :searches
 
-    def initialize(players)
+    def initialize(players = [], error: nil)
       @players = players
+      @error = error
       @searches = []
     end
 
     def search_players(search, limit:)
       @searches << { search: search, limit: limit }
+      raise @error if @error
       @players
     end
   end
@@ -54,10 +56,10 @@ class ParticipantsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_equal [{ search: "Jan", limit: 20 }], client.searches
-    assert_select "turbo-frame#egd_search"
+    assert_select "turbo-frame#egd_search_results"
     assert_select "h2", text: "Zoeken in de EGD"
     assert_select "form[action=?][data-controller=?][data-turbo-frame=?]", new_participant_path(season_slug: seasons(:current).slug),
-      "autosubmit", "egd_search"
+      "autosubmit", "egd_search_results"
     assert_select "input[name=?][data-action=?]", "egd_search", "input->autosubmit#queue search->autosubmit#queue"
     assert_select "div", text: /Jan Jansen/
     assert_select "form[action=?]", import_egd_participants_path(season_slug: seasons(:current).slug)
@@ -75,6 +77,20 @@ class ParticipantsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_equal 20, css_select("input[value='Toevoegen uit EGD']").size
+  end
+
+  test "EGD search shows errors inside the results frame" do
+    sign_in_as users(:admin)
+    client = FakeEgdClient.new(error: Egd::Error.new("EGD is niet bereikbaar"))
+
+    with_egd_client(client) do
+      get new_participant_url(season_slug: seasons(:current).slug, egd_search: "Jan")
+    end
+
+    assert_response :success
+    assert_select "turbo-frame#egd_search_results div[role=alert]", text: "EGD is niet bereikbaar"
+    assert_select "p", text: "Geen spelers gevonden.", count: 0
+    assert_equal 0, css_select("input[value='Toevoegen uit EGD']").size
   end
 
   test "signed in users can import one EGD player into an active season" do

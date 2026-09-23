@@ -72,7 +72,7 @@ class ParticipantsController < ApplicationController
 
       egd_client.search_players(@egd_search, limit: 20).first(20)
     rescue Egd::Error => error
-      flash.now[:alert] = error.message
+      @egd_search_error = error.message
       []
     end
 
