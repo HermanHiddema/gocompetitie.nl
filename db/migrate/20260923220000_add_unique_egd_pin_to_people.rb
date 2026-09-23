@@ -36,7 +36,7 @@ class AddUniqueEgdPinToPeople < ActiveRecord::Migration[8.1]
       MigrationPerson.merge_egd_pin_duplicates!
     end
 
-    add_index :people, :egd_pin, unique: true, algorithm: :concurrently
+    add_index :people, :egd_pin, unique: true, algorithm: :concurrently, if_not_exists: true
   end
 
   def down
