@@ -36,7 +36,7 @@ class PersonTest < ActiveSupport::TestCase
   end
 
   test "a blank EGD pin is stored as nil and may be shared" do
-    person = Person.create!(firstname: "Dirk", lastname: "Delft", egd_pin: "")
+    person = Person.create!(firstname: "Dirk", lastname: "Delft", egd_pin: "   ")
 
     assert_nil person.egd_pin
     assert_predicate Person.new(firstname: "Eva", lastname: "Eindhoven", egd_pin: ""), :valid?
