@@ -62,7 +62,7 @@ class ParticipantsControllerTest < ActionDispatch::IntegrationTest
       "autosubmit", "egd_search_results"
     assert_select "input[name=?][data-action=?]", "egd_search", "input->autosubmit#queue search->autosubmit#queue"
     assert_select "div", text: /Jan Jansen/
-    assert_select "form[action=?]", import_egd_participants_path(season_slug: seasons(:current).slug)
+    assert_select "form[action=?][data-turbo-frame=_top]", import_egd_participants_path(season_slug: seasons(:current).slug)
   end
 
   test "EGD search shows at most 20 players" do

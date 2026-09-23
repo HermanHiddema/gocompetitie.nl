@@ -38,9 +38,12 @@ class Egd::ClientTest < ActiveSupport::TestCase
     request = http.requests.first
     assert_equal "Bearer secret", request["Authorization"]
     body = JSON.parse(request.body)
-    assert_equal({ "countryCode" => "NL" }, body.dig("variables", "filter"))
-    assert_equal({ "page" => 1, "limit" => 2 }, body.dig("variables", "pagination"))
-    assert_equal({ "page" => 2, "limit" => 2 }, JSON.parse(http.requests.last.body).dig("variables", "pagination"))
+    assert_equal "NL", body.dig("variables", "countryCode")
+    assert_equal 1, body.dig("variables", "page")
+    assert_equal 2, body.dig("variables", "limit")
+    assert_equal 2, JSON.parse(http.requests.last.body).dig("variables", "page")
+    assert_not_includes body.dig("query"), "$pagination"
+    assert_not_includes body.dig("query"), "$filter"
   end
 
   test "players can be searched by text" do
@@ -57,7 +60,9 @@ class Egd::ClientTest < ActiveSupport::TestCase
     body = JSON.parse(http.requests.first.body)
     assert_equal "Jan", body.dig("variables", "search")
     assert_nil body.dig("variables", "filter")
-    assert_equal({ "page" => 1, "limit" => 5 }, body.dig("variables", "pagination"))
+    assert_equal 1, body.dig("variables", "page")
+    assert_equal 5, body.dig("variables", "limit")
+    assert_not_includes body.dig("query"), "$pagination"
   end
 
   test "searching players does not page past the requested limit" do
@@ -72,7 +77,8 @@ class Egd::ClientTest < ActiveSupport::TestCase
 
     assert_equal [1], players.map { |player| player["pin"] }
     assert_equal 1, http.requests.size
-    assert_equal({ "page" => 1, "limit" => 20 }, JSON.parse(http.requests.first.body).dig("variables", "pagination"))
+    assert_equal 1, JSON.parse(http.requests.first.body).dig("variables", "page")
+    assert_equal 20, JSON.parse(http.requests.first.body).dig("variables", "limit")
   end
 
   test "the page size stays within the maximum of the API" do
@@ -80,7 +86,7 @@ class Egd::ClientTest < ActiveSupport::TestCase
 
     with_http(http) { Egd::Client.new(token: "secret").players(limit: 500).to_a }
 
-    assert_equal 100, JSON.parse(http.requests.first.body).dig("variables", "pagination", "limit")
+    assert_equal 100, JSON.parse(http.requests.first.body).dig("variables", "limit")
   end
 
   test "GraphQL errors are reported" do

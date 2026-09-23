@@ -34,7 +34,8 @@
                   <% if player["club"].present? %>· <%= player["club"] %><% end %>
                 </div>
               </div>
-              <%= form_with url: import_egd_participants_path(**season_url_options), class: "shrink-0" do %>
+              <%= form_with url: import_egd_participants_path(**season_url_options), class: "shrink-0",
+                data: { turbo_frame: "_top" } do %>
                 <% %w[pin firstName lastName club grade rating].each do |key| %>
                   <%= hidden_field_tag "egd_player[#{key}]", player[key] %>
                 <% end %>

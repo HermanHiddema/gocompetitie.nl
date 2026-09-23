@@ -9,8 +9,20 @@ module Egd
     READ_TIMEOUT = 30
 
     PLAYERS_QUERY = <<~GRAPHQL.freeze
-      query Players($filter: PlayerFilterInput, $pagination: PaginationInput!) {
-        players(filter: $filter, order: { field: pin, direction: ASC }, pagination: $pagination) {
+      query Players(
+        $pin: Int, $countryCode: String, $grade: String, $club: String,
+        $lastName: String, $firstName: String, $ratingFrom: Int, $ratingTo: Int,
+        $page: Int!, $limit: Int!
+      ) {
+        players(
+          filter: {
+            pin: $pin, countryCode: $countryCode, grade: $grade, club: $club,
+            lastName: $lastName, firstName: $firstName,
+            ratingFrom: $ratingFrom, ratingTo: $ratingTo
+          }
+          order: { field: pin, direction: ASC }
+          pagination: { page: $page, limit: $limit }
+        ) {
           data { pin firstName lastName countryCode club grade rating lastAppearance }
           hasMorePages
         }
@@ -18,8 +30,8 @@ module Egd
     GRAPHQL
 
     PLAYERS_SEARCH_QUERY = <<~GRAPHQL.freeze
-      query PlayersSearch($search: String!, $pagination: PaginationInput!) {
-        playersSearch(search: $search, order: { field: rating, direction: DESC }, pagination: $pagination) {
+      query PlayersSearch($search: String!, $page: Int!, $limit: Int!) {
+        playersSearch(search: $search, order: { field: rating, direction: DESC }, pagination: { page: $page, limit: $limit }) {
           data { pin firstName lastName countryCode club grade rating }
           hasMorePages
         }
@@ -41,8 +53,8 @@ module Egd
 
       page = 1
       loop do
-        pagination = { page: page, limit: limit.clamp(1, MAX_PAGE_SIZE) }
-        result = query(PLAYERS_QUERY, filter: filter.presence, pagination: pagination).fetch("players")
+        variables = filter.symbolize_keys.slice(:pin, :countryCode, :grade, :club, :lastName, :firstName, :ratingFrom, :ratingTo)
+        result = query(PLAYERS_QUERY, **variables, page: page, limit: limit.clamp(1, MAX_PAGE_SIZE)).fetch("players")
         result["data"].each { |player| yield player }
 
         break unless result["hasMorePages"]
@@ -57,8 +69,7 @@ module Egd
         return Enumerator.new { |yielder| search_players(search, limit: limit) { |player| yielder << player } }
       end
 
-      pagination = { page: 1, limit: limit.clamp(1, MAX_PAGE_SIZE) }
-      result = query(PLAYERS_SEARCH_QUERY, search: search, pagination: pagination).fetch("playersSearch")
+      result = query(PLAYERS_SEARCH_QUERY, search: search, page: 1, limit: limit.clamp(1, MAX_PAGE_SIZE)).fetch("playersSearch")
       result["data"].each { |player| yield player }
     end
 
