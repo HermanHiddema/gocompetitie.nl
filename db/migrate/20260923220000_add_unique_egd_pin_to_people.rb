@@ -35,6 +35,6 @@ class AddUniqueEgdPinToPeople < ActiveRecord::Migration[8.1]
   end
 
   def down
-    remove_index :people, :egd_pin
+    raise ActiveRecord::IrreversibleMigration
   end
 end
