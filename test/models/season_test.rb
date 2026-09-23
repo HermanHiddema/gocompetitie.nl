@@ -219,6 +219,151 @@ class SeasonTest < ActiveSupport::TestCase
     file&.unlink
   end
 
+  test "players are imported from the EGD, by default the recently active Dutch ones" do
+    season = Season.create!(name: "Najaar 2029")
+    client = FakeEgdClient.new([
+      egd_player(pin: 12345678, first_name: "Jan", last_name: "Jansen", club: "Tstv", grade: "2k",
+        rating: 1850, last_appearance: 1.year.ago.to_date.to_s),
+      egd_player(pin: 22222222, first_name: "Piet", last_name: "Pietersen", club: "Tstv", grade: "5k",
+        rating: 1400, last_appearance: 6.years.ago.to_date.to_s),
+      egd_player(pin: 33333333, first_name: "Klaas", last_name: "Klaassen", club: "Tstv", grade: "1d",
+        rating: 2100, last_appearance: nil)
+    ])
+
+    imported = nil
+    assert_difference -> { season.participants.count }, 1 do
+      imported = season.import_egd_players(client: client)
+    end
+
+    assert_equal 1, imported
+    assert_equal({ countryCode: "NL" }, client.filter)
+
+    participant = season.participants.sole
+    assert_equal "Jan Jansen", participant.fullname
+    assert_equal 1850, participant.rating
+    assert_equal "2k", participant.rank
+    assert_equal "12345678", participant.egd_pin
+    assert_equal "Tstv", participant.club.abbrev
+  end
+
+  test "importing players from the EGD requires a draft season" do
+    client = RejectingEgdClient.new
+
+    [seasons(:current), Season.create!(name: "Najaar 2028", phase: :finished),
+      Season.create!(name: "Voorjaar 2028", phase: :cancelled)].each do |season|
+      error = assert_raises(ActiveRecord::RecordInvalid) do
+        season.import_egd_players(client: client)
+      end
+
+      assert_equal ["Alleen een seizoen in de fase draft kan worden gevuld met spelers uit de EGD."],
+        error.record.errors.full_messages
+    end
+  end
+
+  test "importing players from the EGD twice updates them instead of adding them again" do
+    season = Season.create!(name: "Najaar 2029")
+    player = egd_player(pin: 12345678, first_name: "Jan", last_name: "Jansen", club: "Tstv", grade: "2k",
+      rating: 1850, last_appearance: 1.year.ago.to_date.to_s)
+    season.import_egd_players(client: FakeEgdClient.new([player]))
+
+    assert_no_difference -> { season.participants.count } do
+      season.import_egd_players(client: FakeEgdClient.new([player.merge("rating" => 1900, "grade" => "1k")]))
+    end
+
+    participant = season.participants.sole
+    assert_equal 1900, participant.rating
+    assert_equal "1k", participant.rank
+  end
+
+  test "refreshing EGD players clears a removed club" do
+    season = Season.create!(name: "Najaar 2029")
+    player = egd_player(pin: 12345678, first_name: "Jan", last_name: "Jansen", club: "Tstv", grade: "2k",
+      rating: 1850, last_appearance: 1.year.ago.to_date.to_s)
+    season.import_egd_players(client: FakeEgdClient.new([player]))
+
+    season.import_egd_players(client: FakeEgdClient.new([player.merge("club" => nil)]))
+
+    participant = season.participants.sole
+    assert_nil participant.reload.club
+    assert_nil participant.person.reload.club
+  end
+
+  test "importing an EGD player adopts an existing participant with the same EGD pin" do
+    season = Season.create!(name: "Najaar 2029")
+    participant = season.participants.create!(
+      firstname: "Jan",
+      lastname: "Jansen",
+      rating: 1700,
+      rank: "3k",
+      egd_pin: "12345678"
+    )
+    player = egd_player(pin: 12345678, first_name: "Jan", last_name: "Jansen", club: "Tstv", grade: "2k",
+      rating: 1850, last_appearance: 1.year.ago.to_date.to_s)
+
+    assert_no_difference -> { season.participants.count } do
+      season.import_egd_players(client: FakeEgdClient.new([player]))
+    end
+
+    assert_equal participant, season.participants.sole
+    assert_equal "12345678", participant.reload.egd_pin
+    assert_equal 1850, participant.rating
+    assert_equal "2k", participant.rank
+    assert_equal "Tstv", participant.club.abbrev
+    assert_equal "12345678", participant.person.egd_pin
+  end
+
+  test "all players of a country are imported when no period is given" do
+    season = Season.create!(name: "Najaar 2029")
+    client = FakeEgdClient.new([
+      egd_player(pin: 12345678, first_name: "Jan", last_name: "Jansen", club: "Tstv", grade: "2k",
+        rating: 1850, last_appearance: 20.years.ago.to_date.to_s)
+    ])
+
+    assert_difference -> { season.participants.count }, 1 do
+      season.import_egd_players(country_code: "DE", years: nil, client: client)
+    end
+
+    assert_equal({ countryCode: "DE" }, client.filter)
+  end
+
+  test "invalid activity cutoffs are rejected before importing" do
+    season = Season.create!(name: "Najaar 2029")
+    client = RejectingEgdClient.new
+
+    ["four", -1, 0].each do |years|
+      error = assert_raises(Egd::Error) do
+        season.import_egd_players(years: years, client: client)
+      end
+
+      assert_equal "YEARS moet een positief aantal jaren zijn", error.message
+    end
+  end
+
+  test "EGD import validates the season before constructing the default client" do
+    original_token = ENV.delete("EGD_API_TOKEN")
+
+    error = assert_raises(ActiveRecord::RecordInvalid) do
+      seasons(:current).import_egd_players
+    end
+
+    assert_equal ["Alleen een seizoen in de fase draft kan worden gevuld met spelers uit de EGD."],
+      error.record.errors.full_messages
+  ensure
+    ENV["EGD_API_TOKEN"] = original_token if original_token
+  end
+
+  test "EGD import validates YEARS before constructing the default client" do
+    original_token = ENV.delete("EGD_API_TOKEN")
+
+    error = assert_raises(Egd::Error) do
+      Season.create!(name: "Najaar 2029").import_egd_players(years: "four")
+    end
+
+    assert_equal "YEARS moet een positief aantal jaren zijn", error.message
+  ensure
+    ENV["EGD_API_TOKEN"] = original_token if original_token
+  end
+
   test "the champion is the winner of the highest league of a finished season" do
     season = seasons(:current)
 
@@ -267,4 +412,30 @@ class SeasonTest < ActiveSupport::TestCase
 
     assert_equal teams(:amsterdam), seasons.first.champion
   end
+
+  private
+    # Stands in for Egd::Client so the tests do not reach the European Go Database.
+    class FakeEgdClient
+      attr_reader :filter
+
+      def initialize(players)
+        @players = players
+      end
+
+      def players(filter: {})
+        @filter = filter
+        @players
+      end
+    end
+
+    class RejectingEgdClient
+      def players(**)
+        raise "players should not be fetched for invalid YEARS"
+      end
+    end
+
+    def egd_player(pin:, first_name:, last_name:, club:, grade:, rating:, last_appearance:)
+      { "pin" => pin, "firstName" => first_name, "lastName" => last_name, "countryCode" => "NL",
+        "club" => club, "grade" => grade, "rating" => rating, "lastAppearance" => last_appearance }
+    end
 end
