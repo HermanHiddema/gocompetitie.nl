@@ -82,7 +82,7 @@ class PersonTest < ActiveSupport::TestCase
     # Duplicate pins only exist in databases from before the unique index, so it
     # is dropped inside the transaction of the test to be able to create them.
     def without_unique_egd_pin_index
-      Person.lease_connection.execute("DROP INDEX index_people_on_egd_pin")
+      Person.lease_connection.remove_index(:people, :egd_pin)
       yield
     ensure
       Person.lease_connection.add_index(:people, :egd_pin, unique: true) unless Person.lease_connection.index_exists?(:people, :egd_pin, unique: true)
