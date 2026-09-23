@@ -18,6 +18,7 @@
 # Indexes
 #
 #  index_people_on_club_id  (club_id)
+#  index_people_on_egd_pin  (egd_pin) UNIQUE
 #
 # Foreign Keys
 #
@@ -30,9 +31,41 @@ class Person < ApplicationRecord
   has_many :captained_teams, class_name: "Team", foreign_key: :captain_id, dependent: :nullify, inverse_of: :captain
   has_many :contacted_clubs, class_name: "Club", foreign_key: :contact_person_id, dependent: :nullify, inverse_of: :contact_person
 
+  normalizes :egd_pin, with: ->(egd_pin) { egd_pin.presence }
+
   validates :firstname, :lastname, presence: true
+  validates :egd_pin, uniqueness: true, allow_nil: true
 
   scope :ordered, -> { order(:firstname, :lastname) }
+
+  # Merges the people that share an EGD pin into the one that was updated most
+  # recently, so that a pin identifies a single person.
+  def self.merge_egd_pin_duplicates!
+    transaction do
+      duplicate_egd_pins.sum do |egd_pin|
+        target, *duplicates = where(egd_pin: egd_pin).order(updated_at: :desc, id: :desc).to_a
+        duplicates.each { |duplicate| duplicate.merge_into!(target) }
+        duplicates.size
+      end
+    end
+  end
+
+  def self.duplicate_egd_pins
+    where.not(egd_pin: nil).group(:egd_pin).having("COUNT(*) > 1").pluck(:egd_pin)
+  end
+
+  # Reattaches everything that refers to this person to the other person and
+  # deletes this person afterwards.
+  def merge_into!(other)
+    raise ArgumentError, "a person cannot be merged into itself" if other.id == id
+
+    self.class.transaction do
+      participants.update_all(person_id: other.id)
+      captained_teams.update_all(captain_id: other.id)
+      contacted_clubs.update_all(contact_person_id: other.id)
+      destroy!
+    end
+  end
 
   def name
     "#{firstname.tr("_", " ")} #{lastname.tr("_", " ")}"

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_18_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_23_220000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -95,6 +95,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_18_120000) do
     t.integer "rating"
     t.datetime "updated_at", null: false
     t.index ["club_id"], name: "index_people_on_club_id"
+    t.index ["egd_pin"], name: "index_people_on_egd_pin", unique: true
   end
 
   create_table "seasons", force: :cascade do |t|

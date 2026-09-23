@@ -88,7 +88,9 @@ By default the Dutch players that appeared in a tournament in the past four year
 are imported, and `YEARS` must be a positive number. Bulk imports only work for
 seasons that are still a draft. Every player becomes a person, matched on their
 EGD pin, and a participant of the season, with the club, rating and rank from
-the database. The import needs a personal access token of the EGD, created under
+the database. A pin identifies a single person: it is unique in the database, so
+people that shared one were merged into the person that was updated most
+recently. The import needs a personal access token of the EGD, created under
 *Developer → New Token*, in `EGD_API_TOKEN`:
 
 ```bash
