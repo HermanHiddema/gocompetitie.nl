@@ -1,4 +1,6 @@
 class AddUniqueEgdPinToPeople < ActiveRecord::Migration[8.1]
+  disable_ddl_transaction!
+
   class MigrationPerson < ApplicationRecord
     self.table_name = "people"
 
@@ -29,9 +31,12 @@ class AddUniqueEgdPinToPeople < ActiveRecord::Migration[8.1]
   end
 
   def up
-    execute "UPDATE people SET egd_pin = NULLIF(BTRIM(egd_pin), '')"
-    MigrationPerson.merge_egd_pin_duplicates!
-    add_index :people, :egd_pin, unique: true
+    MigrationPerson.transaction do
+      execute "UPDATE people SET egd_pin = NULLIF(BTRIM(egd_pin), '')"
+      MigrationPerson.merge_egd_pin_duplicates!
+    end
+
+    add_index :people, :egd_pin, unique: true, algorithm: :concurrently
   end
 
   def down
