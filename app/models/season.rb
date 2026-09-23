@@ -210,9 +210,10 @@ class Season < ApplicationRecord
   # Seeds the season with players from the European Go Database: by default the
   # Dutch players that appeared in a tournament in the past four years. See
   # docs/egd-graphql-api.md for the API this reads from.
-  def import_egd_players(country_code: EGD_COUNTRY_CODE, years: EGD_ACTIVE_YEARS, client: Egd::Client.new)
+  def import_egd_players(country_code: EGD_COUNTRY_CODE, years: EGD_ACTIVE_YEARS, client: nil)
     ensure_transition_from!(:draft, action: "gevuld met spelers uit de EGD")
     active_since = egd_active_since(years)
+    client ||= Egd::Client.new
     players = client.players(filter: { countryCode: country_code })
       .select { |player| importable_egd_player?(player, active_since) }
 

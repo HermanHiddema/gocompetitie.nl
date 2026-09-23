@@ -2,10 +2,9 @@ class ParticipantsController < ApplicationController
   allow_unauthenticated_access only: %i[index show]
 
   before_action :set_participant, only: %i[show edit update destroy]
-  before_action :require_admin!, only: %i[new create edit update destroy]
-  before_action :require_season!, only: %i[new create]
-  before_action :require_editable_season!, only: %i[new create edit update destroy]
-  before_action :require_admin!, :require_season!, :require_editable_season!, only: :import_egd
+  before_action :require_admin!, only: %i[new create edit update destroy import_egd]
+  before_action :require_season!, only: %i[new create import_egd]
+  before_action :require_editable_season!, only: %i[new create edit update destroy import_egd]
 
   def index
     @participants = @season ? @season.participants.includes(:club, :home_games, :away_games, team_member: :team).by_rating : Participant.none
@@ -71,7 +70,7 @@ class ParticipantsController < ApplicationController
     def search_egd_players
       return [] if @egd_search.blank?
 
-      egd_client.search_players(@egd_search, limit: 20).to_a
+      egd_client.search_players(@egd_search, limit: 20).first(20)
     rescue Egd::Error => error
       flash.now[:alert] = error.message
       []

@@ -54,9 +54,27 @@ class ParticipantsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_equal [{ search: "Jan", limit: 20 }], client.searches
+    assert_select "turbo-frame#egd_search"
     assert_select "h2", text: "Zoeken in de EGD"
+    assert_select "form[action=?][data-controller=?][data-turbo-frame=?]", new_participant_path(season_slug: seasons(:current).slug),
+      "autosubmit", "egd_search"
+    assert_select "input[name=?][data-action=?]", "egd_search", "input->autosubmit#queue search->autosubmit#queue"
     assert_select "div", text: /Jan Jansen/
     assert_select "form[action=?]", import_egd_participants_path(season_slug: seasons(:current).slug)
+  end
+
+  test "EGD search shows at most 20 players" do
+    sign_in_as users(:admin)
+    client = FakeEgdClient.new(25.times.map do |index|
+      { "pin" => index, "firstName" => "Speler", "lastName" => index.to_s, "club" => "Tstv", "grade" => "2k", "rating" => 1850 - index }
+    end)
+
+    with_egd_client(client) do
+      get new_participant_url(season_slug: seasons(:current).slug, egd_search: "Speler")
+    end
+
+    assert_response :success
+    assert_equal 20, css_select("input[value='Toevoegen uit EGD']").size
   end
 
   test "signed in users can import one EGD player into an active season" do

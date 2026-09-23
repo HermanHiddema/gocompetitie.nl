@@ -315,6 +315,31 @@ class SeasonTest < ActiveSupport::TestCase
     end
   end
 
+  test "EGD import validates the season before constructing the default client" do
+    original_token = ENV.delete("EGD_API_TOKEN")
+
+    error = assert_raises(ActiveRecord::RecordInvalid) do
+      seasons(:current).import_egd_players
+    end
+
+    assert_equal ["Alleen een seizoen in de fase draft kan worden gevuld met spelers uit de EGD."],
+      error.record.errors.full_messages
+  ensure
+    ENV["EGD_API_TOKEN"] = original_token if original_token
+  end
+
+  test "EGD import validates YEARS before constructing the default client" do
+    original_token = ENV.delete("EGD_API_TOKEN")
+
+    error = assert_raises(Egd::Error) do
+      Season.create!(name: "Najaar 2029").import_egd_players(years: "four")
+    end
+
+    assert_equal "YEARS moet een positief aantal jaren zijn", error.message
+  ensure
+    ENV["EGD_API_TOKEN"] = original_token if original_token
+  end
+
   test "the champion is the winner of the highest league of a finished season" do
     season = seasons(:current)
 
