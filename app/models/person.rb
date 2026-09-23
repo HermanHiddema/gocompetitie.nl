@@ -31,7 +31,7 @@ class Person < ApplicationRecord
   has_many :captained_teams, class_name: "Team", foreign_key: :captain_id, dependent: :nullify, inverse_of: :captain
   has_many :contacted_clubs, class_name: "Club", foreign_key: :contact_person_id, dependent: :nullify, inverse_of: :contact_person
 
-  normalizes :egd_pin, with: ->(egd_pin) { egd_pin.presence }
+  normalizes :egd_pin, with: ->(egd_pin) { egd_pin&.strip.presence }
 
   validates :firstname, :lastname, presence: true
   validates :egd_pin, uniqueness: true, allow_nil: true

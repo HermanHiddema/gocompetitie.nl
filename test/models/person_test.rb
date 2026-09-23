@@ -42,6 +42,15 @@ class PersonTest < ActiveSupport::TestCase
     assert_predicate Person.new(firstname: "Eva", lastname: "Eindhoven", egd_pin: ""), :valid?
   end
 
+  test "an EGD pin is stripped before it is stored and validated" do
+    person = Person.create!(firstname: "Dirk", lastname: "Delft", egd_pin: " 12345678 ")
+    duplicate = Person.new(firstname: "Eva", lastname: "Eindhoven", egd_pin: "12345678")
+
+    assert_equal "12345678", person.egd_pin
+    assert_not duplicate.valid?
+    assert_equal [:egd_pin], duplicate.errors.attribute_names
+  end
+
   test "merging a person reattaches its relations and deletes it" do
     anna = people(:anna)
     bram = people(:bram)
