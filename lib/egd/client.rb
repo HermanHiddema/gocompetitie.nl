@@ -51,22 +51,15 @@ module Egd
       end
     end
 
-    # Yields every player matching a free-text search, paging through the results.
+    # Yields one page of players matching a free-text search.
     def search_players(search, limit: MAX_PAGE_SIZE)
       unless block_given?
         return Enumerator.new { |yielder| search_players(search, limit: limit) { |player| yielder << player } }
       end
 
-      page = 1
-      loop do
-        pagination = { page: page, limit: limit.clamp(1, MAX_PAGE_SIZE) }
-        result = query(PLAYERS_SEARCH_QUERY, search: search, pagination: pagination).fetch("playersSearch")
-        result["data"].each { |player| yield player }
-
-        break unless result["hasMorePages"]
-
-        page += 1
-      end
+      pagination = { page: 1, limit: limit.clamp(1, MAX_PAGE_SIZE) }
+      result = query(PLAYERS_SEARCH_QUERY, search: search, pagination: pagination).fetch("playersSearch")
+      result["data"].each { |player| yield player }
     end
 
     # Posts a GraphQL document and returns its `data`, raising Egd::Error for

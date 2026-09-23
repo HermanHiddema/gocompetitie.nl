@@ -60,6 +60,21 @@ class Egd::ClientTest < ActiveSupport::TestCase
     assert_equal({ "page" => 1, "limit" => 5 }, body.dig("variables", "pagination"))
   end
 
+  test "searching players does not page past the requested limit" do
+    http = FakeHttp.new([
+      search_success(players: [{ "pin" => 1 }], has_more_pages: true),
+      search_success(players: [{ "pin" => 2 }], has_more_pages: false)
+    ])
+
+    players = with_http(http) do
+      Egd::Client.new(token: "secret").search_players("Jan", limit: 20).to_a
+    end
+
+    assert_equal [1], players.map { |player| player["pin"] }
+    assert_equal 1, http.requests.size
+    assert_equal({ "page" => 1, "limit" => 20 }, JSON.parse(http.requests.first.body).dig("variables", "pagination"))
+  end
+
   test "the page size stays within the maximum of the API" do
     http = FakeHttp.new([success(players: [], has_more_pages: false)])
 
