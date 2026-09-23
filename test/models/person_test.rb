@@ -84,5 +84,7 @@ class PersonTest < ActiveSupport::TestCase
     def without_unique_egd_pin_index
       Person.lease_connection.execute("DROP INDEX index_people_on_egd_pin")
       yield
+    ensure
+      Person.lease_connection.add_index(:people, :egd_pin, unique: true) unless Person.lease_connection.index_exists?(:people, :egd_pin, unique: true)
     end
 end
