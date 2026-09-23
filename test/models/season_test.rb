@@ -288,6 +288,30 @@ class SeasonTest < ActiveSupport::TestCase
     assert_nil participant.person.reload.club
   end
 
+  test "importing an EGD player adopts an existing participant with the same EGD pin" do
+    season = Season.create!(name: "Najaar 2029")
+    participant = season.participants.create!(
+      firstname: "Jan",
+      lastname: "Jansen",
+      rating: 1700,
+      rank: "3k",
+      egd_pin: "12345678"
+    )
+    player = egd_player(pin: 12345678, first_name: "Jan", last_name: "Jansen", club: "Tstv", grade: "2k",
+      rating: 1850, last_appearance: 1.year.ago.to_date.to_s)
+
+    assert_no_difference -> { season.participants.count } do
+      season.import_egd_players(client: FakeEgdClient.new([player]))
+    end
+
+    assert_equal participant, season.participants.sole
+    assert_equal "12345678", participant.reload.egd_pin
+    assert_equal 1850, participant.rating
+    assert_equal "2k", participant.rank
+    assert_equal "Tstv", participant.club.abbrev
+    assert_equal "12345678", participant.person.egd_pin
+  end
+
   test "all players of a country are imported when no period is given" do
     season = Season.create!(name: "Najaar 2029")
     client = FakeEgdClient.new([

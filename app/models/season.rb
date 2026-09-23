@@ -235,7 +235,10 @@ class Season < ApplicationRecord
       club: egd_club(player["club"])
     )
 
-    participant = participants.find_or_initialize_by(person: person)
+    participant = participants.find_by(person: person) ||
+      participants.find_by(egd_pin: person.egd_pin) ||
+      participants.new
+    participant.person = person
     participant.copy_person_attributes
     participant.rank = player["grade"]
     participant.save!
