@@ -18,6 +18,7 @@
 # Indexes
 #
 #  index_people_on_club_id  (club_id)
+#  index_people_on_egd_pin  (egd_pin) UNIQUE
 #
 # Foreign Keys
 #
