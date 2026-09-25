@@ -1,5 +1,9 @@
 <% content_for :title, "Team #{@team.name}" %>
-<h1 class="mb-6 text-2xl font-bold">Team <%= @team.name %></h1>
+<%= page_header "Team #{@team.name}" do %>
+  <% if admin? %>
+    <%= button_link_to "Team bewerken", edit_team_path(@team), short: "Bewerken" %>
+  <% end %>
+<% end %>
 
 <section class="mb-8 rounded-lg bg-white p-4 shadow-sm ring-1 ring-slate-200">
   <dl class="grid gap-2 sm:grid-cols-[8rem_1fr] text-sm">
@@ -43,9 +47,3 @@
   <h2 class="mb-3 text-lg font-semibold">Wedstrijden</h2>
   <%= render partial: "matches/match_details", collection: @matches, as: :match %>
 </section>
-
-<% if admin? %>
-  <div class="flex gap-3">
-    <%= button_link_to "Team bewerken", edit_team_path(@team) %>
-  </div>
-<% end %>

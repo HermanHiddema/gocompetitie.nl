@@ -1,5 +1,13 @@
 <% content_for :title, @club.name %>
-<h1 class="mb-6 text-2xl font-bold"><%= @club.name %> <span class="text-slate-500">(<%= @club.abbrev %>)</span></h1>
+<% title = capture do %>
+  <%= @club.name %> <span class="text-slate-500">(<%= @club.abbrev %>)</span>
+<% end %>
+
+<%= page_header title do %>
+  <% if admin? %>
+    <%= button_link_to "Bewerken", edit_club_path(@club, **season_url_options) %>
+  <% end %>
+<% end %>
 
 <section class="mb-8 rounded-lg bg-white p-4 shadow-sm ring-1 ring-slate-200">
   <% if @club.contact_person %>
@@ -50,9 +58,3 @@
   <h2 class="mb-3 text-lg font-semibold">Spelers</h2>
   <%= render partial: "participants/participant", collection: @participants %>
 </section>
-
-<% if admin? %>
-  <div class="flex gap-3">
-    <%= button_link_to "Bewerken", edit_club_path(@club, **season_url_options) %>
-  </div>
-<% end %>

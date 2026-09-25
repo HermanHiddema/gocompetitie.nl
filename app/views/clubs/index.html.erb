@@ -1,5 +1,9 @@
 <% content_for :title, "Clubs" %>
-<h1 class="mb-6 text-2xl font-bold">Clubs</h1>
+<%= page_header "Clubs" do %>
+  <% if admin? %>
+    <%= button_link_to "Club toevoegen", new_club_path(**season_url_options), short: "+ Club" %>
+  <% end %>
+<% end %>
 
 <section class="rounded-lg bg-white p-4 shadow-sm ring-1 ring-slate-200">
   <div class="hidden grid-cols-5 gap-4 border-b border-slate-200 pb-2 text-xs font-semibold uppercase tracking-wide text-slate-500 md:grid">
@@ -16,9 +20,3 @@
   <%= link_to params[:all] ? "Alleen clubs met een naam tonen" : "Alle clubs tonen",
         clubs_path(all: params[:all] ? nil : 1, **season_url_options), class: "underline" %>
 </p>
-
-<% if admin? %>
-  <div class="mt-6">
-    <%= button_link_to "Club toevoegen", new_club_path(**season_url_options) %>
-  </div>
-<% end %>

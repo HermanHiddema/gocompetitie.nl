@@ -6,12 +6,19 @@
   </section>
 <% end %>
 
-<div class="mb-6 flex flex-wrap items-center gap-3">
-  <h1 class="text-2xl font-bold">Stand <%= @season&.name %></h1>
-  <% if @season && !@season.active? %>
-    <%= season_phase_badge(@season, class: "rounded-full bg-slate-100 px-2 py-1 text-xs") %>
+<% badge = season_phase_badge(@season, class: "rounded-full bg-slate-100 px-2 py-1 text-xs") if @season && !@season.active? %>
+
+<%= page_header "Stand #{@season&.name}", badge: badge do %>
+  <% if admin? && @season %>
+    <% if @season.editable? %>
+      <%= button_link_to "Seizoen bewerken", edit_season_path(@season), short: "Bewerken" %>
+    <% end %>
+    <% if @season.draft? %>
+      <%= button_link_to "Poule toevoegen", new_league_path(season_id: @season.id), short: "+ Poule" %>
+      <%= button_to button_label("Seizoen starten", "Starten"), start_season_path(@season), class: button_classes %>
+    <% end %>
   <% end %>
-</div>
+<% end %>
 
 <% if @leagues.blank? %>
   <p class="text-slate-600">Er zijn nog geen poules voor dit seizoen.</p>
@@ -24,18 +31,6 @@
         </h2>
         <%= render "leagues/standings", league: league %>
       </section>
-    <% end %>
-  </div>
-<% end %>
-
-<% if admin? && @season %>
-  <div class="mt-8 flex flex-wrap gap-3">
-    <% if @season.editable? %>
-      <%= button_link_to "Seizoen bewerken", edit_season_path(@season) %>
-    <% end %>
-    <% if @season.draft? %>
-      <%= button_link_to "Poule toevoegen", new_league_path(season_id: @season.id) %>
-      <%= button_to "Seizoen starten", start_season_path(@season), class: button_classes %>
     <% end %>
   </div>
 <% end %>

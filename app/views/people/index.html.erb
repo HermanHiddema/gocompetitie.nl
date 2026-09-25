@@ -1,12 +1,10 @@
 <% content_for :title, "Personen" %>
-<h1 class="mb-6 text-2xl font-bold">Personen</h1>
+<%= page_header "Personen" do %>
+  <% if admin? %>
+    <%= button_link_to "Persoon toevoegen", new_person_path, short: "+ Persoon" %>
+  <% end %>
+<% end %>
 
 <section class="rounded-lg bg-white p-4 shadow-sm ring-1 ring-slate-200">
   <%= render @people %>
 </section>
-
-<% if admin? %>
-  <div class="mt-6">
-    <%= button_link_to "Persoon toevoegen", new_person_path %>
-  </div>
-<% end %>
