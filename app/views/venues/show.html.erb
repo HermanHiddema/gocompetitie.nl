@@ -1,5 +1,9 @@
 <% content_for :title, @venue.name %>
-<h1 class="mb-2 text-2xl font-bold"><%= @venue.name %></h1>
+<%= page_header @venue.name, class: "mb-2" do %>
+  <% if admin? %>
+    <%= button_link_to "Locatie bewerken", edit_venue_path(@venue, **season_url_options), short: "Bewerken" %>
+  <% end %>
+<% end %>
 <p class="mb-6 text-slate-600"><%= @venue.address %>, <%= @venue.city %></p>
 
 <section class="mb-8 rounded-lg bg-white p-4 shadow-sm ring-1 ring-slate-200">
@@ -18,9 +22,3 @@
   <h2 class="mb-3 text-lg font-semibold">Wedstrijden</h2>
   <%= render "matches/grid", matches: @matches %>
 </section>
-
-<% if admin? %>
-  <div class="flex gap-3">
-    <%= button_link_to "Locatie bewerken", edit_venue_path(@venue, **season_url_options) %>
-  </div>
-<% end %>

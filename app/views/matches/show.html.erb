@@ -1,19 +1,19 @@
 <% content_for :title, "#{@match.home_team.name} - #{@match.away_team.name}" %>
 
-<h1 class="mb-6 text-2xl font-bold">
+<% title = capture do %>
   <%= @match.home_team.name %> &ndash; <%= @match.away_team.name %>
-</h1>
+<% end %>
 
-<section class="rounded-lg bg-white p-4 shadow-sm ring-1 ring-slate-200">
-  <%= render "matches/match_details", match: @match %>
-</section>
-
-<% if current_user && @match.season&.editable? %>
-  <div class="mt-6 flex gap-3">
+<%= page_header title do %>
+  <% if current_user && @match.season&.editable? %>
     <%= button_link_to "Bewerken", edit_match_path(@match) %>
     <% if admin? %>
       <%= button_to "Verwijderen", match_path(@match), method: :delete, class: button_classes(:danger),
             form: { data: { turbo_confirm: "Weet je het zeker?" } } %>
     <% end %>
-  </div>
+  <% end %>
 <% end %>
+
+<section class="rounded-lg bg-white p-4 shadow-sm ring-1 ring-slate-200">
+  <%= render "matches/match_details", match: @match %>
+</section>

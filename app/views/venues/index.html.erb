@@ -1,12 +1,10 @@
 <% content_for :title, "Speellocaties" %>
-<h1 class="mb-6 text-2xl font-bold">Speellocaties</h1>
+<%= page_header "Speellocaties" do %>
+  <% if admin? %>
+    <%= button_link_to "Locatie toevoegen", new_venue_path(**season_url_options), short: "+ Locatie" %>
+  <% end %>
+<% end %>
 
 <section class="rounded-lg bg-white p-4 shadow-sm ring-1 ring-slate-200">
   <%= render @venues %>
 </section>
-
-<% if admin? %>
-  <div class="mt-6">
-    <%= button_link_to "Locatie toevoegen", new_venue_path(**season_url_options) %>
-  </div>
-<% end %>

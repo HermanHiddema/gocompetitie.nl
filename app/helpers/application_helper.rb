@@ -115,8 +115,31 @@ module ApplicationHelper
     link_to name, path, class: classes, **options
   end
 
-  def button_link_to(name, path, style: :primary, **options)
-    link_to name, path, class: button_classes(style), **options
+  # Pages put their buttons at the top, to the right of the title, so the
+  # actions are visible without scrolling.
+  def page_header(title, badge: nil, **options, &block)
+    actions = capture(&block) if block
+    classes = ["flex flex-wrap items-center justify-between gap-x-4 gap-y-2", options.delete(:class) || "mb-6"]
+
+    tag.div(class: classes, **options) do
+      concat tag.div(class: "flex flex-wrap items-center gap-3") {
+        concat tag.h1(title, class: "text-2xl font-bold")
+        concat badge if badge
+      }
+      concat tag.div(actions, class: "flex flex-wrap items-center gap-2") if actions.present?
+    end
+  end
+
+  def button_link_to(name, path, style: :primary, short: nil, **options)
+    link_to button_label(name, short), path, class: button_classes(style), **options
+  end
+
+  # Buttons in a page header show a shorter label on small screens, to save
+  # space next to the title.
+  def button_label(name, short = nil)
+    return name if short.blank?
+
+    safe_join([tag.span(short, class: "sm:hidden"), tag.span(name, class: "hidden sm:inline")])
   end
 
   def button_classes(style = :primary)

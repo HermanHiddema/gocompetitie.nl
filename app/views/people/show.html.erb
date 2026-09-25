@@ -1,5 +1,9 @@
 <% content_for :title, @person.name %>
-<h1 class="mb-6 text-2xl font-bold"><%= @person.name %></h1>
+<%= page_header @person.name do %>
+  <% if admin? %>
+    <%= button_link_to "Persoon bewerken", edit_person_path(@person), short: "Bewerken" %>
+  <% end %>
+<% end %>
 
 <section class="mb-8 rounded-lg bg-white p-4 shadow-sm ring-1 ring-slate-200">
   <dl class="grid gap-2 text-sm sm:grid-cols-[10rem_1fr]">
@@ -15,9 +19,3 @@
     <% end %>
   </dl>
 </section>
-
-<% if admin? %>
-  <div class="flex gap-3">
-    <%= button_link_to "Persoon bewerken", edit_person_path(@person) %>
-  </div>
-<% end %>

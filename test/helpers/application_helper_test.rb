@@ -40,4 +40,29 @@ class ApplicationHelperTest < ActionView::TestCase
     season.phase = :cancelled
     assert_dom_equal %(<span role="img" aria-label="geannuleerd" title="geannuleerd">🛑</span>), season_phase_badge(season)
   end
+
+  test "puts the buttons of a page next to its title" do
+    render inline: <<~ERB
+      <%= page_header("Teams") do %><%= button_link_to("Team toevoegen", "/teams/new", short: "+ Team") %><% end %>
+    ERB
+
+    assert_select "div > div > h1", text: "Teams"
+    assert_select "div > div > a[href=?]", "/teams/new"
+  end
+
+  test "omits the buttons of a page without them" do
+    header = page_header("Teams") { "" }
+
+    assert_dom_equal %(<div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 mb-6">) +
+      %(<div class="flex flex-wrap items-center gap-3"><h1 class="text-2xl font-bold">Teams</h1></div></div>), header
+  end
+
+  test "shows a shorter button label on small screens" do
+    assert_dom_equal %(<span class="sm:hidden">+ Team</span><span class="hidden sm:inline">Team toevoegen</span>),
+      button_label("Team toevoegen", "+ Team")
+  end
+
+  test "shows a single button label without a shorter one" do
+    assert_equal "Team toevoegen", button_label("Team toevoegen")
+  end
 end
