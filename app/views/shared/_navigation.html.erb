@@ -18,6 +18,10 @@
       <%= nav_link_to "Clubs", clubs_path(**season_url_options) %>
       <%= nav_link_to "Locaties", venues_path(**season_url_options) %>
       <%= nav_link_to "Archief", seasons_path(**season_url_options) %>
+      <% if admin? %>
+        <%= nav_link_to "Spelers", participants_path(**season_url_options) %>
+        <%= nav_link_to "Personen", people_path %>
+      <% end %>
 
       <div class="sm:ml-auto">
         <% if current_user %>
