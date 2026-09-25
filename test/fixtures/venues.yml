@@ -11,7 +11,7 @@
 #  playing_time :string           not null
 #  created_at   :datetime         not null
 #  updated_at   :datetime         not null
-#  club_id      :bigint
+#  club_id      :bigint           not null
 #
 # Indexes
 #
@@ -46,6 +46,7 @@ rotterdam:
   playing_time: "20:00"
 
 to_be_determined:
+  club: geen
   name: "(Nader te bepalen)"
   address: Onbekend
   city: in onderling overleg

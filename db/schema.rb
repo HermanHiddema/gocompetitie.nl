@@ -106,7 +106,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_25_180000) do
     t.string "phase", default: "draft", null: false
     t.string "slug", null: false
     t.datetime "updated_at", null: false
-    t.index ["phase"], name: "index_seasons_on_active_phase", unique: true, where: "phase = 'active'"
+    t.index ["phase"], name: "index_seasons_on_active_phase", unique: true, where: "((phase)::text = 'active'::text)"
     t.index ["phase"], name: "index_seasons_on_phase"
     t.index ["slug"], name: "index_seasons_on_slug", unique: true
   end
@@ -157,7 +157,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_25_180000) do
   create_table "venues", force: :cascade do |t|
     t.string "address", null: false
     t.string "city", null: false
-    t.bigint "club_id"
+    t.bigint "club_id", null: false
     t.datetime "created_at", null: false
     t.text "info"
     t.string "name", null: false

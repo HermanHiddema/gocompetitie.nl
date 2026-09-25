@@ -32,3 +32,7 @@ utrecht:
 rotterdam:
   name: Go Club Rotterdam
   abbrev: Rott
+
+geen:
+  name: Geen
+  abbrev: xxxx

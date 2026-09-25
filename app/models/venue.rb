@@ -11,7 +11,7 @@
 #  playing_time :string           not null
 #  created_at   :datetime         not null
 #  updated_at   :datetime         not null
-#  club_id      :bigint
+#  club_id      :bigint           not null
 #
 # Indexes
 #
@@ -24,7 +24,7 @@
 class Venue < ApplicationRecord
   DAYS = %w[zondag maandag dinsdag woensdag donderdag vrijdag zaterdag].freeze
 
-  belongs_to :club, optional: true
+  belongs_to :club
 
   has_many :matches, dependent: :restrict_with_error
 
