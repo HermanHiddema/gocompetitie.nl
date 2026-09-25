@@ -77,8 +77,9 @@ class MatchesControllerTest < ActionDispatch::IntegrationTest
     home_team = league.teams.create!(name: "Amsterdam 9", abbrev: "Amst9", club: clubs(:amsterdam))
     away_team = league.teams.create!(name: "Utrecht 9", abbrev: "Utre9", club: clubs(:utrecht))
 
-    get matches_url(season_slug: previous.slug)
-    assert_select "a[href=?]", new_match_path(season_slug: previous.slug)
+    get league_url(league)
+    assert_select "a[href=?]", new_match_path(league_id: league.id, home_team_id: home_team.id,
+      away_team_id: away_team.id, season_slug: previous.slug)
 
     get new_match_url(season_slug: previous.slug, league_id: league.id, home_team_id: home_team.id, away_team_id: away_team.id)
     assert_select "form[action=?]", matches_path(season_slug: previous.slug)
