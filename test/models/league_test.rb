@@ -182,7 +182,7 @@ class LeagueTest < ActiveSupport::TestCase
     # Play a match between two teams, with one result per board, seen from the
     # first (home) team.
     def play(league, home_team, away_team, results)
-      match = league.matches.create!(home_team: home_team, away_team: away_team)
+      match = league.matches.create!(home_team: home_team, away_team: away_team, venue: venues(:amsterdam))
       match.games.by_board.each_with_index { |game, index| game.update!(result: results[index]) }
       match
     end

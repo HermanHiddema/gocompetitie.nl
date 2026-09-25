@@ -52,6 +52,17 @@ class MatchesControllerTest < ActionDispatch::IntegrationTest
     assert_equal 3, match.games.count
   end
 
+  test "the venue cannot be left blank in the match forms" do
+    sign_in_as users(:admin)
+
+    get new_match_url
+    assert_select "select#match_venue_id option[value=?]", "", count: 0
+    assert_select "select#match_venue_id option:first-child", text: venues(:to_be_determined).name
+
+    get edit_match_url(@match)
+    assert_select "select#match_venue_id option[value=?]", "", count: 0
+  end
+
   test "matches can only be created inside the selected season" do
     sign_in_as users(:admin)
     previous = seasons(:previous)

@@ -42,6 +42,16 @@ class VenuesControllerTest < ActionDispatch::IntegrationTest
     assert_select "form[action=?]", venue_path(venues(:amsterdam), season_slug: slug)
   end
 
+  test "a venue with matches cannot be destroyed" do
+    sign_in_as users(:admin)
+
+    assert_no_difference -> { Venue.count } do
+      delete venue_url(venues(:amsterdam))
+    end
+
+    assert_response :unprocessable_content
+  end
+
   test "editing requires authentication" do
     get new_venue_url
     assert_redirected_to new_session_url

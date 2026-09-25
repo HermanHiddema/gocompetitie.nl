@@ -12,7 +12,7 @@ require "test_helper"
 #  away_team_id :bigint           not null
 #  home_team_id :bigint           not null
 #  league_id    :bigint           not null
-#  venue_id     :bigint
+#  venue_id     :bigint           not null
 #
 # Indexes
 #
@@ -52,8 +52,16 @@ class MatchTest < ActiveSupport::TestCase
     assert_equal "?-?", @unplayed.result
   end
 
+  test "a match requires a venue" do
+    match = Match.new(league: leagues(:top), home_team: teams(:amsterdam), away_team: teams(:rotterdam))
+
+    assert_not match.valid?
+    assert_includes match.errors.attribute_names, :venue
+  end
+
   test "games are created for matching board numbers after create" do
-    match = Match.create!(league: leagues(:top), home_team: teams(:amsterdam), away_team: teams(:rotterdam))
+    match = Match.create!(league: leagues(:top), home_team: teams(:amsterdam), away_team: teams(:rotterdam),
+      venue: venues(:amsterdam))
 
     assert_equal 3, match.games.count
     assert_equal participants(:amsterdam_1), match.games.find_by(board_number: 1).home_player

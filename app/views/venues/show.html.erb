@@ -11,10 +11,12 @@
     <span class="font-semibold">Speelavond:</span>
     <%= @venue.playing_day_name %> om <%= @venue.playing_time %>
   </p>
-  <p class="mt-1 text-sm">
-    <span class="font-semibold">Club:</span>
-    <%= link_to @venue.club.name, club_path(@venue.club, **season_url_options), class: "hover:underline" %>
-  </p>
+  <% if @venue.club %>
+    <p class="mt-1 text-sm">
+      <span class="font-semibold">Club:</span>
+      <%= link_to @venue.club.name, club_path(@venue.club, **season_url_options), class: "hover:underline" %>
+    </p>
+  <% end %>
   <%= markdown @venue.info %>
 </section>
 

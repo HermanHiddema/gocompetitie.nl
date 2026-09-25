@@ -13,7 +13,7 @@ require "test_helper"
 #  playing_time :string           not null
 #  created_at   :datetime         not null
 #  updated_at   :datetime         not null
-#  club_id      :bigint           not null
+#  club_id      :bigint
 #
 # Indexes
 #
@@ -28,10 +28,24 @@ class VenueTest < ActiveSupport::TestCase
     assert_equal "dinsdag", venues(:amsterdam).playing_day_name
   end
 
-  test "a venue requires club, name, address, city and playing details" do
+  test "a venue requires name, address, city and playing details, but no club" do
     venue = Venue.new
 
     assert_not venue.valid?
-    assert_equal %i[club name address city playing_time playing_day].sort, venue.errors.attribute_names.sort
+    assert_equal %i[name address city playing_time playing_day].sort, venue.errors.attribute_names.sort
+  end
+
+  test "a venue does not need a club" do
+    venue = venues(:to_be_determined)
+
+    assert_nil venue.club
+    assert_predicate venue, :valid?
+  end
+
+  test "a venue with matches cannot be destroyed" do
+    venue = venues(:amsterdam)
+
+    assert_not venue.destroy
+    assert_predicate venue.errors[:base], :any?
   end
 end

@@ -11,7 +11,7 @@
 #  playing_time :string           not null
 #  created_at   :datetime         not null
 #  updated_at   :datetime         not null
-#  club_id      :bigint           not null
+#  club_id      :bigint
 #
 # Indexes
 #
@@ -24,14 +24,15 @@
 class Venue < ApplicationRecord
   DAYS = %w[zondag maandag dinsdag woensdag donderdag vrijdag zaterdag].freeze
 
-  belongs_to :club
+  belongs_to :club, optional: true
 
-  has_many :matches, dependent: :nullify
+  has_many :matches, dependent: :restrict_with_error
 
   validates :name, :address, :city, :playing_time, presence: true
   validates :playing_day, presence: true, inclusion: { in: 0..6 }
 
   scope :ordered, -> { order(:city, :name) }
+  scope :by_name, -> { order(:name) }
   # A venue belongs to a season when its club takes part in it, or when a match
   # of the season is played there.
   scope :in_season, ->(season) {

@@ -10,7 +10,7 @@
 #  away_team_id :bigint           not null
 #  home_team_id :bigint           not null
 #  league_id    :bigint           not null
-#  venue_id     :bigint
+#  venue_id     :bigint           not null
 #
 # Indexes
 #
@@ -30,7 +30,7 @@
 class Match < ApplicationRecord
   BOARD_COUNT = 3
   belongs_to :league
-  belongs_to :venue, optional: true
+  belongs_to :venue
   belongs_to :home_team, class_name: "Team", inverse_of: :home_matches
   belongs_to :away_team, class_name: "Team", inverse_of: :away_matches
 
