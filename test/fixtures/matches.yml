@@ -10,7 +10,7 @@
 #  away_team_id :bigint           not null
 #  home_team_id :bigint           not null
 #  league_id    :bigint           not null
-#  venue_id     :bigint
+#  venue_id     :bigint           not null
 #
 # Indexes
 #

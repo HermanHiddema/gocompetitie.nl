@@ -40,8 +40,12 @@ class VenuesController < ApplicationController
   end
 
   def destroy
-    @venue.destroy!
-    redirect_to venues_url(season_slug: @season&.slug), notice: "Speellocatie is verwijderd.", status: :see_other
+    if @venue.destroy
+      redirect_to venues_url(season_slug: @season&.slug), notice: "Speellocatie is verwijderd.", status: :see_other
+    else
+      flash.now[:alert] = @venue.errors.full_messages.to_sentence
+      render :edit, status: :unprocessable_content
+    end
   end
 
   private

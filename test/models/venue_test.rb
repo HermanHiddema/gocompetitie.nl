@@ -34,4 +34,18 @@ class VenueTest < ActiveSupport::TestCase
     assert_not venue.valid?
     assert_equal %i[club name address city playing_time playing_day].sort, venue.errors.attribute_names.sort
   end
+
+  test "the placeholder venue uses the fallback club" do
+    venue = venues(:to_be_determined)
+
+    assert_equal clubs(:geen), venue.club
+    assert_predicate venue, :valid?
+  end
+
+  test "a venue with matches cannot be destroyed" do
+    venue = venues(:amsterdam)
+
+    assert_not venue.destroy
+    assert_predicate venue.errors[:base], :any?
+  end
 end
