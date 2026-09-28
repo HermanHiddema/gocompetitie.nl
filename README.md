@@ -34,6 +34,8 @@ application on Rails 8, with the same business logic and a new Tailwind CSS fron
   Games and matches are stored per side (`home` and `away`), not per color: with a
   handicap the weaker player takes black, otherwise the home team plays black on the
   odd boards and white on the even ones.
+  A match is normally played at a venue: saving one without a venue requires the
+  *Nader te bepalen* option of the venue select, which stores no venue at all.
 * **User** – an account to sign in with. Ordinary users are team captains, who may only
   edit matches (date, time, venue, players and results). Users flagged as `admin`
   maintain everything else.

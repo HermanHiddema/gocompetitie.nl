@@ -43,13 +43,54 @@ class MatchesControllerTest < ActionDispatch::IntegrationTest
 
     assert_difference -> { Match.count }, 1 do
       post matches_url, params: { match: { league_id: leagues(:top).id, home_team_id: teams(:amsterdam).id,
-        away_team_id: teams(:rotterdam).id, venue_id: venues(:amsterdam).id,
+        away_team_id: teams(:rotterdam).id, venue_choice: venues(:amsterdam).id,
         playing_date: "2026-04-01", playing_time: "20:00" } }
     end
 
     match = Match.last
     assert_redirected_to edit_match_url(match)
     assert_equal 3, match.games.count
+  end
+
+  test "scheduling a match without choosing a venue fails" do
+    sign_in_as users(:admin)
+
+    assert_no_difference -> { Match.count } do
+      post matches_url, params: { match: { league_id: leagues(:top).id, home_team_id: teams(:amsterdam).id,
+        away_team_id: teams(:rotterdam).id, venue_choice: "",
+        playing_date: "2026-04-01", playing_time: "20:00" } }
+    end
+
+    assert_response :unprocessable_content
+    assert_select "li", /Speellocatie moet gekozen worden/
+  end
+
+  test "a match can be scheduled without a venue on purpose" do
+    sign_in_as users(:admin)
+
+    assert_difference -> { Match.count }, 1 do
+      post matches_url, params: { match: { league_id: leagues(:top).id, home_team_id: teams(:amsterdam).id,
+        away_team_id: teams(:rotterdam).id, venue_choice: Match::VENUE_UNDECIDED,
+        playing_date: "2026-04-01", playing_time: "20:00" } }
+    end
+
+    assert_nil Match.last.venue_id
+  end
+
+  test "editing keeps the venue select blank for a match without a venue" do
+    sign_in_as users(:member)
+    @match.update!(venue: nil)
+
+    get edit_match_url(@match)
+
+    assert_response :success
+    assert_select "select[name='match[venue_choice]']" do
+      assert_select "option[value=?]", Match::VENUE_UNDECIDED, text: "Nader te bepalen"
+      assert_select "option[selected]", count: 0
+    end
+
+    patch match_url(@match), params: { match: { venue_choice: "" } }
+    assert_response :unprocessable_content
   end
 
   test "matches can only be created inside the selected season" do
@@ -61,7 +102,7 @@ class MatchesControllerTest < ActionDispatch::IntegrationTest
 
     assert_no_difference -> { Match.count } do
       post matches_url, params: { match: { league_id: league.id, home_team_id: home_team.id,
-        away_team_id: away_team.id, venue_id: venues(:amsterdam).id,
+        away_team_id: away_team.id, venue_choice: venues(:amsterdam).id,
         playing_date: "2026-04-01", playing_time: "20:00" } }
     end
 
@@ -279,7 +320,7 @@ class MatchesControllerTest < ActionDispatch::IntegrationTest
 
     assert_no_difference -> { Match.count } do
       post matches_url, params: { match: { league_id: leagues(:top).id, home_team_id: teams(:amsterdam).id,
-        away_team_id: teams(:rotterdam).id, venue_id: venues(:amsterdam).id,
+        away_team_id: teams(:rotterdam).id, venue_choice: venues(:amsterdam).id,
         playing_date: "2026-04-01", playing_time: "20:00" } }
     end
 

@@ -84,10 +84,10 @@ class MatchesController < ApplicationController
     end
 
     def match_create_params
-      params.expect(match: [:league_id, :venue_id, :playing_date, :playing_time, :home_team_id, :away_team_id])
+      params.expect(match: [:league_id, :venue_choice, :playing_date, :playing_time, :home_team_id, :away_team_id])
     end
 
     def match_update_params
-      params.expect(match: [:venue_id, :playing_date, :playing_time, games_attributes: [[:id, :home_id, :away_id, :result, :handicap]]])
+      params.expect(match: [:venue_choice, :playing_date, :playing_time, games_attributes: [[:id, :home_id, :away_id, :result, :handicap]]])
     end
 end

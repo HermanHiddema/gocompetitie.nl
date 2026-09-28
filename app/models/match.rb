@@ -29,6 +29,8 @@
 #
 class Match < ApplicationRecord
   BOARD_COUNT = 3
+  # Magic value of the venue select with which a venue is skipped on purpose.
+  VENUE_UNDECIDED = "undecided"
   belongs_to :league
   belongs_to :venue, optional: true
   belongs_to :home_team, class_name: "Team", inverse_of: :home_matches
@@ -42,6 +44,7 @@ class Match < ApplicationRecord
   validate :teams_are_distinct
   validate :teams_belong_to_league
   validate :team_pair_is_unique
+  validate :venue_is_chosen
 
   delegate :name, :address, :city, :club, :playing_time, :playing_day, to: :venue, prefix: true, allow_nil: true
   delegate :season, to: :league, allow_nil: true
@@ -113,6 +116,17 @@ class Match < ApplicationRecord
     "#{home_team.name} - #{away_team.name}"
   end
 
+  # The venue select, which offers VENUE_UNDECIDED to skip the venue on purpose.
+  # An existing match without a venue starts out blank, so it has to be chosen again.
+  def venue_choice
+    @venue_choice || venue_id&.to_s
+  end
+
+  def venue_choice=(value)
+    @venue_choice = value.to_s
+    self.venue_id = @venue_choice == VENUE_UNDECIDED ? nil : @venue_choice.presence
+  end
+
   private
     def points_for(column)
       games.filter_map(&column).sum / 2.0 if played?
@@ -142,5 +156,11 @@ class Match < ApplicationRecord
         home: home_team_id, away: away_team_id
       ).exists?
       errors.add(:base, "teams already have a match in this league") if duplicate
+    end
+
+    def venue_is_chosen
+      return unless @venue_choice&.blank?
+
+      errors.add(:venue, "moet gekozen worden, kies \"Nader te bepalen\" als die nog niet bekend is")
     end
 end
