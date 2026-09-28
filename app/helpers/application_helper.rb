@@ -160,4 +160,15 @@ module ApplicationHelper
   def label_classes
     "block text-sm font-medium text-slate-700 mb-1"
   end
+
+  VENUE_UNDECIDED_LABEL = "Nader te bepalen"
+
+  # The venues to pick from, preceded by the option with which a match is
+  # saved without a venue on purpose.
+  def venue_choice_options(match)
+    options_for_select(
+      [[VENUE_UNDECIDED_LABEL, Match::VENUE_UNDECIDED]] + Venue.ordered.pluck(:name, :id),
+      match.venue_choice
+    )
+  end
 end

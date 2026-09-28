@@ -80,4 +80,27 @@ class MatchTest < ActiveSupport::TestCase
     assert_equal teams(:amsterdam), @match.opponent(teams(:utrecht))
     assert_nil @match.opponent(teams(:rotterdam))
   end
+
+  test "a venue has to be chosen or skipped on purpose" do
+    @match.venue_choice = ""
+
+    assert_not @match.valid?
+    assert @match.errors.of_kind?(:venue, "moet gekozen worden, kies \"Nader te bepalen\" als die nog niet bekend is")
+  end
+
+  test "the undecided venue clears the venue without an error" do
+    @match.venue_choice = Match::VENUE_UNDECIDED
+
+    assert @match.valid?
+    assert_nil @match.venue_id
+    assert @match.save
+    assert_nil @match.reload.venue_id
+  end
+
+  test "the venue select of a match without a venue is blank again" do
+    @match.update!(venue_choice: Match::VENUE_UNDECIDED)
+
+    assert_nil Match.find(@match.id).venue_choice
+    assert_equal venues(:utrecht).id.to_s, matches(:utrecht_rotterdam).venue_choice
+  end
 end
