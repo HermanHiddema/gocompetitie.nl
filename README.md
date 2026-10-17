@@ -22,6 +22,12 @@ application on Rails 8, with the same business logic and a new Tailwind CSS fron
 * **Club**, **Venue** (*speellocatie*) and **Person** – the organisations, playing
   locations and contact persons. Clubs and venues outlive a season, so their pages
   are prefixed with the season as well and list only what takes part in it.
+* **Group** – the teams of a season are fielded by groups, which the interface calls
+  clubs. A group usually is a single club, but clubs that field teams together (e.g.
+  Gouda + Zoetermeer) form one group, and ad hoc teams (e.g. TU Delft) get a group
+  that is linked to no club at all. Every season has groups of its own: admins
+  register them under *Clubs aanmelden* before adding the teams, and a new season
+  starts with the groups that fielded a team in the latest two seasons.
 * **Participant** – a person playing in a specific season, with rating and rank.
 * **Team** and **TeamMember** – three players per team, one per board.
 * **Match** and **Game** – a match between two teams consists of a game per board.

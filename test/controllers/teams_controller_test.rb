@@ -28,6 +28,30 @@ class TeamsControllerTest < ActionDispatch::IntegrationTest
     assert_select "h1", "Team Amsterdam 1"
   end
 
+  test "show links the clubs that field the team together" do
+    group = groups(:amsterdam)
+    group.update!(name: "Amsterdam/Utrecht", clubs: [clubs(:amsterdam), clubs(:utrecht)])
+
+    get team_url(teams(:amsterdam))
+
+    assert_select "dd", /Amsterdam\/Utrecht/
+    assert_select "dd a[href=?]", club_path(clubs(:amsterdam), season_slug: seasons(:current).slug)
+    assert_select "dd a[href=?]", club_path(clubs(:utrecht), season_slug: seasons(:current).slug)
+  end
+
+  test "the team form offers the clubs registered for the season" do
+    sign_in_as users(:admin)
+    season = seasons(:current)
+    season.update!(phase: :draft)
+    seasons(:previous).groups.create!(name: "Go Club Leiden")
+
+    get new_team_url(season_slug: season.slug)
+
+    assert_select "select[name='team[group_id]'] option", text: "Go Club Amsterdam"
+    assert_select "select[name='team[group_id]'] option", text: "Go Club Leiden", count: 0
+    assert_select "a[href=?]", groups_path(season_slug: season.slug)
+  end
+
   test "new requires authentication" do
     get new_team_url
     assert_redirected_to new_session_url

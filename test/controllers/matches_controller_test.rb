@@ -139,6 +139,36 @@ class MatchesControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "edit lists the players of all clubs that field a team together" do
+    sign_in_as users(:admin)
+    groups(:amsterdam).clubs << clubs(:rotterdam)
+
+    get edit_match_url(@match)
+
+    assert_response :success
+    assert_select "select[name$='[home_id]'] option", text: /Rotterdam/
+  end
+
+  test "edit lists all participants for a team without a club" do
+    sign_in_as users(:admin)
+    groups(:amsterdam).group_memberships.destroy_all
+    Participant.where(club: clubs(:amsterdam)).update_all(club_id: nil)
+
+    get edit_match_url(@match)
+
+    assert_response :success
+    assert_select "select[name$='[home_id]'] option", text: /Rotterdam/
+  end
+
+  test "edit only lists the players of the clubs of the teams" do
+    sign_in_as users(:admin)
+
+    get edit_match_url(@match)
+
+    assert_response :success
+    assert_select "select[name$='[home_id]'] option", text: /Rotterdam/, count: 0
+  end
+
   test "edit can list all participants of the season" do
     sign_in_as users(:admin)
 

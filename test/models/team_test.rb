@@ -49,6 +49,16 @@ class TeamTest < ActiveSupport::TestCase
     assert_equal %i[group league name abbrev].sort, team.errors.attribute_names.sort
   end
 
+  test "the club of a team must belong to the season of its league" do
+    team = leagues(:first).teams.build(name: "Delft 1", abbrev: "Delf", group: seasons(:previous).groups.create!(name: "TU Delft"))
+
+    assert_not team.valid?
+    assert_includes team.errors.attribute_names, :group
+
+    team.group = seasons(:current).groups.create!(name: "TU Delft")
+    assert team.valid?
+  end
+
   test "the league of a team with matches cannot be changed" do
     team = teams(:amsterdam)
 

@@ -263,6 +263,16 @@ class SeasonsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to season_url(Season.find_by(slug: "najaar-2026"))
   end
 
+  test "a new season starts with the clubs of the latest seasons" do
+    sign_in_as users(:admin)
+
+    post seasons_url, params: { season: { name: "Najaar 2026" } }
+
+    season = Season.find_by!(slug: "najaar-2026")
+    assert_equal ["Go Club Amsterdam", "Go Club Rotterdam", "Go Club Utrecht"], season.groups.ordered.map(&:name)
+    assert_equal [clubs(:amsterdam)], season.groups.find_by!(name: "Go Club Amsterdam").clubs.to_a
+  end
+
   test "admins can open the form for a new season" do
     sign_in_as users(:admin)
 
