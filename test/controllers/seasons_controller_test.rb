@@ -34,7 +34,7 @@ class SeasonsControllerTest < ActionDispatch::IntegrationTest
   test "index pluralizes singular season statistics" do
     season = Season.create!(name: "Najaar 2026", phase: :finished)
     league = season.leagues.create!(name: "Hoofdklasse", position: 0)
-    league.teams.create!(name: "Amsterdam 1", abbrev: "Amst1", club: clubs(:amsterdam))
+    league.teams.create!(name: "Amsterdam 1", abbrev: "Amst1", group: season.groups.create!(name: "Go Club Amsterdam", clubs: [clubs(:amsterdam)]))
 
     get seasons_url
 

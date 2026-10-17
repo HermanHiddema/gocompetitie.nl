@@ -19,7 +19,7 @@ class SeasonsController < ApplicationController
 
   def show
     respond_to do |format|
-      format.html { @leagues = @season.leagues.ordered.includes(teams: [:club, { team_members: :participant }], matches: [:games, { league: :season }]) }
+      format.html { @leagues = @season.leagues.ordered.includes(teams: [:group, { team_members: :participant }], matches: [:games, { league: :season }]) }
       format.text { render plain: @season.results.join("\n") }
     end
   end
@@ -33,8 +33,9 @@ class SeasonsController < ApplicationController
 
   def create
     @season = Season.new(season_params)
+    saved = Season.transaction { @season.save && @season.copy_recent_groups }
 
-    if @season.save
+    if saved
       redirect_to @season, notice: "Seizoen is toegevoegd."
     else
       render :new, status: :unprocessable_content

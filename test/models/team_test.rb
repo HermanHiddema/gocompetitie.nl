@@ -10,19 +10,19 @@ require "test_helper"
 #  created_at :datetime         not null
 #  updated_at :datetime         not null
 #  captain_id :bigint
-#  club_id    :bigint           not null
+#  group_id   :bigint           not null
 #  league_id  :bigint           not null
 #
 # Indexes
 #
 #  index_teams_on_captain_id  (captain_id)
-#  index_teams_on_club_id     (club_id)
+#  index_teams_on_group_id    (group_id)
 #  index_teams_on_league_id   (league_id)
 #
 # Foreign Keys
 #
 #  fk_rails_...  (captain_id => people.id)
-#  fk_rails_...  (club_id => clubs.id)
+#  fk_rails_...  (group_id => groups.id)
 #  fk_rails_...  (league_id => leagues.id)
 #
 class TeamTest < ActiveSupport::TestCase
@@ -46,7 +46,7 @@ class TeamTest < ActiveSupport::TestCase
     team = Team.new
 
     assert_not team.valid?
-    assert_equal %i[club league name abbrev].sort, team.errors.attribute_names.sort
+    assert_equal %i[group league name abbrev].sort, team.errors.attribute_names.sort
   end
 
   test "the league of a team with matches cannot be changed" do

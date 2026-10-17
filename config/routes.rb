@@ -20,6 +20,7 @@ Rails.application.routes.draw do
     resources :clubs
     resources :venues
     resources :games, only: :index
+    resources :groups, only: %i[index new create]
     resources :matches, only: %i[index new create]
     resources :participants, only: %i[index new create] do
       collection do
@@ -29,6 +30,7 @@ Rails.application.routes.draw do
     resources :teams, only: %i[index new create]
   end
 
+  resources :groups, only: %i[edit update destroy]
   resources :matches, except: %i[index new create]
   resources :participants, except: %i[index new create]
   resources :teams, except: %i[index new create]

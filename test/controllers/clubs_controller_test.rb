@@ -76,7 +76,7 @@ class ClubsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to club_url(club, season_slug: seasons(:current).slug)
     assert_equal "Go Club Rotterdam Zuid", club.reload.name
 
-    club.teams.destroy_all
+    club.group_memberships.destroy_all
     club.venues.destroy_all
     delete club_url(club)
     assert_redirected_to clubs_url(season_slug: seasons(:current).slug)

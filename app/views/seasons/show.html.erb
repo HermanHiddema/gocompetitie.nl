@@ -14,6 +14,7 @@
       <%= button_link_to "Seizoen bewerken", edit_season_path(@season), short: "Bewerken" %>
     <% end %>
     <% if @season.draft? %>
+      <%= button_link_to "Clubs aanmelden", groups_path(season_slug: @season.slug), style: :secondary, short: "Clubs" %>
       <%= button_link_to "Poule toevoegen", new_league_path(season_id: @season.id), short: "+ Poule" %>
       <%= button_to button_label("Seizoen starten", "Starten"), start_season_path(@season), class: button_classes %>
     <% end %>

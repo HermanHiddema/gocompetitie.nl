@@ -48,7 +48,7 @@ class LeagueTest < ActiveSupport::TestCase
   test "making a pairing creates matches for every team combination" do
     league = leagues(:first)
     %w[Alpha Beta Gamma].each do |name|
-      league.teams.create!(name: name, abbrev: name[0, 4], club: clubs(:amsterdam), captain: people(:anna))
+      league.teams.create!(name: name, abbrev: name[0, 4], group: groups(:amsterdam), captain: people(:anna))
     end
 
     assert_difference -> { league.matches.count }, 3 do
@@ -162,7 +162,7 @@ class LeagueTest < ActiveSupport::TestCase
   test "participants list the team players and the substitutes without a team" do
     substitute = seasons(:current).participants.create!(firstname: "Invaller", lastname: "Speler", rating: 1900, club: clubs(:amsterdam))
     other_team_player = seasons(:current).participants.create!(firstname: "Andere", lastname: "Speler", rating: 1800, club: clubs(:amsterdam))
-    other_team = leagues(:first).teams.create!(name: "Amsterdam 2", abbrev: "Ams2", club: clubs(:amsterdam))
+    other_team = leagues(:first).teams.create!(name: "Amsterdam 2", abbrev: "Ams2", group: groups(:amsterdam))
     other_team.team_members.create!(participant: other_team_player, board_number: 1)
     games(:unplayed).update!(home_player: substitute, away_player: other_team_player)
 
@@ -176,7 +176,7 @@ class LeagueTest < ActiveSupport::TestCase
 
   private
     def create_teams(league, names)
-      names.map { |name| league.teams.create!(name: name, abbrev: name[0, 4], club: clubs(:amsterdam)) }
+      names.map { |name| league.teams.create!(name: name, abbrev: name[0, 4], group: groups(:amsterdam)) }
     end
 
     # Play a match between two teams, with one result per board, seen from the

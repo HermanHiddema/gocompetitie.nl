@@ -72,7 +72,7 @@ class SeasonSelectionTest < ActionDispatch::IntegrationTest
 
   test "a record of an older season selects that season" do
     league = seasons(:previous).leagues.create!(name: "Hoofdklasse", position: 0)
-    team = league.teams.create!(name: "Amsterdam 9", abbrev: "Amst9", club: clubs(:amsterdam))
+    team = league.teams.create!(name: "Amsterdam 9", abbrev: "Amst9", group: seasons(:previous).groups.create!(name: "Go Club Amsterdam", clubs: [clubs(:amsterdam)]))
     participant = seasons(:previous).participants.create!(firstname: "Oude", lastname: "Speler")
 
     [league_url(league), team_url(team), participant_url(participant)].each do |url|
