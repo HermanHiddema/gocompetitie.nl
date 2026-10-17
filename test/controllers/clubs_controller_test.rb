@@ -1,13 +1,22 @@
 require "test_helper"
 
 class ClubsControllerTest < ActionDispatch::IntegrationTest
-  test "index is public" do
+  test "the list of all clubs is only for admins" do
+    get clubs_url
+    assert_redirected_to new_session_url
+
+    sign_in_as users(:member)
+    get clubs_url
+    assert_response :unauthorized
+
+    sign_in_as users(:admin)
     get clubs_url
     assert_response :success
-    assert_select "h1", "Clubs"
+    assert_select "h1", "Alle clubs"
   end
 
   test "index only lists clubs that take part in the season" do
+    sign_in_as users(:admin)
     get clubs_url(season_slug: seasons(:previous).slug)
     assert_select "a", text: "Go Club Amsterdam", count: 0
 
@@ -18,6 +27,7 @@ class ClubsControllerTest < ActionDispatch::IntegrationTest
   test "index only lists clubs with a proper name unless all is given" do
     club = Club.create!(name: "Xyz", abbrev: "Xyz")
     club.participants.create!(firstname: "Speler", lastname: "Xyz", season: seasons(:current))
+    sign_in_as users(:admin)
 
     get clubs_url
     assert_select "a", text: "Xyz", count: 0

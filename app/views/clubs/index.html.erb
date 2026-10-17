@@ -1,5 +1,5 @@
-<% content_for :title, "Clubs" %>
-<%= page_header "Clubs" do %>
+<% content_for :title, "Alle clubs" %>
+<%= page_header "Alle clubs" do %>
   <% if admin? %>
     <%= button_link_to "Club toevoegen", new_club_path(**season_url_options), short: "+ Club" %>
   <% end %>

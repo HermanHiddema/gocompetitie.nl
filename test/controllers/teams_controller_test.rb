@@ -34,7 +34,7 @@ class TeamsControllerTest < ActionDispatch::IntegrationTest
 
     get team_url(teams(:amsterdam))
 
-    assert_select "dd", /Amsterdam\/Utrecht/
+    assert_select "dd a[href=?]", group_path(group), text: "Amsterdam/Utrecht"
     assert_select "dd a[href=?]", club_path(clubs(:amsterdam), season_slug: seasons(:current).slug)
     assert_select "dd a[href=?]", club_path(clubs(:utrecht), season_slug: seasons(:current).slug)
   end

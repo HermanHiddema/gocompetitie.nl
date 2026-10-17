@@ -1,15 +1,27 @@
-# Admins register the groups that field the teams of a season before the teams
-# themselves. In the interface they are called clubs, as most groups are a
-# single club.
+# The groups that field the teams of a season, which are called clubs in the
+# interface as most groups are a single club. Everybody can see them, admins
+# register them before the teams themselves.
 class GroupsController < ApplicationController
-  before_action :require_admin!
-  before_action :set_group, only: %i[edit update destroy]
-  before_action :require_season!, only: %i[index new create]
+  allow_unauthenticated_access only: %i[index show]
+
+  before_action :set_group, only: %i[show edit update destroy]
+  before_action :require_admin!, only: %i[new create edit update destroy]
+  before_action :require_season!, only: %i[new create]
   before_action :require_editable_season!, only: %i[new create edit update destroy]
   before_action :require_draft_season!, only: %i[new create destroy]
 
   def index
-    @groups = @season.groups.includes(:clubs, :teams).ordered
+    @groups = @season ? @season.groups.includes(:clubs, :teams).ordered : Group.none
+  end
+
+  def show
+    @clubs = @group.clubs.ordered
+    @venues = @group.venues.distinct.ordered
+    @teams = @group.teams.includes(:league, team_members: :participant).ordered
+    @matches = Match.where(home_team: @teams).or(Match.where(away_team: @teams))
+      .includes(:venue, :home_team, :away_team, :games, league: :season).scheduled
+    @participants = @group.season.participants.joins(:team_member).where(team_members: { team_id: @teams.select(:id) })
+      .includes(:club, :home_games, :away_games, team_member: :team).by_rating
   end
 
   def new

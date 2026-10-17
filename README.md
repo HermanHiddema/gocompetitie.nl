@@ -27,7 +27,9 @@ application on Rails 8, with the same business logic and a new Tailwind CSS fron
   Gouda + Zoetermeer) form one group, and ad hoc teams (e.g. TU Delft) get a group
   that is linked to no club at all. Every season has groups of its own: admins
   register them under *Clubs aanmelden* before adding the teams, and a new season
-  starts with the groups that fielded a team in the latest two seasons.
+  starts with the groups that fielded a team in the latest two seasons. The public
+  *Clubs* page lists the groups of the season; the club records themselves are
+  maintained by admins under *Alle clubs* in the user menu.
 * **Participant** – a person playing in a specific season, with rating and rank.
 * **Team** and **TeamMember** – three players per team, one per board.
 * **Match** and **Game** – a match between two teams consists of a game per board.

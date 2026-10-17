@@ -30,12 +30,12 @@ Rails.application.routes.draw do
     resources :teams, only: %i[index new create]
   end
 
-  resources :groups, only: %i[edit update destroy]
+  resources :groups, only: %i[show edit update destroy]
   resources :matches, except: %i[index new create]
   resources :participants, except: %i[index new create]
   resources :teams, except: %i[index new create]
 
-  get "club", to: redirect("/clubs")
+  get "club", to: redirect("/groups")
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
   get "up" => "rails/health#show", as: :rails_health_check

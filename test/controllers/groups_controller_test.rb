@@ -6,27 +6,73 @@ class GroupsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "registering clubs requires authentication" do
-    get groups_url(season_slug: @season.slug)
+    get new_group_url(season_slug: @season.slug)
     assert_redirected_to new_session_url
   end
 
   test "only admins register the clubs of a season" do
     sign_in_as users(:member)
 
-    get groups_url(season_slug: @season.slug)
+    get new_group_url(season_slug: @season.slug)
+    assert_response :unauthorized
+
+    get edit_group_url(groups(:amsterdam))
     assert_response :unauthorized
   end
 
-  test "index lists the clubs of the season with their linked clubs" do
+  test "the public club list shows the clubs of the season" do
+    get groups_url
+
+    assert_response :success
+    assert_select "h1", "Clubs"
+    assert_select "a[href=?]", group_path(groups(:amsterdam)), text: "Go Club Amsterdam"
+    assert_select "a[href=?]", club_path(clubs(:amsterdam), season_slug: @season.slug)
+    assert_select "a[href=?]", edit_group_path(groups(:amsterdam)), count: 0
+    assert_select "header a[href=?]", groups_path(season_slug: @season.slug), text: "Clubs"
+
+    get groups_url(season_slug: seasons(:previous).slug)
+    assert_select "a", text: "Go Club Amsterdam", count: 0
+  end
+
+  test "the club list offers admins to edit the clubs of the season" do
     sign_in_as users(:admin)
 
     get groups_url(season_slug: @season.slug)
 
     assert_response :success
-    assert_select "h1", "Clubs van Voorjaar 2026"
-    assert_select "a[href=?]", edit_group_path(groups(:amsterdam)), text: "Go Club Amsterdam"
-    assert_select "a[href=?]", club_path(clubs(:amsterdam), season_slug: @season.slug)
+    assert_select "a[href=?]", edit_group_path(groups(:amsterdam))
     assert_select "a", text: "Club aanmelden", count: 0
+    assert_select "header details a[href=?]", clubs_path(season_slug: @season.slug), text: "Alle clubs"
+  end
+
+  test "the list of all clubs is not offered to captains" do
+    sign_in_as users(:member)
+
+    get groups_url
+
+    assert_select "a[href=?]", clubs_path(season_slug: @season.slug), count: 0
+  end
+
+  test "show lists the linked clubs, teams and players of a club" do
+    group = @season.groups.create!(name: "Amsterdam/Utrecht", clubs: [clubs(:amsterdam), clubs(:utrecht)])
+    teams(:amsterdam).update!(group: group)
+
+    get group_url(group)
+
+    assert_response :success
+    assert_select "h1", "Amsterdam/Utrecht"
+    assert_select "a[href=?]", club_path(clubs(:utrecht), season_slug: @season.slug)
+    assert_select "a[href=?]", team_path(teams(:amsterdam))
+    assert_select "a", text: /Speler1 Amsterdam/
+    assert_select "a", text: /Speler1 Utrecht/, count: 0
+  end
+
+  test "show is not available for the clubs of a draft season" do
+    @season.update!(phase: :draft)
+
+    get group_url(groups(:amsterdam))
+
+    assert_response :not_found
   end
 
   test "admins register clubs that field teams together or without a club" do

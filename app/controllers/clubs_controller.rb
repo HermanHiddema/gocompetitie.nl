@@ -1,8 +1,8 @@
 class ClubsController < ApplicationController
-  allow_unauthenticated_access only: %i[index show]
+  allow_unauthenticated_access only: :show
 
   before_action :set_club, only: %i[show edit update destroy]
-  before_action :require_admin!, only: %i[new create edit update destroy]
+  before_action :require_admin!, only: %i[index new create edit update destroy]
 
   # Clubs exist outside of a season, so they are all shown as long as there is
   # no season to filter them by.

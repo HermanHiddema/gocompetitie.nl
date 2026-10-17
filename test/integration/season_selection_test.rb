@@ -59,13 +59,13 @@ class SeasonSelectionTest < ActionDispatch::IntegrationTest
   test "clubs and venues keep the season of the path" do
     slug = seasons(:previous).slug
 
-    [clubs_url(season_slug: slug), club_url(clubs(:amsterdam), season_slug: slug),
+    [groups_url(season_slug: slug), club_url(clubs(:amsterdam), season_slug: slug),
      venues_url(season_slug: slug), venue_url(venues(:amsterdam), season_slug: slug)].each do |url|
       get url
 
       assert_response :success
       assert_select "footer", /Najaar 2025/
-      assert_select "a[href=?]", clubs_path(season_slug: slug)
+      assert_select "a[href=?]", groups_path(season_slug: slug)
       assert_select "a[href=?]", venues_path(season_slug: slug)
     end
   end
