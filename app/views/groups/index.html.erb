@@ -1,0 +1,38 @@
+<% content_for :title, "Clubs" %>
+<%= page_header "Clubs" do %>
+  <% if admin? && @season&.draft? %>
+    <%= button_link_to "Club aanmelden", new_group_path(**season_url_options), short: "+ Club" %>
+  <% end %>
+<% end %>
+
+<% if admin? && @season&.editable? %>
+  <p class="mb-4 text-sm text-slate-600">
+    De clubs die in dit seizoen teams opstellen. Clubs die samen teams opstellen worden als één club aangemeld,
+    en teams die bij geen enkele club horen krijgen een club zonder gekoppelde clubs.
+  </p>
+<% end %>
+
+<section class="rounded-lg bg-white p-4 shadow-sm ring-1 ring-slate-200">
+  <div class="hidden grid-cols-4 gap-4 border-b border-slate-200 pb-2 text-xs font-semibold uppercase tracking-wide text-slate-500 md:grid">
+    <span>Naam</span>
+    <span class="md:col-span-2">Gekoppelde clubs</span>
+    <span>Teams</span>
+  </div>
+  <% @groups.each do |group| %>
+    <div class="grid grid-cols-2 gap-x-4 gap-y-1 border-b border-slate-100 py-2 text-sm last:border-0 md:grid-cols-4">
+      <div class="font-medium">
+        <%= link_to group.name, group_path(group), class: "hover:underline" %>
+        <% if admin? && @season.editable? %>
+          <%= link_to "bewerken", edit_group_path(group), class: "ml-1 text-xs font-normal text-slate-500 underline" %>
+        <% end %>
+      </div>
+      <div class="text-slate-600 md:col-span-2">
+        <%= safe_join(group.clubs.sort_by(&:name).map { |club| link_to club.name, club_path(club, **season_url_options), class: "hover:underline" }, ", ") %>
+      </div>
+      <div class="text-slate-600"><%= pluralize(group.teams.size, "team", "teams") %></div>
+    </div>
+  <% end %>
+  <% if @groups.empty? %>
+    <p class="text-sm text-slate-600">Er zijn nog geen clubs aangemeld voor dit seizoen.</p>
+  <% end %>
+</section>

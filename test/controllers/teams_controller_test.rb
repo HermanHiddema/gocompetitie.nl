@@ -10,7 +10,7 @@ class TeamsControllerTest < ActionDispatch::IntegrationTest
 
   test "index lists the teams of the season alphabetically, across leagues" do
     teams(:amsterdam).update!(name: "Zwolle 1")
-    leagues(:first).teams.create!(name: "Almere 1", abbrev: "Alme", club: clubs(:amsterdam))
+    leagues(:first).teams.create!(name: "Almere 1", abbrev: "Alme", group: groups(:amsterdam))
 
     get teams_url
 
@@ -28,6 +28,30 @@ class TeamsControllerTest < ActionDispatch::IntegrationTest
     assert_select "h1", "Team Amsterdam 1"
   end
 
+  test "show links the clubs that field the team together" do
+    group = groups(:amsterdam)
+    group.update!(name: "Amsterdam/Utrecht", clubs: [clubs(:amsterdam), clubs(:utrecht)])
+
+    get team_url(teams(:amsterdam))
+
+    assert_select "dd a[href=?]", group_path(group), text: "Amsterdam/Utrecht"
+    assert_select "dd a[href=?]", club_path(clubs(:amsterdam), season_slug: seasons(:current).slug)
+    assert_select "dd a[href=?]", club_path(clubs(:utrecht), season_slug: seasons(:current).slug)
+  end
+
+  test "the team form offers the clubs registered for the season" do
+    sign_in_as users(:admin)
+    season = seasons(:current)
+    season.update!(phase: :draft)
+    seasons(:previous).groups.create!(name: "Go Club Leiden")
+
+    get new_team_url(season_slug: season.slug)
+
+    assert_select "select[name='team[group_id]'] option", text: "Go Club Amsterdam"
+    assert_select "select[name='team[group_id]'] option", text: "Go Club Leiden", count: 0
+    assert_select "a[href=?]", groups_path(season_slug: season.slug)
+  end
+
   test "new requires authentication" do
     get new_team_url
     assert_redirected_to new_session_url
@@ -37,7 +61,7 @@ class TeamsControllerTest < ActionDispatch::IntegrationTest
     sign_in_as users(:member)
     team = teams(:amsterdam)
 
-    patch team_url(team), params: { team: { name: "Changed Team", abbrev: team.abbrev, club_id: team.club_id,
+    patch team_url(team), params: { team: { name: "Changed Team", abbrev: team.abbrev, group_id: team.group_id,
       league_id: team.league_id, captain_id: team.captain_id } }
 
     assert_response :unauthorized
@@ -51,7 +75,7 @@ class TeamsControllerTest < ActionDispatch::IntegrationTest
     participant = season.participants.create!(firstname: "Nieuwe", lastname: "Speler", rating: 1800, club: clubs(:amsterdam))
 
     assert_difference -> { Team.count }, 1 do
-      post teams_url(season_slug: season.slug), params: { team: { name: "Amsterdam 2", abbrev: "Amst2", club_id: clubs(:amsterdam).id,
+      post teams_url(season_slug: season.slug), params: { team: { name: "Amsterdam 2", abbrev: "Amst2", group_id: groups(:amsterdam).id,
         league_id: leagues(:first).id, captain_id: people(:anna).id,
         team_members_attributes: { "0" => { board_number: 1, participant_id: participant.id } } } }
     end
@@ -66,7 +90,7 @@ class TeamsControllerTest < ActionDispatch::IntegrationTest
     league = seasons(:previous).leagues.create!(name: "Hoofdklasse", position: 0)
 
     assert_no_difference -> { Team.count } do
-      post teams_url(season_slug: season.slug), params: { team: { name: "Amsterdam 9", abbrev: "Amst9", club_id: clubs(:amsterdam).id, league_id: league.id } }
+      post teams_url(season_slug: season.slug), params: { team: { name: "Amsterdam 9", abbrev: "Amst9", group_id: groups(:amsterdam).id, league_id: league.id } }
     end
 
     assert_response :unprocessable_content
@@ -77,7 +101,7 @@ class TeamsControllerTest < ActionDispatch::IntegrationTest
     team = teams(:amsterdam)
     team.season.update!(phase: :finished)
 
-    patch team_url(team), params: { team: { name: "Gewijzigd", abbrev: team.abbrev, club_id: team.club_id,
+    patch team_url(team), params: { team: { name: "Gewijzigd", abbrev: team.abbrev, group_id: team.group_id,
       league_id: team.league_id, captain_id: team.captain_id } }
 
     assert_redirected_to season_url(team.season)
@@ -92,10 +116,10 @@ class TeamsControllerTest < ActionDispatch::IntegrationTest
 
   test "teams can only move to leagues in their own season" do
     sign_in_as users(:admin)
-    team = leagues(:first).teams.create!(name: "Amsterdam 9", abbrev: "Amst9", club: clubs(:amsterdam))
+    team = leagues(:first).teams.create!(name: "Amsterdam 9", abbrev: "Amst9", group: groups(:amsterdam))
     league = seasons(:previous).leagues.create!(name: "Eerste klasse", position: 1)
 
-    patch team_url(team), params: { team: { name: "Gewijzigd", abbrev: team.abbrev, club_id: team.club_id,
+    patch team_url(team), params: { team: { name: "Gewijzigd", abbrev: team.abbrev, group_id: team.group_id,
       league_id: league.id, captain_id: team.captain_id } }
 
     assert_response :unprocessable_content
@@ -107,7 +131,7 @@ class TeamsControllerTest < ActionDispatch::IntegrationTest
     team = teams(:amsterdam)
     league = team.league
 
-    patch team_url(team), params: { team: { name: "Gewijzigd", abbrev: team.abbrev, club_id: team.club_id,
+    patch team_url(team), params: { team: { name: "Gewijzigd", abbrev: team.abbrev, group_id: team.group_id,
       captain_id: team.captain_id } }
 
     assert_redirected_to team_url(team)
@@ -140,7 +164,7 @@ class TeamsControllerTest < ActionDispatch::IntegrationTest
 
     assert_no_difference -> { Team.count } do
       post teams_url(season_slug: season.slug), params: { team: { name: "Amsterdam 2", abbrev: "Amst2",
-        club_id: clubs(:amsterdam).id, league_id: leagues(:first).id } }
+        group_id: groups(:amsterdam).id, league_id: leagues(:first).id } }
     end
 
     assert_redirected_to season_url(season)
@@ -159,7 +183,7 @@ class TeamsControllerTest < ActionDispatch::IntegrationTest
     season = seasons(:current)
     season.update!(phase: :draft)
 
-    post teams_url(season_slug: season.slug), params: { team: { name: "", abbrev: "", club_id: clubs(:amsterdam).id, league_id: leagues(:first).id } }
+    post teams_url(season_slug: season.slug), params: { team: { name: "", abbrev: "", group_id: groups(:amsterdam).id, league_id: leagues(:first).id } }
 
     assert_response :unprocessable_content
   end

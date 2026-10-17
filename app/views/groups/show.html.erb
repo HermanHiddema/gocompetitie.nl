@@ -1,0 +1,48 @@
+<% content_for :title, @group.name %>
+<%= page_header @group.name do %>
+  <% if admin? && @group.season.editable? %>
+    <%= button_link_to "Bewerken", edit_group_path(@group) %>
+  <% end %>
+<% end %>
+
+<% if @clubs.any? %>
+  <section class="mb-8 rounded-lg bg-white p-4 shadow-sm ring-1 ring-slate-200">
+    <h2 class="mb-3 text-lg font-semibold">Club<%= "s" if @clubs.many? %></h2>
+    <% @clubs.each do |club| %>
+      <p class="text-sm">
+        <%= link_to club.name, club_path(club, **season_url_options), class: "font-medium hover:underline" %>
+        <% if club.website.present? %>
+          · <%= external_link_to club.website, class: "underline" %>
+        <% end %>
+      </p>
+    <% end %>
+  </section>
+<% end %>
+
+<% if @venues.any? %>
+  <section class="mb-8 rounded-lg bg-white p-4 shadow-sm ring-1 ring-slate-200">
+    <h2 class="mb-3 text-lg font-semibold">Speellocatie<%= "s" if @venues.many? %></h2>
+    <% @venues.each do |venue| %>
+      <p class="text-sm">
+        <%= venue.playing_day_name&.capitalize %> om <%= venue.playing_time %>:
+        <%= link_to venue.name, venue_path(venue, **season_url_options), class: "hover:underline" %>,
+        <%= venue.address %>, <%= venue.city %>
+      </p>
+    <% end %>
+  </section>
+<% end %>
+
+<section class="mb-8 rounded-lg bg-white p-4 shadow-sm ring-1 ring-slate-200">
+  <h2 class="mb-3 text-lg font-semibold">Teams</h2>
+  <%= render @teams %>
+</section>
+
+<section class="mb-8 rounded-lg bg-white p-4 shadow-sm ring-1 ring-slate-200">
+  <h2 class="mb-3 text-lg font-semibold">Wedstrijden</h2>
+  <%= render "matches/grid", matches: @matches %>
+</section>
+
+<section class="mb-8 rounded-lg bg-white p-4 shadow-sm ring-1 ring-slate-200">
+  <h2 class="mb-3 text-lg font-semibold">Spelers</h2>
+  <%= render partial: "participants/participant", collection: @participants %>
+</section>

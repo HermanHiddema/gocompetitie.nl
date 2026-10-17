@@ -1,0 +1,29 @@
+# == Schema Information
+#
+# Table name: groups
+#
+#  id         :bigint           not null, primary key
+#  name       :string           not null
+#  created_at :datetime         not null
+#  updated_at :datetime         not null
+#  season_id  :bigint           not null
+#
+# Indexes
+#
+#  index_groups_on_season_id_and_name  (season_id,name) UNIQUE
+#
+# Foreign Keys
+#
+#  fk_rails_...  (season_id => seasons.id)
+#
+amsterdam:
+  name: Go Club Amsterdam
+  season: current
+
+utrecht:
+  name: Go Club Utrecht
+  season: current
+
+rotterdam:
+  name: Go Club Rotterdam
+  season: current

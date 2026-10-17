@@ -12,6 +12,8 @@ nl:
     models:
       club: Club
       game: Partij
+      group: Club
+      group_membership: Gekoppelde club
       league: Poule
       match: Wedstrijd
       participant: Speler
@@ -27,6 +29,13 @@ nl:
         website: Website
         info: Informatie
         contact_person: Contactpersoon
+        group_memberships: Aanmeldingen voor een seizoen
+      group:
+        name: Naam
+        clubs: Gekoppelde clubs
+        season: Seizoen
+        teams: Teams
+        group_memberships: Gekoppelde clubs
       game:
         home_player: Thuis
         away_player: Uit
@@ -68,7 +77,7 @@ nl:
       team:
         name: Naam
         abbrev: Afkorting
-        club: Club
+        group: Club
         league: Poule
         captain: Captain
       team_member:

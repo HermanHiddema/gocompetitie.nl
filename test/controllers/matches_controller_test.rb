@@ -97,8 +97,8 @@ class MatchesControllerTest < ActionDispatch::IntegrationTest
     sign_in_as users(:admin)
     previous = seasons(:previous)
     league = previous.leagues.create!(name: "Hoofdklasse", position: 0)
-    home_team = league.teams.create!(name: "Amsterdam 9", abbrev: "Amst9", club: clubs(:amsterdam))
-    away_team = league.teams.create!(name: "Utrecht 9", abbrev: "Utre9", club: clubs(:utrecht))
+    home_team = league.teams.create!(name: "Amsterdam 9", abbrev: "Amst9", group: previous.groups.create!(name: "Go Club Amsterdam"))
+    away_team = league.teams.create!(name: "Utrecht 9", abbrev: "Utre9", group: previous.groups.create!(name: "Go Club Utrecht"))
 
     assert_no_difference -> { Match.count } do
       post matches_url, params: { match: { league_id: league.id, home_team_id: home_team.id,
@@ -115,8 +115,8 @@ class MatchesControllerTest < ActionDispatch::IntegrationTest
     seasons(:current).update!(phase: :draft)
     previous.update!(phase: :active)
     league = previous.leagues.create!(name: "Hoofdklasse", position: 0)
-    home_team = league.teams.create!(name: "Amsterdam 9", abbrev: "Amst9", club: clubs(:amsterdam))
-    away_team = league.teams.create!(name: "Utrecht 9", abbrev: "Utre9", club: clubs(:utrecht))
+    home_team = league.teams.create!(name: "Amsterdam 9", abbrev: "Amst9", group: previous.groups.create!(name: "Go Club Amsterdam"))
+    away_team = league.teams.create!(name: "Utrecht 9", abbrev: "Utre9", group: previous.groups.create!(name: "Go Club Utrecht"))
 
     get league_url(league)
     assert_select "a[href=?]", new_match_path(league_id: league.id, home_team_id: home_team.id,
@@ -137,6 +137,36 @@ class MatchesControllerTest < ActionDispatch::IntegrationTest
     end
 
     assert_response :success
+  end
+
+  test "edit lists the players of all clubs that field a team together" do
+    sign_in_as users(:admin)
+    groups(:amsterdam).clubs << clubs(:rotterdam)
+
+    get edit_match_url(@match)
+
+    assert_response :success
+    assert_select "select[name$='[home_id]'] option", text: /Rotterdam/
+  end
+
+  test "edit lists all participants for a team without a club" do
+    sign_in_as users(:admin)
+    groups(:amsterdam).group_memberships.destroy_all
+    Participant.where(club: clubs(:amsterdam)).update_all(club_id: nil)
+
+    get edit_match_url(@match)
+
+    assert_response :success
+    assert_select "select[name$='[home_id]'] option", text: /Rotterdam/
+  end
+
+  test "edit only lists the players of the clubs of the teams" do
+    sign_in_as users(:admin)
+
+    get edit_match_url(@match)
+
+    assert_response :success
+    assert_select "select[name$='[home_id]'] option", text: /Rotterdam/, count: 0
   end
 
   test "edit can list all participants of the season" do

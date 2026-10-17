@@ -70,17 +70,23 @@ class MatchesController < ApplicationController
     end
 
     # Players of the clubs that make up the team, so guest players from a
-    # partner club can be selected as well. Pass ?all=1 to select any player.
+    # partner club can be selected as well. Pass ?all=1 to select any player,
+    # which is also what a team without any related club gets.
     def selectable_players(team)
       participants = @match.season.participants
-      participants = participants.where(club_id: related_club_ids(team)) unless params[:all]
+      club_ids = related_club_ids(team)
+      participants = participants.where(club_id: club_ids) unless params[:all] || club_ids.empty?
       participants.includes(:club).by_rating
     end
 
+    # The clubs of the group that fields the team, plus the clubs of the
+    # players in the teams of that group.
     def related_club_ids(team)
-      Participant.joins(:team_member)
-        .where(team_members: { team_id: team.club.teams.select(:id) })
-        .distinct.pluck(:club_id).compact.presence || [team.club_id]
+      member_club_ids = Participant.joins(:team_member)
+        .where(team_members: { team_id: team.group.teams.select(:id) })
+        .distinct.pluck(:club_id)
+
+      (team.group.club_ids + member_club_ids).compact.uniq
     end
 
     def match_create_params

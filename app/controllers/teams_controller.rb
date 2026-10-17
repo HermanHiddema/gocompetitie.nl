@@ -10,7 +10,7 @@ class TeamsController < ApplicationController
   before_action :require_draft_season!, only: %i[new create]
 
   def index
-    @teams = @season ? @season.teams.includes(:league, :club, team_members: :participant).ordered : Team.none
+    @teams = @season ? @season.teams.includes(:league, :group, team_members: :participant).ordered : Team.none
   end
 
   def show
@@ -86,10 +86,10 @@ class TeamsController < ApplicationController
     end
 
     def team_create_params
-      params.expect(team: [:name, :abbrev, :club_id, :league_id, :captain_id, team_members_attributes: [[:id, :board_number, :participant_id, :_destroy]]])
+      params.expect(team: [:name, :abbrev, :group_id, :league_id, :captain_id, team_members_attributes: [[:id, :board_number, :participant_id, :_destroy]]])
     end
 
     def team_update_params
-      params.expect(team: [:name, :abbrev, :club_id, :league_id, :captain_id, team_members_attributes: [[:id, :board_number, :participant_id, :_destroy]]])
+      params.expect(team: [:name, :abbrev, :group_id, :league_id, :captain_id, team_members_attributes: [[:id, :board_number, :participant_id, :_destroy]]])
     end
 end
