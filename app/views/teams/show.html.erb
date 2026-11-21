@@ -24,7 +24,13 @@
     </dd>
 
     <dt class="font-semibold">Club</dt>
-    <dd><%= link_to @team.club.name, club_path(@team.club, **season_url_options), class: "hover:underline" %></dd>
+    <dd>
+      <% clubs = @team.group.clubs.ordered.to_a %>
+      <%= link_to @team.group.name, group_path(@team.group), class: "hover:underline" %>
+      <% unless clubs.empty? || (clubs.one? && clubs.first.name == @team.group.name) %>
+        (<%= safe_join(clubs.map { |club| link_to club.name, club_path(club, **season_url_options), class: "hover:underline" }, ", ") %>)
+      <% end %>
+    </dd>
 
     <dt class="font-semibold">Poule</dt>
     <dd><%= link_to @team.league.name, @team.league, class: "hover:underline" %></dd>

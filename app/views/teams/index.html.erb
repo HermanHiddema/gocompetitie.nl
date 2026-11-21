@@ -1,6 +1,7 @@
 <% content_for :title, "Teams" %>
 <%= page_header "Teams" do %>
   <% if admin? && @season&.draft? %>
+    <%= button_link_to "Clubs aanmelden", groups_path(**season_url_options), style: :secondary, short: "Clubs" %>
     <%= button_link_to "Team toevoegen", new_team_path(**season_url_options), short: "+ Team" %>
   <% end %>
 <% end %>

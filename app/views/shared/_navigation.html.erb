@@ -15,7 +15,7 @@
       <%= nav_link_to "Stand", current_season ? season_path(current_season) : root_path %>
       <%= nav_link_to "Rooster", matches_path(**season_url_options) %>
       <%= nav_link_to "Teams", teams_path(**season_url_options) %>
-      <%= nav_link_to "Clubs", clubs_path(**season_url_options) %>
+      <%= nav_link_to "Clubs", groups_path(**season_url_options) %>
       <%= nav_link_to "Locaties", venues_path(**season_url_options) %>
       <%= nav_link_to "Archief", seasons_path(**season_url_options) %>
       <% if admin? %>
@@ -31,6 +31,10 @@
               <span aria-hidden="true">&#9662;</span>
             </summary>
             <div class="absolute right-0 z-10 mt-1 min-w-full rounded-md bg-white p-1 shadow-lg ring-1 ring-slate-200">
+              <% if admin? %>
+                <%= link_to "Alle clubs", clubs_path(**season_url_options),
+                      class: "block w-full rounded px-3 py-2 text-left text-sm text-slate-700 hover:bg-slate-100" %>
+              <% end %>
               <%= button_to "Uitloggen", session_path, method: :delete,
                     class: "w-full rounded px-3 py-2 text-left text-sm text-slate-700 hover:bg-slate-100 cursor-pointer" %>
             </div>

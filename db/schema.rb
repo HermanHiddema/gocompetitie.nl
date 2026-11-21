@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_23_220000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_17_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -39,6 +39,23 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_23_220000) do
     t.index ["away_id"], name: "index_games_on_away_id"
     t.index ["home_id"], name: "index_games_on_home_id"
     t.index ["match_id"], name: "index_games_on_match_id"
+  end
+
+  create_table "group_memberships", force: :cascade do |t|
+    t.bigint "group_id", null: false
+    t.bigint "club_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["club_id"], name: "index_group_memberships_on_club_id"
+    t.index ["group_id", "club_id"], name: "index_group_memberships_on_group_id_and_club_id", unique: true
+  end
+
+  create_table "groups", force: :cascade do |t|
+    t.bigint "season_id", null: false
+    t.string "name", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["season_id", "name"], name: "index_groups_on_season_id_and_name", unique: true
   end
 
   create_table "leagues", force: :cascade do |t|
@@ -135,13 +152,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_23_220000) do
   create_table "teams", force: :cascade do |t|
     t.string "abbrev", null: false
     t.bigint "captain_id"
-    t.bigint "club_id", null: false
     t.datetime "created_at", null: false
     t.bigint "league_id", null: false
     t.string "name", null: false
     t.datetime "updated_at", null: false
+    t.bigint "group_id", null: false
     t.index ["captain_id"], name: "index_teams_on_captain_id"
-    t.index ["club_id"], name: "index_teams_on_club_id"
+    t.index ["group_id"], name: "index_teams_on_group_id"
     t.index ["league_id"], name: "index_teams_on_league_id"
   end
 
@@ -171,6 +188,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_23_220000) do
   add_foreign_key "games", "matches"
   add_foreign_key "games", "participants", column: "away_id"
   add_foreign_key "games", "participants", column: "home_id"
+  add_foreign_key "group_memberships", "clubs"
+  add_foreign_key "group_memberships", "groups"
+  add_foreign_key "groups", "seasons"
   add_foreign_key "leagues", "seasons"
   add_foreign_key "matches", "leagues"
   add_foreign_key "matches", "teams", column: "away_team_id"
@@ -183,7 +203,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_23_220000) do
   add_foreign_key "sessions", "users"
   add_foreign_key "team_members", "participants"
   add_foreign_key "team_members", "teams"
-  add_foreign_key "teams", "clubs"
+  add_foreign_key "teams", "groups"
   add_foreign_key "teams", "leagues"
   add_foreign_key "teams", "people", column: "captain_id"
   add_foreign_key "venues", "clubs"

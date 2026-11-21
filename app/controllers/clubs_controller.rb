@@ -1,8 +1,8 @@
 class ClubsController < ApplicationController
-  allow_unauthenticated_access only: %i[index show]
+  allow_unauthenticated_access only: :show
 
   before_action :set_club, only: %i[show edit update destroy]
-  before_action :require_admin!, only: %i[new create edit update destroy]
+  before_action :require_admin!, only: %i[index new create edit update destroy]
 
   # Clubs exist outside of a season, so they are all shown as long as there is
   # no season to filter them by.
@@ -13,7 +13,7 @@ class ClubsController < ApplicationController
 
   def show
     @participants = @club.participants.where(season: @season).includes(:club, :home_games, :away_games, team_member: :team).by_rating
-    @teams = @club.teams.includes(:league, :club).where(league: @season ? @season.leagues : League.none).ordered
+    @teams = @club.teams.includes(:league, :group).where(league: @season ? @season.leagues : League.none).ordered
     @matches = Match.where(home_team: @teams).or(Match.where(away_team: @teams))
       .includes(:venue, :home_team, :away_team, :games, league: :season).scheduled
   end

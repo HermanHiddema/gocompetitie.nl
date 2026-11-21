@@ -8,23 +8,23 @@
 #  created_at :datetime         not null
 #  updated_at :datetime         not null
 #  captain_id :bigint
-#  club_id    :bigint           not null
+#  group_id   :bigint           not null
 #  league_id  :bigint           not null
 #
 # Indexes
 #
 #  index_teams_on_captain_id  (captain_id)
-#  index_teams_on_club_id     (club_id)
+#  index_teams_on_group_id    (group_id)
 #  index_teams_on_league_id   (league_id)
 #
 # Foreign Keys
 #
 #  fk_rails_...  (captain_id => people.id)
-#  fk_rails_...  (club_id => clubs.id)
+#  fk_rails_...  (group_id => groups.id)
 #  fk_rails_...  (league_id => leagues.id)
 #
 class Team < ApplicationRecord
-  belongs_to :club
+  belongs_to :group
   belongs_to :league
   belongs_to :captain, class_name: "Person", optional: true
 
@@ -40,6 +40,7 @@ class Team < ApplicationRecord
 
   validates :name, :abbrev, presence: true
   validate :league_is_immutable_with_matches, on: :update
+  validate :group_is_in_season
   validate :team_members_are_unique
   validate :team_members_are_valid
 
@@ -74,6 +75,10 @@ class Team < ApplicationRecord
   private
     def league_is_immutable_with_matches
       errors.add(:league, "cannot be changed when matches are scheduled") if league_id_changed? && matches.exists?
+    end
+
+    def group_is_in_season
+      errors.add(:group, :invalid) if group && league && group.season_id != league.season_id
     end
 
     def team_members_are_unique

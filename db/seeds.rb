@@ -41,10 +41,11 @@ clubs.each_with_index do |club, index|
     person.email = "captain-#{club.abbrev.downcase}@example.com"
   end
   club.update!(contact_person: captain)
+  group = season.groups.find_or_create_by!(name: club.name) { |record| record.clubs = [club] }
 
   team = Team.find_or_create_by!(name: club.name, league: league) do |record|
     record.abbrev = club.abbrev
-    record.club = club
+    record.group = group
     record.captain = captain
   end
 

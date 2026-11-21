@@ -9,7 +9,7 @@ class LeaguesController < ApplicationController
   before_action :require_draft_season!, only: %i[new create]
 
   def show
-    @teams = @league.teams.includes(:league, :club, team_members: :participant).ordered
+    @teams = @league.teams.includes(:league, :group, team_members: :participant).ordered
     @matches = @league.matches.includes(:venue, :home_team, :away_team, :games, league: :season).scheduled
     @participants = @league.participants.includes(:club, :home_games, :away_games, team_member: :team).to_a.sort_by(&:rating_change).reverse
 

@@ -176,6 +176,39 @@ class SeasonTest < ActiveSupport::TestCase
     assert season.errors.added?(:slug, :blank)
   end
 
+  test "new seasons copy the groups that fielded a team in the latest two seasons" do
+    seasons(:current).update_columns(created_at: 1.year.ago)
+    seasons(:previous).update_columns(created_at: 2.years.ago)
+    latest = Season.create!(name: "Najaar 2026", phase: :finished)
+    league = latest.leagues.create!(name: "Hoofdklasse", position: 0)
+    together = latest.groups.create!(name: "Go Club Amsterdam", clubs: [clubs(:amsterdam), clubs(:utrecht)])
+    league.teams.create!(name: "Amsterdam 1", abbrev: "Amst", group: together)
+    league.teams.create!(name: "Delft 1", abbrev: "Delf", group: latest.groups.create!(name: "TU Delft"))
+    latest.groups.create!(name: "Zonder teams", clubs: [clubs(:rotterdam)])
+    older = seasons(:previous)
+    older.leagues.create!(name: "Hoofdklasse", position: 0)
+      .teams.create!(name: "Leiden 1", abbrev: "Leid", group: older.groups.create!(name: "Go Club Leiden"))
+
+    season = Season.create!(name: "Voorjaar 2027")
+    season.groups.create!(name: "Go Club Utrecht", clubs: [clubs(:utrecht)])
+    season.copy_recent_groups
+
+    assert_equal ["Go Club Amsterdam", "Go Club Rotterdam", "Go Club Utrecht", "TU Delft"], season.groups.ordered.map(&:name)
+    assert_equal [clubs(:amsterdam), clubs(:utrecht)].sort, season.groups.find_by!(name: "Go Club Amsterdam").clubs.sort
+    assert_equal [clubs(:rotterdam)], season.groups.find_by!(name: "Go Club Rotterdam").clubs.to_a
+    assert_empty season.groups.find_by!(name: "TU Delft").clubs
+  end
+
+  test "statistics count the groups that field a team as clubs" do
+    season = seasons(:current)
+    together = season.groups.create!(name: "Amsterdam/Utrecht", clubs: [clubs(:amsterdam), clubs(:utrecht)])
+    teams(:amsterdam).update!(group: together)
+    teams(:utrecht).update!(group: together)
+
+    assert_equal 2, season.statistics[:clubs]
+    assert_equal 2, Season.statistics_for([season]).fetch(season.id)[:clubs]
+  end
+
   test "leagues are created with the traditional names" do
     season = Season.create!(name: "Najaar 2027")
     season.create_leagues(3)

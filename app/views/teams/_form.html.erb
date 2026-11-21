@@ -19,8 +19,12 @@
       <% end %>
     </div>
     <div>
-      <%= form.label :club_id, Team.human_attribute_name(:club), class: label_classes %>
-      <%= form.collection_select :club_id, Club.ordered, :id, :name, { include_blank: true }, class: field_classes %>
+      <% season = team.season || @season %>
+      <%= form.label :group_id, Team.human_attribute_name(:group), class: label_classes %>
+      <%= form.collection_select :group_id, season.groups.ordered, :id, :name, { include_blank: true }, class: field_classes %>
+      <p class="mt-1 text-xs text-slate-500">
+        Staat de club er niet bij? <%= link_to "Meld de club aan", groups_path(season_slug: season.slug), class: "underline" %>.
+      </p>
     </div>
     <div class="sm:col-span-2">
       <%= form.label :captain_id, Team.human_attribute_name(:captain), class: label_classes %>

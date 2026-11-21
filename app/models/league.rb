@@ -95,7 +95,7 @@ class League < ApplicationRecord
       pairs.each do |home, away|
         next if home.nil? || away.nil?
 
-        venue = home.club.venues.first || Venue.first
+        venue = home.group.venues.first || Venue.first
         if venue
           base_date = weeks[round]
           iso_day = venue.playing_day.zero? ? 7 : venue.playing_day

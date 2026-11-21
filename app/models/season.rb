@@ -28,12 +28,16 @@ class Season < ApplicationRecord
   EGD_COUNTRY_CODE = "NL".freeze
   EGD_ACTIVE_YEARS = 4
 
+  # The number of seasons whose groups a new season starts with.
+  RECENT_SEASONS = 2
+
   enum :phase, PHASES.index_by(&:itself), default: :draft, validate: true
 
   has_many :leagues, -> { ordered }, dependent: :destroy, inverse_of: :season
   has_many :teams, through: :leagues
   has_many :matches, through: :leagues
   has_many :participants, dependent: :destroy
+  has_many :groups, dependent: :destroy
   has_many :games, through: :matches
 
   validates :name, presence: true
@@ -86,7 +90,7 @@ class Season < ApplicationRecord
       statistics[season_id][:teams] = count
     end
 
-    Team.joins(:league).where(leagues: { season_id: season_ids }).group("leagues.season_id").distinct.count(:club_id).each do |season_id, count|
+    Team.joins(:league).where(leagues: { season_id: season_ids }).group("leagues.season_id").distinct.count(:group_id).each do |season_id, count|
       statistics[season_id][:clubs] = count
     end
 
@@ -164,14 +168,14 @@ class Season < ApplicationRecord
     handicap_adjustment.present?
   end
 
-  # Counts for the seasons list: its leagues and teams, the clubs that field a
-  # team and the participants with at least one game played or scheduled.
+  # Counts for the seasons list: its leagues and teams, the groups (shown as
+  # clubs) that field a team and the participants with at least one game played or scheduled.
   def statistics
     return @statistics if instance_variable_defined?(:@statistics)
 
     {
       leagues: leagues.count,
-      clubs: Club.where(id: teams.select(:club_id)).count,
+      clubs: teams.distinct.count(:group_id),
       teams: teams.count,
       participants: participants.where(id: games.select(:home_id))
         .or(participants.where(id: games.select(:away_id))).count
@@ -197,6 +201,23 @@ class Season < ApplicationRecord
       games: games.includes(:home_player, :away_player, match: { league: :season }),
       group_names: ranked_teams.map(&:name)
     ).lines
+  end
+
+  # A new season starts with the groups that fielded a team in the latest two
+  # seasons, so admins only have to register the clubs that changed. Groups
+  # that took part in both seasons are copied as they were in the latest one.
+  def copy_recent_groups(seasons = RECENT_SEASONS)
+    sources = Season.where.not(id: id).recent.limit(seasons).to_a
+    candidates = Group.where(season: sources).where(id: Team.select(:group_id)).includes(:group_memberships)
+      .sort_by { |group| sources.index { |season| season.id == group.season_id } }
+      .uniq(&:name)
+    existing = groups.pluck(:name)
+
+    transaction do
+      candidates.reject { |group| existing.include?(group.name) }.map do |group|
+        groups.create!(name: group.name, club_ids: group.group_memberships.map(&:club_id))
+      end
+    end
   end
 
   def create_leagues(amount = 5)

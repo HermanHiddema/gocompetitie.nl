@@ -12,7 +12,7 @@ class SearchIndexingTest < ActionDispatch::IntegrationTest
   end
 
   test "the pages with personal details are kept out of search indexes" do
-    [clubs_url, club_url(clubs(:amsterdam)), venues_url, venue_url(venues(:amsterdam)),
+    [groups_url, group_url(groups(:amsterdam)), club_url(clubs(:amsterdam)), venues_url, venue_url(venues(:amsterdam)),
      teams_url, team_url(teams(:amsterdam)), match_url(matches(:amsterdam_utrecht)), games_url,
      league_url(leagues(:top))].each do |url|
       get url
