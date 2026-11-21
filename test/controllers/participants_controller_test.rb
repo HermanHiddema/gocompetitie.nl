@@ -28,6 +28,7 @@ class ParticipantsControllerTest < ActionDispatch::IntegrationTest
     get participant_url(participants(:amsterdam_1))
 
     assert_response :success
+    assert_select "li", text: /Speler1 Amsterdam\s*\(2100\)/
   end
 
   test "signed in users can add a participant to the current season" do

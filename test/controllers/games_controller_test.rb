@@ -8,6 +8,7 @@ class GamesControllerTest < ActionDispatch::IntegrationTest
     assert_select "h1", "Partijen"
     assert_select "[role='img'][aria-label='Zwart']"
     assert_select "[role='img'][aria-label='Wit']"
+    assert_select "li", text: /Speler1 Amsterdam\s*\(2100\)/
   end
 
   test "index puts the handicap in the black disc" do
