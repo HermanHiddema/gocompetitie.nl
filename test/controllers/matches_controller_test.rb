@@ -17,6 +17,13 @@ class MatchesControllerTest < ActionDispatch::IntegrationTest
     assert_select "h1", /Amsterdam 1/
   end
 
+  test "show displays the ratings of the players behind their names" do
+    get match_url(@match)
+
+    assert_response :success
+    assert_select "li", text: /Speler1 Amsterdam\s*\(2100\)/
+  end
+
   test "matches of a finished season can no longer be edited" do
     sign_in_as users(:admin)
     seasons(:current).update!(phase: :finished)

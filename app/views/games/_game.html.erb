@@ -7,6 +7,9 @@
           <%= game.handicap if color == :black && game.handicap.positive? %>
         </span>
         <span class="truncate"><%= player&.fullname || "?" %></span>
+        <% if local_assigns[:show_ratings] && player&.rating.present? %>
+          <span class="shrink-0 text-xs text-slate-500">(<%= player.rating %>)</span>
+        <% end %>
       </span>
       <% unless index == 1 %>
         <span class="hidden sm:inline" aria-hidden="true">&ndash;</span>
